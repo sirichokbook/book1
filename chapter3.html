@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เริ่มต้นทำงานกับ AI อย่างจริงจัง · sirichokbook</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,600;1,300&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root { --cream: #F5F0E8; --ink: #1A1208; --amber: #C8852A; --muted: #7A6E5F; --divider: #D9CFC0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background-color: var(--cream); color: var(--ink); font-family: 'Sarabun', sans-serif; font-weight: 300; line-height: 1.9; font-size: 17px; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 100; opacity: 0.4; }
+
+  .cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 60px 24px; position: relative; border-bottom: 1px solid var(--divider); overflow: hidden; }
+  .cover::after { content: ''; position: absolute; bottom: -80px; left: 50%; transform: translateX(-50%); width: 500px; height: 500px; background: radial-gradient(circle, rgba(200,133,42,0.08) 0%, transparent 70%); pointer-events: none; }
+  .cover-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 32px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.2s; }
+  .cover-title { font-family: 'Playfair Display', serif; font-size: clamp(36px, 8vw, 66px); font-weight: 900; line-height: 1.1; letter-spacing: -0.02em; color: var(--ink); max-width: 700px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.4s; }
+  .cover-title em { font-style: italic; color: var(--amber); }
+  .cover-subtitle { margin-top: 24px; font-size: 15px; color: var(--muted); max-width: 440px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.6s; }
+  .cover-divider { width: 48px; height: 2px; background: var(--amber); margin: 40px auto; opacity: 0; animation: fadeUp 0.8s ease forwards 0.8s; }
+  .cover-meta { font-size: 12px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; opacity: 0; animation: fadeUp 0.8s ease forwards 1s; }
+  .scroll-hint { position: absolute; bottom: 32px; display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: 0; animation: fadeUp 0.8s ease forwards 1.4s; }
+  .scroll-hint span { font-size: 11px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; }
+  .scroll-arrow { width: 1px; height: 32px; background: linear-gradient(to bottom, var(--amber), transparent); animation: scrollPulse 2s ease-in-out infinite; }
+  .back-link { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); text-decoration: none; position: absolute; top: 32px; left: 32px; transition: color 0.2s; opacity: 0; animation: fadeUp 0.8s ease forwards 0.1s; }
+  .back-link:hover { color: var(--amber); }
+
+  .toc { max-width: 680px; margin: 0 auto; padding: 80px 24px; border-bottom: 1px solid var(--divider); }
+  .toc-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 40px; }
+  .toc-item { display: flex; align-items: baseline; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--divider); text-decoration: none; color: var(--ink); transition: color 0.2s; }
+  .toc-item:hover { color: var(--amber); }
+  .toc-num { font-family: 'Playfair Display', serif; font-size: 13px; color: var(--amber); min-width: 24px; font-style: italic; }
+  .toc-title { font-size: 15px; font-weight: 400; flex: 1; }
+  .toc-dots { flex: 1; border-bottom: 1px dotted var(--divider); margin: 0 8px; min-width: 20px; }
+
+  .article { max-width: 680px; margin: 0 auto; padding: 80px 24px 120px; }
+  .chapter { margin-bottom: 100px; opacity: 0; transform: translateY(20px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .chapter.visible { opacity: 1; transform: translateY(0); }
+  .chapter-num { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 16px; display: block; }
+  .chapter-title { font-family: 'Playfair Display', serif; font-size: clamp(24px, 5vw, 36px); font-weight: 700; line-height: 1.2; margin-bottom: 40px; color: var(--ink); }
+  .chapter-body p { margin-bottom: 24px; color: #2E2416; }
+  .chapter-body strong { font-weight: 600; color: var(--ink); }
+  .chapter-body em { font-style: italic; color: var(--amber); }
+  .pull-quote { border-left: 3px solid var(--amber); padding: 4px 0 4px 24px; margin: 40px 0; font-family: 'Playfair Display', serif; font-size: 20px; font-style: italic; line-height: 1.5; color: var(--ink); }
+  .section-break { text-align: center; margin: 48px 0; color: var(--amber); letter-spacing: 0.3em; font-size: 14px; }
+
+  .tool-table { border: 1px solid var(--divider); margin: 32px 0; width: 100%; border-collapse: collapse; }
+  .tool-table th { background: rgba(200,133,42,0.06); padding: 12px 16px; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--amber); text-align: left; font-weight: 400; border-bottom: 1px solid var(--divider); }
+  .tool-table td { padding: 14px 16px; font-size: 14px; border-bottom: 1px solid var(--divider); vertical-align: top; }
+  .tool-table tr:last-child td { border-bottom: none; }
+  .tool-table tr:nth-child(even) td { background: rgba(200,133,42,0.02); }
+  .tool-table .td-name { font-weight: 600; color: var(--ink); }
+  .tool-table .td-use { color: var(--muted); }
+  .tool-table .td-price { color: var(--amber); font-size: 13px; }
+
+  .step-list { margin: 32px 0; }
+  .step-item { display: flex; gap: 20px; padding: 20px 0; border-bottom: 1px solid var(--divider); }
+  .step-num { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 900; color: rgba(200,133,42,0.25); min-width: 36px; line-height: 1; }
+  .step-content { flex: 1; }
+  .step-title { font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 6px; }
+  .step-desc { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+  .vocab-section { background: rgba(200,133,42,0.06); border: 1px solid var(--divider); padding: 40px; margin-top: 80px; }
+  .vocab-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 28px; display: block; }
+  .vocab-item { padding: 16px 0; border-bottom: 1px solid var(--divider); }
+  .vocab-item:last-child { border-bottom: none; }
+  .vocab-term { font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 4px; }
+  .vocab-meaning { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .vocab-example { font-size: 13px; color: var(--amber); font-style: italic; margin-top: 4px; }
+
+  footer { text-align: center; padding: 60px 24px; border-top: 1px solid var(--divider); font-size: 12px; color: var(--muted); letter-spacing: 0.1em; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes scrollPulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+  @media (max-width: 600px) {
+    body { font-size: 16px; }
+    .toc, .article { padding-left: 20px; padding-right: 20px; }
+    .back-link { top: 20px; left: 20px; }
+    .tool-table .td-price { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<section class="cover">
+  <a class="back-link" href="index.html">← กลับหน้าหลัก</a>
+  <p class="cover-label">บทที่ 3</p>
+  <h1 class="cover-title">เริ่มต้นทำงานกับ AI <em>อย่างจริงจัง</em></h1>
+  <p class="cover-subtitle">คู่มือปฏิบัติสำหรับคนที่อยากใช้ Claude, NotebookLM และ AI อื่นๆ ให้เกิดประสิทธิภาพจริง ไม่ใช่แค่ทดลองเล่น</p>
+  <div class="cover-divider"></div>
+  <p class="cover-meta">Productivity · เทคโนโลยี &nbsp;·&nbsp; sirichokbook</p>
+  <div class="scroll-hint"><span>เริ่มอ่าน</span><div class="scroll-arrow"></div></div>
+</section>
+
+<nav class="toc">
+  <p class="toc-label">สารบัญ</p>
+  <a class="toc-item" href="#s1"><span class="toc-num">i</span><span class="toc-title">ปัญหาของคนที่ "ใช้ AI อยู่" แต่ยังไม่เกิดผล</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s2"><span class="toc-num">ii</span><span class="toc-title">เลือกเครื่องมือให้ถูกงาน</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s3"><span class="toc-num">iii</span><span class="toc-title">NotebookLM: สมองสำรองที่อ่านแทนคุณ</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s4"><span class="toc-num">iv</span><span class="toc-title">Claude: ผู้ช่วยที่คุยรู้เรื่องที่สุด</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s5"><span class="toc-num">v</span><span class="toc-title">Claude Code: เมื่อ AI เริ่มทำงานแทนคุณได้จริง</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s6"><span class="toc-num">vi</span><span class="toc-title">หลักคิดสำหรับอนาคตที่ต้องทำงานกับ AI</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s7"><span class="toc-num">vii</span><span class="toc-title">บทสรุป: ทักษะที่แท้จริงในยุคนี้</span><span class="toc-dots"></span></a>
+</nav>
+
+<article class="article">
+
+  <div class="chapter visible">
+    <div class="chapter-body">
+      <p>มีคนจำนวนมากที่บอกว่าตัวเองใช้ AI อยู่แล้ว เปิด ChatGPT ถามคำถามบ้าง ให้มันช่วยแปลอีเมลบ้าง แล้วก็ปิดหน้าต่างไป</p>
+      <p>แต่ถ้าถามว่าชีวิตการทำงานเปลี่ยนไปมากแค่ไหน คำตอบส่วนใหญ่คือ "ก็ไม่ได้ต่างอะไรมากนัก"</p>
+      <div class="pull-quote">ปัญหาไม่ได้อยู่ที่ AI ไม่ดีพอ แต่อยู่ที่เรายังใช้มันแบบ "ของเล่น" ไม่ใช่ "เครื่องมือ"</div>
+      <p>บทนี้จะพาคุณผ่านเส้นแบ่งนั้น ตั้งแต่การเลือกเครื่องมือให้ถูกงาน ไปจนถึงการสร้างระบบการทำงานร่วมกับ AI ที่เกิดผลจริงในระยะยาว</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s1">
+    <span class="chapter-num">i</span>
+    <h2 class="chapter-title">ปัญหาของคนที่ "ใช้ AI อยู่" แต่ยังไม่เกิดผล</h2>
+    <div class="chapter-body">
+      <p>ลองนึกถึงครั้งสุดท้ายที่คุณใช้ AI ว่าคุณถามอะไรไป ถ้าคำตอบคือ "ถามเรื่องทั่วๆ ไป" หรือ "ลองดูว่ามันตอบอะไร" นั่นคือสัญญาณว่าคุณยังอยู่ในโหมดทดลอง ไม่ใช่โหมดทำงานจริง</p>
+      <p>คนที่ได้ประโยชน์จาก AI จริงๆ มักมีลักษณะร่วมกันสามอย่าง หนึ่งคือเขารู้ว่างานชิ้นไหนในชีวิตประจำวันที่เสียเวลาซ้ำๆ สองคือเขามีเครื่องมือเฉพาะสำหรับงานแต่ละประเภท และสามคือเขาสื่อสารกับ AI ได้ชัดเจนเหมือนกับที่เขาจะสื่อสารกับเพื่อนร่วมงานคนหนึ่ง</p>
+      <p>ที่เหลือล้วนเป็นทักษะที่ฝึกได้ทั้งนั้น</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s2">
+    <span class="chapter-num">ii</span>
+    <h2 class="chapter-title">เลือกเครื่องมือให้ถูกงาน</h2>
+    <div class="chapter-body">
+      <p>ความผิดพลาดที่พบบ่อยที่สุดคือการใช้เครื่องมือเดียวกับทุกอย่าง เหมือนใช้ไขควงตอกตะปู มันพอได้ แต่ไม่ใช่วิธีที่ดีที่สุด ปัจจุบันมีสามเครื่องมือหลักที่คนทำงานทั่วไปใช้แล้วเห็นผลจริง แต่ละตัวเหมาะกับงานคนละประเภท</p>
+
+      <table class="tool-table">
+        <tr>
+          <th>เครื่องมือ</th>
+          <th>เหมาะกับงานแบบไหน</th>
+          <th>ราคาเริ่มต้น</th>
+        </tr>
+        <tr>
+          <td class="td-name">NotebookLM</td>
+          <td class="td-use">อ่าน สรุป วิเคราะห์เอกสารที่คุณอัปโหลด</td>
+          <td class="td-price">ฟรี</td>
+        </tr>
+        <tr>
+          <td class="td-name">Claude / ChatGPT</td>
+          <td class="td-use">เขียน คิด วิเคราะห์ ระดมไอเดีย</td>
+          <td class="td-price">ฟรี / มีแบบเสียเงิน</td>
+        </tr>
+        <tr>
+          <td class="td-name">Claude Code</td>
+          <td class="td-use">สร้างไฟล์ โค้ด งานที่ต้องการผลลัพธ์เป็นไฟล์จริงหลายขั้นตอน</td>
+          <td class="td-price">ต้องมี Claude Pro ($20/เดือน)</td>
+        </tr>
+      </table>
+
+      <p>กฎง่ายๆ ที่ใช้ได้เสมอคือ ถ้างานมีเอกสารที่ต้องการให้ AI อ่านและวิเคราะห์ ใช้ NotebookLM ถ้างานต้องการการคิดหรือการเขียน ใช้ Claude ถ้างานต้องการผลลัพธ์เป็นไฟล์หรือมีหลายขั้นตอน ใช้ Claude Code</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s3">
+    <span class="chapter-num">iii</span>
+    <h2 class="chapter-title">NotebookLM: สมองสำรองที่อ่านแทนคุณ</h2>
+    <div class="chapter-body">
+      <p>NotebookLM ของ Google เป็นเครื่องมือที่เข้าใจง่ายที่สุด หลักการของมันตรงไปตรงมา คุณอัปโหลดเอกสาร มันจะอ่าน สรุป และตอบคำถามจากเนื้อหาในเอกสารนั้น โดยไม่ปะปนกับข้อมูลภายนอก</p>
+      <p>นั่นคือจุดแข็งที่ทำให้มันต่างจาก AI ทั่วไป เพราะคำตอบมาจากเอกสารของคุณเท่านั้น ไม่ใช่การเดาจากอินเทอร์เน็ต ความเสี่ยงที่จะได้ข้อมูลผิดพลาดจึงต่ำกว่ามาก</p>
+
+      <div class="step-list">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <div class="step-title">สร้าง Notebook แยกตามหัวข้อ</div>
+            <div class="step-desc">อย่าใส่ทุกอย่างในที่เดียว สร้าง Notebook แยกสำหรับแต่ละโปรเจกต์ เช่น "หนังสือที่กำลังอ่าน" หรือ "คลิปที่อยากสรุป" ยิ่ง Notebook เฉพาะเจาะจงเท่าไหร่ คำตอบยิ่งแม่นยำขึ้น</div>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <div class="step-title">อัปโหลดแหล่งข้อมูล</div>
+            <div class="step-desc">รองรับ PDF, Google Docs, URL เว็บไซต์, YouTube, ไฟล์เสียง และข้อความ วิธีที่ใช้บ่อยคือก๊อปปี้ transcript จาก YouTube แล้ววางลงไป หรืออัปโหลด PDF ของหนังสือที่อยากสรุป</div>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <div class="step-title">ถามแบบเจาะจง ไม่ใช่แบบกว้าง</div>
+            <div class="step-desc">แทนที่จะถามว่า "สรุปให้หน่อย" ให้ถามว่า "แนวคิดสามอย่างที่นำไปใช้กับการทำงานได้ทันทีคืออะไร" ยิ่งคำถามชัด ยิ่งได้คำตอบที่มีประโยชน์</div>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <div class="step-title">ลอง Audio Overview</div>
+            <div class="step-desc">ฟีเจอร์ที่น่าสนใจของ NotebookLM คือการแปลงเอกสารเป็นพอดแคสต์สไตล์สองคนสนทนา เหมาะมากสำหรับฟังระหว่างเดินทาง รองรับภาษาไทยและกว่า 50 ภาษา</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s4">
+    <span class="chapter-num">iv</span>
+    <h2 class="chapter-title">Claude: ผู้ช่วยที่คุยรู้เรื่องที่สุด</h2>
+    <div class="chapter-body">
+      <p>ถ้า NotebookLM คือนักวิเคราะห์ที่ดีที่สุดสำหรับเอกสารของคุณ Claude คือผู้ช่วยคิดที่ดีที่สุดสำหรับงานที่ยังไม่มีเอกสาร มันเหมาะกับงานที่ต้องการการเขียน การคิดวิเคราะห์ หรือการระดมไอเดีย</p>
+      <p>สิ่งที่ทำให้ Claude ต่างออกไปคือมันอ่านบริบทได้ดีมาก ถ้าคุณบอกให้ชัดว่าคุณเป็นใคร ต้องการอะไร และใช้โทนแบบไหน มันจะปรับตัวให้เหมาะกับคุณทันที</p>
+      <div class="pull-quote">วิธีที่ดีที่สุดในการใช้ Claude คือปฏิบัติกับมันเหมือนน้องใหม่ที่ฉลาดมาก แต่ไม่รู้บริบทอะไรเลย</div>
+      <p>ตัวอย่างเช่น แทนที่จะพิมพ์ว่า "ช่วยเขียนอีเมลหาลูกค้า" ให้บอกว่า "ฉันเป็น Account Manager ของบริษัท SaaS ลูกค้ารายนี้ใช้ระบบมาสองปีแล้วแต่ยังไม่ได้ต่อสัญญา ช่วยเขียนอีเมลที่ไม่ดูกดดัน แต่ย้ำถึงคุณค่าที่พวกเขาได้รับในช่วงที่ผ่านมา โทนเป็นกันเองแต่ยังเป็นมืออาชีพ" ผลลัพธ์จะต่างกันราวฟ้ากับดิน</p>
+      <p>อีกสิ่งที่ควรรู้คือ Claude ทำงานได้ดีขึ้นมากเมื่อใช้ฟีเจอร์ <strong>Projects</strong> ใน Claude.ai เพราะมันจะจำข้อมูลพื้นฐานของคุณไว้ตลอด ไม่ต้องอธิบายใหม่ทุกครั้งที่เริ่มสนทนา</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s5">
+    <span class="chapter-num">v</span>
+    <h2 class="chapter-title">Claude Code: เมื่อ AI เริ่มทำงานแทนคุณได้จริง</h2>
+    <div class="chapter-body">
+      <p>Claude Code เป็นเครื่องมือที่น่าสนใจที่สุดในสามตัว แต่ก็เป็นตัวที่หลายคนยังเข้าใจผิดมากที่สุด เพราะหลายคนคิดว่ามันคือเครื่องมือสำหรับโปรแกรมเมอร์เท่านั้น</p>
+      <p>แต่ในความเป็นจริง มันคือเครื่องมือสำหรับใครก็ตามที่ต้องการให้ AI ทำงานที่มีผลลัพธ์เป็น "ไฟล์จริง" ไม่ใช่แค่ข้อความในหน้าจอ ผู้จัดการที่ต้องการสร้างรายงาน นักการตลาดที่ต้องการสร้างเว็บเพจ หรือคนที่อยากสร้างเครื่องมือช่วยงานส่วนตัว ล้วนใช้ Claude Code ได้ทั้งนั้น</p>
+      <p>สิ่งที่ทำให้ Claude Code ต่างจาก Claude ปกติคือมันไม่แค่ตอบ <em>มันลงมือทำ</em> มันอ่านไฟล์ในโฟลเดอร์ของคุณได้ สร้างและแก้ไขไฟล์ได้ และทำงานหลายขั้นตอนต่อเนื่องกันได้โดยอัตโนมัติ</p>
+      <div class="pull-quote">Stripe ใช้ Claude Code กับทีมวิศวกร 1,370 คน และสามารถย้ายโค้ด 10,000 บรรทัดได้ใน 4 วัน จากงานที่ประเมินว่าต้องใช้ 10 คนทำ 1 สัปดาห์</div>
+      <p>สำหรับคนที่ยังไม่ถนัดด้านเทคนิค จุดเริ่มต้นที่ดีที่สุดคือใช้ Claude Code ผ่านเว็บที่ <strong>claude.ai/code</strong> ซึ่งไม่ต้องติดตั้งอะไรเลย แค่มี Claude Pro ($20/เดือน) ก็เข้าถึงได้ทันที แล้วลองเริ่มจากงานง่ายๆ ก่อน เช่น "ช่วยสร้างไฟล์ HTML สำหรับหน้าสรุปข้อมูลโปรเจกต์ของฉัน" แล้วค่อยๆ ขยับไปงานที่ซับซ้อนขึ้นเรื่อยๆ</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s6">
+    <span class="chapter-num">vi</span>
+    <h2 class="chapter-title">หลักคิดสำหรับอนาคตที่ต้องทำงานกับ AI</h2>
+    <div class="chapter-body">
+      <p>เครื่องมือจะเปลี่ยนไปเรื่อยๆ แต่มีหลักคิดบางอย่างที่จะยังคงใช้ได้ไม่ว่าเครื่องมือจะเปลี่ยนไปแค่ไหน</p>
+      <p><strong>หนึ่ง — บริบทคือทุกอย่าง</strong> AI ทำงานได้ดีขึ้นเสมอเมื่อมีข้อมูลมากขึ้น นิสัยที่ดีที่สุดคือการอธิบายสิ่งที่ต้องการให้ครบถ้วนก่อนคาดหวังผลลัพธ์</p>
+      <p><strong>สอง — ทำซ้ำ อย่าหยุดที่คำตอบแรก</strong> คำตอบแรกของ AI มักไม่ใช่คำตอบที่ดีที่สุด การโต้ตอบต่อเนื่อง บอกว่าชอบอะไร ไม่ชอบอะไร และขอให้ปรับ คือวิธีที่ได้ผลลัพธ์ที่ดีที่สุด</p>
+      <p><strong>สาม — ตรวจสอบเสมอ</strong> ไม่ว่า AI จะตอบมาด้วยความมั่นใจแค่ไหน สำหรับข้อมูลสำคัญที่จะนำไปใช้จริง ควรตรวจสอบจากแหล่งอื่นเสมอ</p>
+      <div class="pull-quote">ทักษะที่มีค่าที่สุดในยุคนี้ไม่ใช่การรู้จักเครื่องมือทุกตัว แต่คือการรู้ว่าจะถามอะไร เมื่อไหร่ และกับใคร</div>
+      <p><strong>สี่ — สร้างระบบ ไม่ใช่แค่นิสัย</strong> แทนที่จะคิดว่าจะ "ลอง AI" ในงานชิ้นนั้นชิ้นนี้ ลองมองให้กว้างขึ้นว่างานประเภทไหนที่จะมอบให้ AI ช่วยเป็นประจำ เช่น ทุกครั้งที่ดูคลิปความรู้ก็ส่ง transcript ไปที่ NotebookLM ทุกครั้งที่ต้องเขียนอีเมลสำคัญก็ Draft กับ Claude ก่อน ระบบเล็กๆ เหล่านี้สะสมกันเป็นผลลัพธ์ใหญ่ในระยะยาว</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s7">
+    <span class="chapter-num">vii</span>
+    <h2 class="chapter-title">บทสรุป: ทักษะที่แท้จริงในยุคนี้</h2>
+    <div class="chapter-body">
+      <p>ในอีกห้าปีข้างหน้า การทำงานร่วมกับ AI จะไม่ใช่ทักษะพิเศษอีกต่อไป มันจะกลายเป็นทักษะพื้นฐานเหมือนกับการใช้ Excel หรือการส่งอีเมล</p>
+      <p>คนที่เริ่มต้นตอนนี้จะมีข้อได้เปรียบที่ชัดเจนมาก ไม่ใช่เพราะพวกเขาฉลาดกว่า แต่เพราะพวกเขาจะมีเวลาฝึกฝน ทดลอง และสร้างระบบการทำงานของตัวเองมากกว่าคนที่เริ่มทีหลัง</p>
+      <div class="pull-quote">เริ่มต้นเล็ก แต่เริ่มต้นวันนี้</div>
+      <p>ไม่ต้องเรียนรู้ทุกเครื่องมือพร้อมกัน ไม่ต้องเป็นผู้เชี่ยวชาญ แค่เลือกหนึ่งอย่างที่ตรงกับงานที่คุณทำอยู่มากที่สุด แล้วใช้มันให้จริงจังสักหนึ่งเดือน คุณจะเห็นเองว่ามันเปลี่ยนอะไรได้บ้าง</p>
+    </div>
+  </div>
+
+  <div class="chapter" id="vocab">
+    <div class="vocab-section">
+      <span class="vocab-label">คลังคำศัพท์ · บทที่ 3</span>
+      <div class="vocab-item">
+        <div class="vocab-term">Context Window</div>
+        <div class="vocab-meaning">ขนาดของ "หน่วยความจำชั่วคราว" ที่ AI ใช้ในการสนทนาหนึ่งครั้ง ยิ่งใหญ่ AI ยิ่งจำบทสนทนาหรือเอกสารที่ยาวได้มากขึ้น Claude มี Context Window ประมาณ 200,000 tokens</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ส่งไฟล์นี้ไป Claude ได้เลย context window มันใหญ่พอ"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">RAG (Retrieval-Augmented Generation)</div>
+        <div class="vocab-meaning">เทคนิคที่ AI ดึงข้อมูลจากแหล่งที่กำหนดไว้ก่อน แล้วค่อยสร้างคำตอบ ทำให้คำตอบอ้างอิงจากข้อมูลจริงแทนที่จะเดาจากความรู้ทั่วไป NotebookLM ใช้วิธีนี้</div>
+        <div class="vocab-example">ใช้ได้ว่า: "NotebookLM ใช้ RAG ทำให้ตอบได้แม่นยำกว่า ChatGPT ปกติสำหรับเอกสารเฉพาะ"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Agentic AI</div>
+        <div class="vocab-meaning">AI ที่ไม่แค่ตอบคำถาม แต่ลงมือทำงานหลายขั้นตอนได้ด้วยตัวเอง เช่น อ่านไฟล์ สร้างเอกสาร และส่งผลลัพธ์ให้ โดยไม่ต้องให้คนสั่งทีละขั้น Claude Code คือตัวอย่างของ Agentic AI</div>
+        <div class="vocab-example">ใช้ได้ว่า: "Agentic AI คือก้าวถัดไปจาก chatbot ธรรมดา มันทำงานได้โดยไม่ต้องจับมือทุกขั้น"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Workflow Automation</div>
+        <div class="vocab-meaning">การออกแบบกระบวนการทำงานให้เกิดขึ้นโดยอัตโนมัติหรือกึ่งอัตโนมัติ ในบริบทของ AI คือการสร้างระบบที่ทำให้ AI ช่วยงานซ้ำๆ ได้สม่ำเสมอโดยไม่ต้องเริ่มใหม่ทุกครั้ง</div>
+        <div class="vocab-example">ใช้ได้ว่า: "เราวาง workflow automation ไว้ให้ AI สรุปทุก meeting transcript อัตโนมัติ"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">System Prompt</div>
+        <div class="vocab-meaning">คำสั่งพื้นฐานที่กำหนดให้ AI รู้ว่าควรทำตัวอย่างไร มีบุคลิกแบบไหน และมีข้อจำกัดอะไรบ้างก่อนที่ผู้ใช้จะเริ่มพูดคุย คล้ายกับ briefing ให้พนักงานก่อนเริ่มงาน</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ถ้า Claude ตอบแบบแปลกๆ อาจเป็นเพราะ system prompt ของ operator กำหนดให้ทำแบบนั้น"</div>
+      </div>
+    </div>
+  </div>
+
+</article>
+
+<footer>
+  <p>บทที่ 3 &nbsp;·&nbsp; เริ่มต้นทำงานกับ AI อย่างจริงจัง &nbsp;·&nbsp; sirichokbook</p>
+</footer>
+
+<script>
+  const chapters = document.querySelectorAll('.chapter:not(.visible)');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); }
+    });
+  }, { threshold: 0.1 });
+  chapters.forEach(ch => observer.observe(ch));
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+</script>
+</body>
+</html>
