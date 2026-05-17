@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>บทที่ 2: AI ไม่ได้มาแทนคุณ</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,600;1,300&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F5F0E8;
+    --ink: #1A1208;
+    --amber: #C8852A;
+    --muted: #7A6E5F;
+    --divider: #D9CFC0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background-color: var(--cream);
+    color: var(--ink);
+    font-family: 'Sarabun', sans-serif;
+    font-weight: 300;
+    line-height: 1.9;
+    font-size: 17px;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.4;
+  }
+
+  .cover {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 60px 24px;
+    position: relative;
+    border-bottom: 1px solid var(--divider);
+    overflow: hidden;
+  }
+
+  .cover::after {
+    content: '';
+    position: absolute;
+    bottom: -80px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(200,133,42,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .cover-label {
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.2s;
+  }
+
+  .cover-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(36px, 8vw, 72px);
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    max-width: 700px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.4s;
+  }
+
+  .cover-title em {
+    font-style: italic;
+    color: var(--amber);
+  }
+
+  .cover-subtitle {
+    margin-top: 24px;
+    font-size: 15px;
+    color: var(--muted);
+    max-width: 420px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.6s;
+  }
+
+  .cover-divider {
+    width: 48px;
+    height: 2px;
+    background: var(--amber);
+    margin: 40px auto;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.8s;
+  }
+
+  .cover-meta {
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 1s;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 1.4s;
+  }
+
+  .scroll-hint span {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .scroll-arrow {
+    width: 1px;
+    height: 32px;
+    background: linear-gradient(to bottom, var(--amber), transparent);
+    animation: scrollPulse 2s ease-in-out infinite;
+  }
+
+  .toc {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 80px 24px;
+    border-bottom: 1px solid var(--divider);
+  }
+
+  .toc-label {
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 40px;
+  }
+
+  .toc-item {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--divider);
+    cursor: pointer;
+    transition: color 0.2s;
+    text-decoration: none;
+    color: var(--ink);
+  }
+
+  .toc-item:hover { color: var(--amber); }
+  .toc-item:hover .toc-num { color: var(--amber); }
+
+  .toc-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    color: var(--amber);
+    min-width: 24px;
+    font-style: italic;
+  }
+
+  .toc-title { font-size: 15px; font-weight: 400; flex: 1; }
+  .toc-dots { flex: 1; border-bottom: 1px dotted var(--divider); margin: 0 8px; min-width: 20px; }
+
+  .article {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 80px 24px 120px;
+  }
+
+  .chapter {
+    margin-bottom: 100px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .chapter.visible { opacity: 1; transform: translateY(0); }
+
+  .chapter-num {
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .chapter-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(24px, 5vw, 36px);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 40px;
+    color: var(--ink);
+  }
+
+  .chapter-body p { margin-bottom: 24px; color: #2E2416; }
+  .chapter-body strong { font-weight: 600; color: var(--ink); }
+  .chapter-body em { font-style: italic; color: var(--amber); }
+
+  .pull-quote {
+    border-left: 3px solid var(--amber);
+    padding: 4px 0 4px 24px;
+    margin: 40px 0;
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-style: italic;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+
+  .section-break {
+    text-align: center;
+    margin: 48px 0;
+    color: var(--amber);
+    letter-spacing: 0.3em;
+    font-size: 14px;
+  }
+
+  /* Tool Cards */
+  .tool-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 32px 0;
+  }
+
+  .tool-card {
+    border: 1px solid var(--divider);
+    padding: 20px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.4);
+  }
+
+  .tool-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .tool-use {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  @media (max-width: 500px) {
+    .tool-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Vocabulary */
+  .vocab-section {
+    background: rgba(200,133,42,0.06);
+    border: 1px solid var(--divider);
+    border-radius: 2px;
+    padding: 40px;
+    margin-top: 80px;
+  }
+
+  .vocab-label {
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 28px;
+    display: block;
+  }
+
+  .vocab-item {
+    padding: 16px 0;
+    border-bottom: 1px solid var(--divider);
+  }
+
+  .vocab-item:last-child { border-bottom: none; }
+
+  .vocab-term { font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 4px; }
+  .vocab-meaning { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .vocab-example { font-size: 13px; color: var(--amber); font-style: italic; margin-top: 4px; }
+
+  /* Nav */
+  .chapter-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 40px 24px 60px;
+    border-top: 1px solid var(--divider);
+  }
+
+  .nav-link {
+    font-size: 13px;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+    transition: color 0.2s;
+  }
+
+  .nav-link:hover { color: var(--amber); }
+  .nav-link span { display: block; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--amber); margin-bottom: 4px; }
+
+  footer {
+    text-align: center;
+    padding: 40px 24px;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+
+  @media (max-width: 600px) {
+    body { font-size: 16px; }
+    .toc, .article { padding-left: 20px; padding-right: 20px; }
+    .vocab-section { padding: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<section class="cover">
+  <p class="cover-label">บทที่ 2</p>
+  <h1 class="cover-title">AI ไม่ได้มา<em>แทน</em>คุณ</h1>
+  <p class="cover-subtitle">ว่าด้วยวิธีที่คนธรรมดาใช้ AI เพิ่มเวลาและพลังงานในชีวิตประจำวัน</p>
+  <div class="cover-divider"></div>
+  <p class="cover-meta">เทคโนโลยี &nbsp;·&nbsp; sirichokbook</p>
+  <div class="scroll-hint">
+    <span>เริ่มอ่าน</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<!-- TOC -->
+<nav class="toc">
+  <p class="toc-label">สารบัญ</p>
+  <a class="toc-item" href="#s1"><span class="toc-num">i</span><span class="toc-title">ความกลัวที่เข้าใจผิด</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s2"><span class="toc-num">ii</span><span class="toc-title">AI คืออะไรในชีวิตจริง</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s3"><span class="toc-num">iii</span><span class="toc-title">งานที่ AI ทำแทนได้ดี</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s4"><span class="toc-num">iv</span><span class="toc-title">งานที่ยังต้องเป็นคุณ</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s5"><span class="toc-num">v</span><span class="toc-title">เครื่องมือที่ควรรู้จัก</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s6"><span class="toc-num">vi</span><span class="toc-title">วิธีเริ่มต้นที่ไม่ยุ่งยาก</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s7"><span class="toc-num">vii</span><span class="toc-title">บทสรุป: เครื่องมือไม่เคยฉลาดกว่าคนใช้</span><span class="toc-dots"></span></a>
+</nav>
+
+<!-- ARTICLE -->
+<article class="article">
+
+  <!-- Opening -->
+  <div class="chapter visible">
+    <div class="chapter-body">
+      <p>ต้นปี 2566 มีข่าวชิ้นหนึ่งที่ถูกแชร์ในกลุ่มทำงานทั่วไทย บริษัทแห่งหนึ่งในอเมริกาปลดพนักงานฝ่าย customer service ออกหลายสิบคน แล้วแทนที่ด้วย AI</p>
+      <p>ทุกคนอ่านข่าวนั้นแล้วรู้สึกเหมือนกัน ความรู้สึกที่ว่า "ถ้าไม่ใช่วันนี้ ก็คงเป็นพรุ่งนี้"</p>
+      <div class="pull-quote">แต่ความกลัวนั้นตั้งอยู่บนความเข้าใจที่ผิด</div>
+      <p>เพราะ AI ในปัจจุบันนั้นไม่ได้มาแทนคน มันมาเพิ่มพลังให้คน และความแตกต่างระหว่างสองสิ่งนี้ ใหญ่กว่าที่คิดมาก</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <!-- Section 1 -->
+  <div class="chapter" id="s1">
+    <span class="chapter-num">i</span>
+    <h2 class="chapter-title">ความกลัวที่เข้าใจผิด</h2>
+    <div class="chapter-body">
+      <p>ทุกครั้งที่เทคโนโลยีใหม่เกิดขึ้น มนุษย์ก็กลัวแบบเดิมเสมอ ตอนที่รถยนต์เกิดขึ้น คนขับรถม้าก็กลัวว่าตัวเองจะตกงาน ตอนที่เครื่องพิมพ์ดีดเกิดขึ้น นักคัดลอกเอกสารก็กลัว และตอนที่ Excel เกิดขึ้น นักบัญชีก็กลัว</p>
+      <p>บางอาชีพหายไปจริง แต่อาชีพใหม่ก็เกิดขึ้นมาแทน และสิ่งที่น่าสนใจกว่านั้นคือ คนที่เรียนรู้จะใช้เครื่องมือใหม่เร็วที่สุด มักกลายเป็นคนที่มีคุณค่ามากที่สุดในตลาด</p>
+      <p>AI ก็ไม่ต่างกัน ความกลัวมีอยู่จริง แต่ความกลัวนั้นไม่ใช่สัญญาณให้หลีกหนี มันเป็นสัญญาณให้เข้าใจก่อนคนอื่น</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <!-- Section 2 -->
+  <div class="chapter" id="s2">
+    <span class="chapter-num">ii</span>
+    <h2 class="chapter-title">AI คืออะไรในชีวิตจริง</h2>
+    <div class="chapter-body">
+      <p>ถ้าตัดคำศัพท์เทคนิคทั้งหมดออก AI ในชีวิตประจำวันวันนี้คืออะไร?</p>
+      <p>มันคือ <strong>ผู้ช่วยที่ไม่เคยเหนื่อย ไม่เคยหงุดหนิด และพร้อมทำงานซ้ำๆ ให้คุณได้ตลอดเวลา</strong> โดยที่คุณไม่ต้องจ่ายเงินเดือน ไม่ต้องเลี้ยงข้าว และไม่ต้องกังวลว่ามันจะลาออก</p>
+      <p>แต่ผู้ช่วยคนนี้มีข้อจำกัด มันไม่รู้จักคุณ ไม่รู้บริบทของชีวิตคุณ และไม่สามารถตัดสินใจแทนคุณในสิ่งที่สำคัญได้ มันทำได้ดีในงานที่มี pattern ชัดเจน แต่สับสนในงานที่ต้องใช้ judgment และประสบการณ์จริง</p>
+      <div class="pull-quote">AI เก่งในสิ่งที่คุณไม่อยากทำ และอ่อนแอในสิ่งที่คุณทำได้ดีที่สุด</div>
+      <p>นั่นคือจุดที่ทั้งสองฝ่ายเสริมกันได้พอดี</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <!-- Section 3 -->
+  <div class="chapter" id="s3">
+    <span class="chapter-num">iii</span>
+    <h2 class="chapter-title">งานที่ AI ทำแทนได้ดี</h2>
+    <div class="chapter-body">
+      <p>ลองนึกถึงงานในชีวิตประจำวันที่คุณทำแล้วรู้สึกว่า "งานนี้กินเวลาแต่ไม่ได้ใช้ความคิดอะไรมาก" งานพวกนั้นคืองานที่ AI เข้ามาช่วยได้ดีที่สุด</p>
+      <p><strong>การสรุปและย่อข้อมูล</strong> — อ่านรายงาน 20 หน้าแล้วสรุปให้เป็น 5 บรรทัด แปลงประชุม 1 ชั่วโมงเป็น bullet point ที่อ่านได้ใน 2 นาที สิ่งเหล่านี้ AI ทำได้เร็วกว่าคนหลายเท่า</p>
+      <p><strong>การเขียนฉบับร่างแรก</strong> — อีเมลขอโทษลูกค้า ข้อเสนอโครงการ คำอธิบายสินค้า สิ่งเหล่านี้ AI ร่างให้ได้ใน 30 วินาที แล้วคุณค่อยแก้ตามที่ต้องการ แทนที่จะเริ่มจากหน้ากระดาษเปล่า</p>
+      <p><strong>การค้นหาและจัดระเบียบข้อมูล</strong> — สรุปหัวข้อที่ไม่รู้ เปรียบเทียบตัวเลือก หาข้อดีข้อเสีย งานเหล่านี้ที่เคยกินเวลาหลายชั่วโมงสามารถทำได้ในไม่กี่นาที</p>
+      <p><strong>งานซ้ำๆ ที่มี pattern</strong> — แปลเอกสาร ตรวจคำผิด แปลง format ข้อมูล สร้างเนื้อหาในรูปแบบที่กำหนดไว้แล้ว</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <!-- Section 4 -->
+  <div class="chapter" id="s4">
+    <span class="chapter-num">iv</span>
+    <h2 class="chapter-title">งานที่ยังต้องเป็นคุณ</h2>
+    <div class="chapter-body">
+      <p>แต่มีงานอีกประเภทหนึ่งที่ AI ยังทำแทนไม่ได้ และน่าจะยังทำแทนไม่ได้ในเร็ววัน</p>
+      <p><strong>การตัดสินใจที่ต้องใช้บริบทชีวิตจริง</strong> — AI ไม่รู้ว่าลูกค้าคนนี้มีนิสัยยังไง ไม่รู้ว่าเพื่อนร่วมงานคนนั้นรู้สึกยังไง และไม่รู้ว่าบริษัทของคุณมีวัฒนธรรมองค์กรแบบไหน สิ่งเหล่านี้คือข้อมูลที่อยู่ในหัวคุณและมีคุณค่ามหาศาล</p>
+      <p><strong>ความสัมพันธ์และความไว้วางใจ</strong> — ลูกค้าซื้อของจากคนที่ไว้ใจ ไม่ใช่จากข้อความที่ถูกต้องที่สุด การสร้างความสัมพันธ์นั้นต้องการความเป็นมนุษย์ที่ AI ไม่มี</p>
+      <p><strong>ความคิดสร้างสรรค์เชิงกลยุทธ์</strong> — AI เก่งเรื่องการผสมผสานสิ่งที่มีอยู่แล้ว แต่การมองเห็นโอกาสที่ยังไม่มีใครเห็น การตั้งคำถามใหม่ หรือการเปลี่ยนกรอบความคิดทั้งหมด ยังเป็นงานของมนุษย์</p>
+      <div class="pull-quote">AI คือเครื่องมือ ไม่ใช่สมอง คุณยังต้องเป็นคนที่รู้ว่าจะใช้มันทำอะไร</div>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <!-- Section 5 -->
+  <div class="chapter" id="s5">
+    <span class="chapter-num">v</span>
+    <h2 class="chapter-title">เครื่องมือที่ควรรู้จัก</h2>
+    <div class="chapter-body">
+      <p>ณ ปี 2566-2567 มีเครื่องมือ AI ที่คนทั่วไปใช้ในชีวิตประจำวันได้จริงอยู่หลายตัว แต่ละตัวเก่งคนละด้าน</p>
+
+      <div class="tool-grid">
+        <div class="tool-card">
+          <div class="tool-name">ChatGPT / Claude</div>
+          <div class="tool-use">สนทนา ถามตอบ เขียนเนื้อหา สรุปข้อมูล เหมาะกับงานที่ต้องการคิดและเขียน</div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-name">Notion AI</div>
+          <div class="tool-use">สรุปและจัดการโน้ต เขียน draft ในพื้นที่ทำงาน เหมาะกับคนที่ใช้ Notion อยู่แล้ว</div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-name">Midjourney / DALL-E</div>
+          <div class="tool-use">สร้างภาพจากคำอธิบาย เหมาะกับงาน visual ที่ไม่ต้องการความแม่นยำสูง</div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-name">Perplexity</div>
+          <div class="tool-use">ค้นหาข้อมูลพร้อม source อ้างอิง เหมาะแทน Google ในงานที่ต้องการความน่าเชื่อถือ</div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-name">Otter / Fireflies</div>
+          <div class="tool-use">ถอดเสียงและสรุปประชุมอัตโนมัติ ประหยัดเวลาการจด minutes ได้มาก</div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-name">Gamma</div>
+          <div class="tool-use">สร้าง Presentation จากข้อความ เหมาะกับการทำสไลด์เบื้องต้นรวดเร็ว</div>
+        </div>
+      </div>
+
+      <p>ไม่จำเป็นต้องใช้ทุกตัว การเลือกหนึ่งหรือสองตัวที่ตรงกับงานของคุณมากที่สุด แล้วเรียนรู้ให้เชี่ยวชาญ ดีกว่าลองทุกตัวแล้วไม่เชี่ยวชาญสักตัวเดียว</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <!-- Section 6 -->
+  <div class="chapter" id="s6">
+    <span class="chapter-num">vi</span>
+    <h2 class="chapter-title">วิธีเริ่มต้นที่ไม่ยุ่งยาก</h2>
+    <div class="chapter-body">
+      <p>หลายคนรู้ว่า AI มีประโยชน์ แต่ไม่รู้จะเริ่มต้นยังไง คำแนะนำที่ตรงที่สุดคือ อย่าเริ่มจากการเรียนรู้ทุกอย่าง ให้เริ่มจากปัญหาที่คุณมีอยู่แล้ว</p>
+      <p>ลองถามตัวเองว่า ในสัปดาห์ที่ผ่านมามีงานอะไรที่กินเวลาคุณไปโดยไม่จำเป็น? งานนั้นคือจุดเริ่มต้น</p>
+      <p>ถ้าคุณเสียเวลาไปกับการเขียนอีเมล ลองให้ AI ร่างให้ก่อน ถ้าคุณเสียเวลากับการสรุปรายงาน ลองวางข้อความลงใน ChatGPT แล้วขอให้สรุป ถ้าคุณไม่รู้จะเริ่มนำเสนองาน ลองบอก AI ว่าคุณต้องการอะไร แล้วดูว่ามันช่วยได้แค่ไหน</p>
+      <div class="pull-quote">การเรียนรู้ที่ดีที่สุดไม่ได้มาจากการอ่าน แต่มาจากการลองใช้กับปัญหาจริงของตัวเอง</div>
+      <p>และสิ่งสำคัญที่สุดที่ควรจำคือ AI ผิดได้ ตอบไม่ตรงได้ และมั่วได้ ดังนั้นอย่าใช้ output ของมันโดยไม่อ่านทวน หน้าที่ของคุณคือการตรวจสอบและตัดสินใจขั้นสุดท้ายเสมอ</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <!-- Section 7 -->
+  <div class="chapter" id="s7">
+    <span class="chapter-num">vii</span>
+    <h2 class="chapter-title">บทสรุป: เครื่องมือไม่เคยฉลาดกว่าคนใช้</h2>
+    <div class="chapter-body">
+      <p>ย้อนกลับไปที่ข่าวบริษัทอเมริกาที่ปลดพนักงานแล้วใช้ AI แทน สิ่งที่ข่าวนั้นไม่ได้บอกคือ บริษัทนั้นต้องจ้างคนใหม่เพื่อดูแลและพัฒนาระบบ AI และคนที่ได้งานเหล่านั้นคือคนที่เข้าใจทั้งงานเดิมและเทคโนโลยีใหม่</p>
+      <p>ความกลัวจึงไม่ใช่ทางออก แต่ความอยากรู้อยากเห็นต่างหากที่เป็น</p>
+      <div class="pull-quote">คนที่ได้เปรียบจาก AI ไม่ใช่คนที่ฉลาดที่สุด แต่คือคนที่เริ่มเร็วที่สุด</div>
+      <p>และ "เร็ว" ในที่นี้ไม่ได้หมายถึงรีบ มันหมายถึงการไม่รอจนกว่าทุกอย่างจะชัดเจนก่อนค่อยเริ่ม เพราะถ้ารอแบบนั้น ทุกอย่างจะไม่มีวันชัดเจนพอ</p>
+    </div>
+  </div>
+
+  <!-- Vocabulary -->
+  <div class="chapter" id="vocab">
+    <div class="vocab-section">
+      <span class="vocab-label">คลังคำศัพท์ · บทที่ 2</span>
+
+      <div class="vocab-item">
+        <div class="vocab-term">Generative AI</div>
+        <div class="vocab-meaning">AI ที่สามารถสร้างเนื้อหาใหม่ได้ ไม่ว่าจะเป็นข้อความ ภาพ หรือเสียง แตกต่างจาก AI รุ่นเก่าที่ทำได้แค่จัดหมวดหมู่หรือวิเคราะห์ข้อมูลที่มีอยู่แล้ว</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ChatGPT เป็นตัวอย่างของ generative AI ที่คนทั่วไปเข้าถึงได้"</div>
+      </div>
+
+      <div class="vocab-item">
+        <div class="vocab-term">Prompt</div>
+        <div class="vocab-meaning">คำสั่งหรือคำถามที่คุณพิมพ์ให้ AI การเขียน prompt ที่ดีคือทักษะสำคัญ เพราะ AI จะตอบได้ดีแค่ไหนขึ้นอยู่กับว่าคุณถามอย่างไร</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ลอง prompt ใหม่ดู ให้ specific กว่านี้ แล้วผลลัพธ์จะดีขึ้น"</div>
+      </div>
+
+      <div class="vocab-item">
+        <div class="vocab-term">Hallucination</div>
+        <div class="vocab-meaning">เมื่อ AI ตอบข้อมูลที่ผิดหรือแต่งขึ้นมาเองโดยไม่รู้ตัว เป็นปัญหาสำคัญที่ต้องระวังโดยเฉพาะกับข้อมูลที่ต้องการความแม่นยำสูง</div>
+        <div class="vocab-example">ใช้ได้ว่า: "อย่าเอาตัวเลขนี้ไปใช้เลย AI hallucination ได้ ต้องเช็คก่อน"</div>
+      </div>
+
+      <div class="vocab-item">
+        <div class="vocab-term">Productivity</div>
+        <div class="vocab-meaning">ความสามารถในการผลิตผลงานต่อหน่วยเวลา ในบริบทของ AI หมายถึงการทำงานได้มากขึ้นในเวลาเท่าเดิม โดยใช้ AI รับงานส่วนที่ซ้ำซากออกไป</div>
+        <div class="vocab-example">ใช้ได้ว่า: "การใช้ AI ช่วยร่างอีเมลเพิ่ม productivity ของทีมได้จริง"</div>
+      </div>
+
+      <div class="vocab-item">
+        <div class="vocab-term">Augmentation (การเสริมศักยภาพ)</div>
+        <div class="vocab-meaning">แนวคิดที่ว่า AI ควรถูกใช้เพื่อเพิ่มความสามารถของมนุษย์ ไม่ใช่แทนที่ เป็นมุมมองที่ตรงข้ามกับความกลัวว่า AI จะมาแย่งงาน</div>
+        <div class="vocab-example">ใช้ได้ว่า: "บริษัทที่ใช้ AI แบบ augmentation จะได้เปรียบกว่าบริษัทที่ใช้เพื่อลดคน"</div>
+      </div>
+
+    </div>
+  </div>
+
+</article>
+
+<!-- Chapter Navigation -->
+<div class="chapter-nav">
+  <a class="nav-link" href="index.html">
+    <span>← ก่อนหน้า</span>
+    บทที่ 1: ราคาที่ไม่มีเหตุผล
+  </a>
+  <a class="nav-link" href="#" style="text-align:right; opacity:0.3; pointer-events:none">
+    <span>ถัดไป →</span>
+    บทที่ 3 (เร็วๆนี้)
+  </a>
+</div>
+
+<footer>
+  <p>บทที่ 2 &nbsp;·&nbsp; AI ไม่ได้มาแทนคุณ &nbsp;·&nbsp; sirichokbook</p>
+</footer>
+
+<script>
+  const chapters = document.querySelectorAll('.chapter:not(.visible)');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  chapters.forEach(ch => observer.observe(ch));
+
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+</script>
+</body>
+</html>
