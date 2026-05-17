@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ราคาที่ไม่มีเหตุผล</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,600;1,300&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F5F0E8;
+    --ink: #1A1208;
+    --amber: #C8852A;
+    --amber-light: #E8A84A;
+    --muted: #7A6E5F;
+    --divider: #D9CFC0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background-color: var(--cream);
+    color: var(--ink);
+    font-family: 'Sarabun', sans-serif;
+    font-weight: 300;
+    line-height: 1.9;
+    font-size: 17px;
+  }
+
+  /* Grain texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.4;
+  }
+
+  /* Cover */
+  .cover {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 60px 24px;
+    position: relative;
+    border-bottom: 1px solid var(--divider);
+    overflow: hidden;
+  }
+
+  .cover::after {
+    content: '';
+    position: absolute;
+    bottom: -80px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(200,133,42,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .cover-label {
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.2s;
+  }
+
+  .cover-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(36px, 8vw, 72px);
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    max-width: 700px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.4s;
+  }
+
+  .cover-title em {
+    font-style: italic;
+    color: var(--amber);
+  }
+
+  .cover-subtitle {
+    margin-top: 24px;
+    font-size: 15px;
+    color: var(--muted);
+    max-width: 420px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.6s;
+  }
+
+  .cover-divider {
+    width: 48px;
+    height: 2px;
+    background: var(--amber);
+    margin: 40px auto;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.8s;
+  }
+
+  .cover-meta {
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 1s;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 1.4s;
+  }
+
+  .scroll-hint span {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .scroll-arrow {
+    width: 1px;
+    height: 32px;
+    background: linear-gradient(to bottom, var(--amber), transparent);
+    animation: scrollPulse 2s ease-in-out infinite;
+  }
+
+  /* TOC */
+  .toc {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 80px 24px;
+    border-bottom: 1px solid var(--divider);
+  }
+
+  .toc-label {
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 40px;
+  }
+
+  .toc-item {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--divider);
+    cursor: pointer;
+    transition: color 0.2s;
+    text-decoration: none;
+    color: var(--ink);
+  }
+
+  .toc-item:hover { color: var(--amber); }
+  .toc-item:hover .toc-num { color: var(--amber); }
+
+  .toc-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    color: var(--amber);
+    min-width: 24px;
+    font-style: italic;
+  }
+
+  .toc-title {
+    font-size: 15px;
+    font-weight: 400;
+    flex: 1;
+  }
+
+  .toc-dots {
+    flex: 1;
+    border-bottom: 1px dotted var(--divider);
+    margin: 0 8px;
+    min-width: 20px;
+  }
+
+  /* Article */
+  .article {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 80px 24px 120px;
+  }
+
+  .chapter {
+    margin-bottom: 100px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .chapter.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .chapter-num {
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .chapter-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(24px, 5vw, 36px);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 40px;
+    color: var(--ink);
+  }
+
+  .chapter-body p {
+    margin-bottom: 24px;
+    color: #2E2416;
+  }
+
+  .chapter-body strong {
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .chapter-body em {
+    font-style: italic;
+    color: var(--amber);
+  }
+
+  .pull-quote {
+    border-left: 3px solid var(--amber);
+    padding: 4px 0 4px 24px;
+    margin: 40px 0;
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-style: italic;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+
+  .section-break {
+    text-align: center;
+    margin: 48px 0;
+    color: var(--amber);
+    letter-spacing: 0.3em;
+    font-size: 14px;
+  }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 60px 24px;
+    border-top: 1px solid var(--divider);
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    body { font-size: 16px; }
+    .toc, .article { padding-left: 20px; padding-right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<section class="cover">
+  <p class="cover-label">บทที่ 1</p>
+  <h1 class="cover-title">ราคาที่<em>ไม่มี</em>เหตุผล</h1>
+  <p class="cover-subtitle">ว่าด้วยกลยุทธ์เบื้องหลังของแพงที่ยังมีคนซื้อ และสิ่งที่ตลาดกำลังบอกเรา</p>
+  <div class="cover-divider"></div>
+  <p class="cover-meta">กลยุทธ์การตลาด &nbsp;·&nbsp; โดย โจ้</p>
+  <div class="scroll-hint">
+    <span>เริ่มอ่าน</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<!-- TABLE OF CONTENTS -->
+<nav class="toc">
+  <p class="toc-label">สารบัญ</p>
+  <a class="toc-item" href="#s1">
+    <span class="toc-num">i</span>
+    <span class="toc-title">คนสองประเภทในแถวเดียวกัน</span>
+    <span class="toc-dots"></span>
+  </a>
+  <a class="toc-item" href="#s2">
+    <span class="toc-num">ii</span>
+    <span class="toc-title">คนที่กลัวของถูก</span>
+    <span class="toc-dots"></span>
+  </a>
+  <a class="toc-item" href="#s3">
+    <span class="toc-num">iii</span>
+    <span class="toc-title">ราคาที่สูงเกินเหตุผล และสูงอย่างสมเหตุสมผล</span>
+    <span class="toc-dots"></span>
+  </a>
+  <a class="toc-item" href="#s4">
+    <span class="toc-num">iv</span>
+    <span class="toc-title">จิตวิทยาที่ไม่มีใครบอกคุณ</span>
+    <span class="toc-dots"></span>
+  </a>
+  <a class="toc-item" href="#s5">
+    <span class="toc-num">v</span>
+    <span class="toc-title">สูตรการอยู่รอดในระยะยาว</span>
+    <span class="toc-dots"></span>
+  </a>
+  <a class="toc-item" href="#s6">
+    <span class="toc-num">vi</span>
+    <span class="toc-title">ราคาคือความคาดหวัง</span>
+    <span class="toc-dots"></span>
+  </a>
+  <a class="toc-item" href="#s7">
+    <span class="toc-num">vii</span>
+    <span class="toc-title">ความเสี่ยงที่ซ่อนอยู่</span>
+    <span class="toc-dots"></span>
+  </a>
+  <a class="toc-item" href="#s8">
+    <span class="toc-num">viii</span>
+    <span class="toc-title">กรณีศึกษา: Sushiro</span>
+    <span class="toc-dots"></span>
+  </a>
+  <a class="toc-item" href="#s9">
+    <span class="toc-num">ix</span>
+    <span class="toc-title">บทสรุป: ตลาดไม่เคยโง่</span>
+    <span class="toc-dots"></span>
+  </a>
+</nav>
+
+<!-- ARTICLE -->
+<article class="article">
+
+  <!-- Opening -->
+  <div class="chapter visible">
+    <div class="chapter-body">
+      <p>วันหนึ่ง ขณะที่คุณเดินผ่านร้านน้ำปั่นในห้างสรรพสินค้า สายตาคุณก็หยุดอยู่ที่ป้ายราคา</p>
+      <p><strong>เจ็ดร้อยแปดสิบบาท</strong></p>
+      <p>คุณอ่านซ้ำอีกครั้ง เจ็ดร้อยแปดสิบบาท สำหรับน้ำปั่นแก้วเดียว ในช่วงเวลาที่ค่าครองชีพสูงขึ้นทุกวัน ในช่วงเวลาที่คนรอบข้างพูดถึงเศรษฐกิจไม่ดีเหมือนเพลงกล่อมเด็ก แต่ที่หน้าร้าน มีคนยืนต่อแถว</p>
+      <div class="pull-quote">ยาวเฟื้อย</div>
+      <p>สิ่งที่เกิดขึ้นตรงหน้านั้นไม่ใช่ความบังเอิญ และมันก็ไม่ได้เกิดจากความโง่เขลาของใคร มันเป็นกลไกที่ลึกซึ้งกว่านั้นมาก เป็นกลไกที่เมื่อคุณเข้าใจมันแล้ว คุณจะไม่มองตลาดเหมือนเดิมอีกต่อไป</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <!-- Section 1 -->
+  <div class="chapter" id="s1">
+    <span class="chapter-num">i</span>
+    <h2 class="chapter-title">คนสองประเภทในแถวเดียวกัน</h2>
+    <div class="chapter-body">
+      <p>ลองมองแถวคนที่ยืนรอซื้อน้ำปั่นอีกครั้ง</p>
+      <p>ถ้าคุณสังเกตให้ดี คุณจะเห็นว่าคนในแถวนั้นไม่ได้เหมือนกันทั้งหมด มีคนที่จ้องมือถือพลางถ่ายรูปป้ายราคา พลางกระซิบกับเพื่อนว่า "แพงจังเลย แต่ขอลองดูหน่อยแล้วกัน" และมีอีกคนที่ยืนเงียบๆ รู้ว่าตัวเองจะสั่งอะไร รู้ราคา และไม่ได้รู้สึกแปลกใจแม้แต่น้อย</p>
+      <p>คนแรกคือ <strong>นักท่องกระแส</strong> เขามาเพราะทุกคนพูดถึงร้านนี้ เขาอยากลอง อยากโพสต์ อยากเป็นส่วนหนึ่งของสิ่งที่กำลังเกิดขึ้น และหลังจากที่กระแสจางลง เขาก็จะเดินต่อไปยังแถวถัดไปของร้านถัดไปที่กำลังเป็นกระแส</p>
+      <p>คนที่สองคือ <strong>ลูกค้าจริง</strong> และเขาคือคนที่เลี้ยงธุรกิจให้มีชีวิตอยู่</p>
+      <p>ความแตกต่างของคนสองประเภทนี้คือสิ่งที่หลายธุรกิจเข้าใจผิดมาตลอด เพราะเมื่อร้านเปิดใหม่แล้วมีแถวยาว เจ้าของร้านมักจะคิดว่าตัวเองประสบความสำเร็จ แต่ในความเป็นจริง แถวยาวนั้นอาจเป็นเพียง<em>เสียงปรบมือที่กำลังจะเงียบลง</em></p>
+      <p>ถ้าคุณไม่เชื่อ ลองเดินไปสำรวจ Community Mall แถวบ้านดูสักครั้ง คุณจะเห็นร้านใหม่เกิดขึ้น มีคนเข้าไปซื้อเยอะ แต่เวลาผ่านไปไม่กี่เดือน คนหายไปแทบทั้งหมด ร้านเหล่านั้นไม่ได้ล้มเหลวเพราะสินค้าไม่ดี แต่พวกเขาล้มเหลวเพราะไม่เคยสร้างความสัมพันธ์กับลูกค้ากลุ่มที่สอง</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <!-- Section 2 -->
+  <div class="chapter" id="s2">
+    <span class="chapter-num">ii</span>
+    <h2 class="chapter-title">คนที่กลัวของถูก</h2>
+    <div class="chapter-body">
+      <p>ลูกค้ากลุ่มที่สองนั้นมีลักษณะพิเศษที่น่าสนใจมาก และสิ่งที่น่าสนใจที่สุดในตัวพวกเขาก็คือ พวกเขากลัวของถูก</p>
+      <div class="pull-quote">ฟังดูแปลกใช่ไหม? แต่มันเป็นความจริง</div>
+      <p>คนกลุ่มนี้มีมาตรฐานในหัวที่สูงมาก และมาตรฐานนั้นไม่ใช่แค่เรื่องรสชาติ แต่เป็นเรื่องของรายละเอียดเล็กๆน้อยๆ ที่คนส่วนใหญ่ไม่เคยสังเกต อย่างเช่น น้ำปั่นที่ดื่มแล้วรู้สึกถึง texture ที่ลื่นไหลสม่ำเสมอ ที่ไม่มีความรู้สึกเคลือบปากอย่างที่ไม่ควรมี ที่ไม่ได้รสชาติของสารปรุงแต่งที่แอบซ่อนอยู่</p>
+      <p>ถ้าน้ำปั่นที่พวกเขาดื่มไม่ผ่านเกณฑ์เหล่านี้ พวกเขาจะตัดแบรนด์นั้นออกจากชีวิตทันที โดยไม่มีโอกาสครั้งที่สอง</p>
+      <p>และสำหรับของราคาถูก? พวกเขาไม่แม้แต่จะลอง เพราะในใจของพวกเขา ราคาถูกแปลว่ามาตรฐานต่ำ และพวกเขาไม่มีเวลาจะพิสูจน์ว่าตัวเองคิดผิด</p>
+      <p>นั่นคือเหตุผลว่าทำไมแบรนด์ที่ตั้งราคาสูงจึงสามารถมีกลุ่มลูกค้าของตัวเองได้ ไม่ใช่เพราะคนรวยกว่าที่คิด แต่เพราะมีคนที่มีความต้องการเฉพาะเจาะจง และพวกเขายินดีจ่ายราคาที่สะท้อนความเฉพาะเจาะจงนั้น</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <!-- Section 3 -->
+  <div class="chapter" id="s3">
+    <span class="chapter-num">iii</span>
+    <h2 class="chapter-title">ราคาที่สูงเกินเหตุผล และราคาที่สูงอย่างสมเหตุสมผล</h2>
+    <div class="chapter-body">
+      <p>ก่อนที่เราจะไปต่อ มีความแตกต่างสำคัญหนึ่งอย่างที่ต้องพูดถึง</p>
+      <p>น้ำปั่น 700-800 บาท กับ เจลาโต้ 300 บาท นั้นไม่ใช่สิ่งเดียวกัน</p>
+      <p>เจลาโต้คุณภาพสูงนั้นมีต้นทุนการผลิตที่สูงจริง ไม่ว่าจะเป็นวัตถุดิบที่คัดสรรมาอย่างพิถีพิถัน กระบวนการผลิตที่ซับซ้อน และระบบการจัดเก็บที่มีต้นทุนสูงมาก ราคาของมันสามารถอธิบายได้ด้วยตรรกะ</p>
+      <p>แต่น้ำปั่นราคา 700-800 บาทนั้นต่างออกไป ต้นทุนวัตถุดิบไม่ว่าจะนับอย่างไรก็ไม่ถึงราคานั้น ความแพงของมันไม่ได้มาจากต้นทุน แต่มาจากการสร้าง <strong>perception</strong> หรือการรับรู้ในใจผู้บริโภค</p>
+      <p>ซึ่งนั่นหมายความว่าแบรนด์เหล่านี้ไม่ได้แค่ขายน้ำปั่น พวกเขาขายความรู้สึก พวกเขาขายสถานะ พวกเขาขายการได้เป็นส่วนหนึ่งของกลุ่มคนที่มี "รสนิยม" บางอย่าง และการขายแบบนี้ต้องการการลงทุนในภาพลักษณ์อย่างมหาศาล</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <!-- Section 4 -->
+  <div class="chapter" id="s4">
+    <span class="chapter-num">iv</span>
+    <h2 class="chapter-title">จิตวิทยาที่ไม่มีใครบอกคุณ</h2>
+    <div class="chapter-body">
+      <p>มีสิ่งหนึ่งที่เกิดขึ้นในใจของลูกค้าที่ซื้อของแพง และมันเป็นสิ่งที่แบรนด์ส่วนใหญ่ไม่รู้ว่าตัวเองได้รับประโยชน์จากมัน</p>
+      <p>ลองนึกภาพว่าคุณเพิ่งซื้อน้ำปั่นราคา 750 บาท กลับบ้าน เพื่อนคุณเห็นแล้วพูดว่า "แพงอย่างนี้ซื้อทำไม โง่มั้ย?"</p>
+      <div class="pull-quote">สิ่งที่เกิดขึ้นในหัวคุณในวินาทีนั้นคืออะไร?</div>
+      <p>คุณจะไม่ยอมรับว่าตัวเองโง่ สมองของคุณจะเริ่มทำงานทันที มันจะค้นหาเหตุผล มันจะนึกถึงว่าน้ำปั่นนั้นใช้วัตถุดิบออร์แกนิค มันจะนึกถึงว่าร้านนั้นมีมาตรฐานสูงมาก มันจะนึกถึงทุกสิ่งทุกอย่างที่สนับสนุนการตัดสินใจของตัวเอง</p>
+      <p>และหลังจากนั้น คุณจะไม่แค่เชื่อในแบรนด์นั้นมากขึ้น แต่คุณจะกลายเป็น <strong>ผู้ปกป้องแบรนด์</strong> นั้นโดยอัตโนมัติ</p>
+      <p>นั่นคือสิ่งที่นักจิตวิทยาเรียกว่า "การปกป้องการตัดสินใจของตัวเอง" และมันคือเหตุผลว่าทำไมลูกค้าของแบรนด์ราคาแพงจึงมีความเหนียวแน่นที่แบรนด์ทั่วไปไม่มี</p>
+      <p>พวกเขาไม่แค่ซื้อซ้ำ พวกเขาพูดถึงแบรนด์ให้คนอื่นฟัง พวกเขาแนะนำเพื่อน พวกเขาโต้เถียงกับคนที่วิจารณ์แบรนด์ที่พวกเขาชื่นชอบ ทั้งหมดนี้เกิดขึ้นโดยที่แบรนด์ไม่ต้องจ่ายเงินแม้แต่บาทเดียว</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <!-- Section 5 -->
+  <div class="chapter" id="s5">
+    <span class="chapter-num">v</span>
+    <h2 class="chapter-title">สูตรการอยู่รอดในระยะยาว</h2>
+    <div class="chapter-body">
+      <p>แต่ความสำเร็จในวันเปิดร้านไม่ได้รับประกันความสำเร็จในระยะยาว และแบรนด์ที่ตั้งราคาสูงก็ไม่ต่างกัน พวกเขาต้องทำสองสิ่งให้ได้อย่างต่อเนื่อง</p>
+      <p><strong>สิ่งแรก คือการเกาะกระแสใหญ่ ไม่ใช่กระแสเล็ก</strong></p>
+      <p>กระแสเล็กคือการที่คนพูดถึงอะไรบางอย่างในช่วงสั้นๆ แล้วก็ลืม กระแสใหญ่หรือที่เรียกว่า Macro Trend คือการเปลี่ยนแปลงของทัศนคติและวิถีชีวิตที่ดำเนินอยู่เป็นปีๆ อย่างเช่น Wellness, Biohacking หรือ Anti-aging</p>
+      <p>ลูกค้ากลุ่มที่มีมาตรฐานสูงนั้นไม่ใช่แค่คนที่ได้ยินเรื่องเหล่านี้ผ่านหู พวกเขาคือคนที่อ่านหนังสือเรื่องนี้ ติดตามงานวิจัย และใช้ชีวิตตาม ดังนั้น แบรนด์ที่สามารถพูดภาษาเดียวกับพวกเขาได้ ก็ไม่จำเป็นต้องกังวลว่าลูกค้าจะหายไปไหน</p>
+      <p><strong>สิ่งที่สอง คือการสร้างชุมชน</strong></p>
+      <p>ข้อได้เปรียบที่แปลกของแบรนด์ราคาแพงคือ กลุ่มลูกค้าของพวกเขานั้นแคบ และ<em>ความแคบนั้นคือจุดแข็ง</em></p>
+      <p>เพราะเมื่อกลุ่มลูกค้าแคบ ทุกคนในกลุ่มนั้นมักจะมีความคิดคล้ายกัน มีความสนใจที่ทับซ้อนกัน บางครั้งคล้ายกันจนนึกว่าลอกกันมา และนั่นทำให้การสร้างชุมชนนั้นง่ายกว่าแบรนด์แมสมาก</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <!-- Section 6 -->
+  <div class="chapter" id="s6">
+    <span class="chapter-num">vi</span>
+    <h2 class="chapter-title">ราคาคือความคาดหวัง ไม่ใช่แค่ตัวเลข</h2>
+    <div class="chapter-body">
+      <p>มีคนเถียงกันมาตลอดว่าถ้าการตลาดดีพอ ราคาก็ขายได้ทุกราคา</p>
+      <p><strong>แต่นั่นผิด</strong></p>
+      <p>ราคาไม่ใช่แค่ตัวเลข ราคาคือการกำหนดระดับความคาดหวัง ยิ่งราคาสูง ความคาดหวังก็ยิ่งสูงตามไปด้วย และมันเป็นเส้นโค้งที่ชันขึ้นเรื่อยๆ</p>
+      <p>เมื่อคุณตั้งราคาน้ำปั่นที่ 750 บาท ลูกค้าของคุณจะไม่แค่คาดหวังว่ามันจะอร่อย พวกเขาคาดหวังว่าประสบการณ์ทุกอย่างในร้านนั้นจะต้องสมบูรณ์แบบ ตั้งแต่สี กลิ่น รสชาติ ไปจนถึงวิธีที่พนักงานพูดคุยกับพวกเขา</p>
+      <div class="pull-quote">นั่นคือสภาวะที่เรียกว่า "พลาดไม่ได้"</div>
+      <p>และมันทำให้การขยายธุรกิจนั้นยากกว่าแบรนด์ทั่วไปมาก ทุกครั้งที่จะเปิดสาขาใหม่ ทุกครั้งที่จะเพิ่มเมนู ทุกครั้งที่จะเปลี่ยนพนักงาน คำถามที่ต้องตอบให้ได้เสมอคือ "เราจะรักษามาตรฐานแบบเดิมได้ไหม?"</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <!-- Section 7 -->
+  <div class="chapter" id="s7">
+    <span class="chapter-num">vii</span>
+    <h2 class="chapter-title">ความเสี่ยงที่ซ่อนอยู่</h2>
+    <div class="chapter-body">
+      <p>ความเสี่ยงของแบรนด์ราคาแพงนั้นมีสองรูปแบบใหญ่</p>
+      <p><strong>รูปแบบแรก</strong> คือ Perception ที่พังได้ชั่วพริบตา ใช้เวลาหลายปีในการสร้างภาพลักษณ์ แต่ภาพลักษณ์นั้นอาจพังทลายในชั่วข้ามคืน ไม่ว่าจะจากคุณภาพที่ตกลงวันเดียว จากการบริการที่ผิดพลาดหนหนึ่ง หรือแม้แต่จาก perception โดยรวมที่เปลี่ยนไปเพราะเหตุการณ์อะไรบางอย่างในสังคม</p>
+      <p><strong>รูปแบบที่สอง</strong> คือการลอกเลียนแบบในราคาที่ถูกกว่า นี่คือจุดตายที่หลายคนมองข้าม</p>
+      <p>ลูกค้าในยุคปัจจุบันไม่ได้ภักดีกับราคาแพง พวกเขาภักดีกับสิ่งที่พวกเขาได้รับ ถ้าวันหนึ่งมีคู่แข่งที่ copy Business Model ทุกอย่างของคุณแล้วขายในราคาที่ถูกกว่า และถ้าลูกค้ารู้สึกว่าสิ่งที่ได้รับนั้นไม่ต่างกัน นั่นคือวันที่ธุรกิจของคุณเริ่มสั่นคลอน</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <!-- Section 8 -->
+  <div class="chapter" id="s8">
+    <span class="chapter-num">viii</span>
+    <h2 class="chapter-title">กรณีศึกษา: ทำไม Sushiro ถึงไม่หายไปกับกระแส</h2>
+    <div class="chapter-body">
+      <p>หลายคนสงสัยว่าทำไม Sushiro ถึงยังอยู่ได้ ทั้งที่ตอนแรกก็ดูเหมือนร้านกระแสที่มีคนต่อแถวยาว</p>
+      <p>คำตอบก็คือ <em>Sushiro ไม่เคยเป็นร้านกระแสตั้งแต่แรก</em></p>
+      <p>ราคาของ Sushiro นั้นสมเหตุสมผลเมื่อเทียบกับสิ่งที่ได้รับ คุณภาพดีกว่าคู่แข่งในราคาเดียวกัน ความคุ้มค่าชัดเจนและจับต้องได้ ดังนั้นหลังจากที่คลื่นแรกของนักท่องกระแสหายไป สิ่งที่เหลืออยู่คือลูกค้าที่กลับมาเพราะพวกเขารู้สึกว่าคุ้มค่า ไม่ใช่เพราะอยากอวด</p>
+      <p>นั่นคือความหมายของการจับลูกค้ากลุ่มหลักได้จริง ไม่ใช่การมีแถวยาว แต่เป็นการทำให้คนที่เคยลองแล้วอยากกลับมา</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <!-- Section 9 -->
+  <div class="chapter" id="s9">
+    <span class="chapter-num">ix</span>
+    <h2 class="chapter-title">บทสรุป: ตลาดไม่เคยโง่</h2>
+    <div class="chapter-body">
+      <p>ย้อนกลับไปที่ภาพตั้งต้น คุณยืนอยู่หน้าร้านน้ำปั่น แถวยาว ราคา 750 บาท</p>
+      <p>ตอนนี้คุณรู้แล้วว่าเกิดอะไรขึ้น คุณเห็นแล้วว่าในแถวนั้นมีคนสองประเภทที่มีเหตุผลต่างกันโดยสิ้นเชิง คุณเข้าใจแล้วว่าราคาไม่ใช่แค่ตัวเลข และคุณรู้แล้วว่าการมีแถวยาวไม่ได้รับประกันความสำเร็จ</p>
+      <div class="pull-quote">ตลาดไม่เคยโง่ ลูกค้าทุกคนในแถวนั้นมีเหตุผลของตัวเอง</div>
+      <p>หน้าที่ของธุรกิจไม่ใช่การหลอกล่อคนให้ซื้อของแพง แต่เป็นการหาให้เจอว่า "ลูกค้าของเรา" คือใคร และเมื่อเจอแล้ว ทำให้พวกเขารู้สึกว่าการตัดสินใจซื้อของพวกเขานั้นถูกต้องทุกครั้งที่กลับมา</p>
+      <p>เพราะท้ายที่สุด ลูกค้าจะเป็นคนตัดสินเอง เสมอ</p>
+    </div>
+  </div>
+
+</article>
+
+<footer>
+  <p>บทที่ 1 &nbsp;·&nbsp; ราคาที่ไม่มีเหตุผล</p>
+</footer>
+
+<script>
+  // Intersection Observer for scroll animations
+  const chapters = document.querySelectorAll('.chapter:not(.visible)');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  chapters.forEach(ch => observer.observe(ch));
+
+  // Smooth scroll for TOC links
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+</script>
+</body>
+</html>
