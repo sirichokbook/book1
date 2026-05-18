@@ -12,36 +12,11 @@
   body { background-color: var(--cream); color: var(--ink); font-family: 'Sarabun', sans-serif; font-weight: 300; line-height: 1.9; font-size: 17px; }
   body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 100; opacity: 0.4; }
 
-  /* TOOLTIP SYSTEM */
-  .term {
-    color: var(--amber);
-    font-weight: 400;
-    border-bottom: 1px dashed var(--amber);
-    cursor: pointer;
-    position: relative;
-    display: inline;
-  }
-
-  .tooltip {
-    display: none;
-    position: fixed;
-    background: var(--ink);
-    color: var(--cream);
-    font-size: 13px;
-    line-height: 1.6;
-    padding: 12px 16px;
-    max-width: 260px;
-    z-index: 9999;
-    pointer-events: none;
-    font-family: 'Sarabun', sans-serif;
-    font-weight: 300;
-    border-left: 3px solid var(--amber);
-  }
-
+  .term { color: var(--amber); font-weight: 400; border-bottom: 1px dashed var(--amber); cursor: pointer; display: inline; }
+  .tooltip { display: none; position: fixed; background: var(--ink); color: var(--cream); font-size: 13px; line-height: 1.6; padding: 12px 16px; max-width: 260px; z-index: 9999; pointer-events: none; font-family: 'Sarabun', sans-serif; font-weight: 300; border-left: 3px solid var(--amber); }
   .tooltip.show { display: block; }
   .tooltip-term { font-weight: 600; font-size: 12px; letter-spacing: 0.1em; color: var(--amber); margin-bottom: 4px; text-transform: uppercase; }
 
-  /* COVER */
   .cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 60px 24px; position: relative; border-bottom: 1px solid var(--divider); overflow: hidden; }
   .cover::after { content: ''; position: absolute; bottom: -80px; left: 50%; transform: translateX(-50%); width: 500px; height: 500px; background: radial-gradient(circle, rgba(200,133,42,0.08) 0%, transparent 70%); pointer-events: none; }
   .cover-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 32px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.2s; }
@@ -56,7 +31,6 @@
   .back-link { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); text-decoration: none; position: absolute; top: 32px; left: 32px; transition: color 0.2s; opacity: 0; animation: fadeUp 0.8s ease forwards 0.1s; }
   .back-link:hover { color: var(--amber); }
 
-  /* TOC */
   .toc { max-width: 680px; margin: 0 auto; padding: 80px 24px; border-bottom: 1px solid var(--divider); }
   .toc-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 40px; }
   .toc-item { display: flex; align-items: baseline; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--divider); text-decoration: none; color: var(--ink); transition: color 0.2s; }
@@ -65,7 +39,6 @@
   .toc-title { font-size: 15px; font-weight: 400; flex: 1; }
   .toc-dots { flex: 1; border-bottom: 1px dotted var(--divider); margin: 0 8px; min-width: 20px; }
 
-  /* ARTICLE */
   .article { max-width: 680px; margin: 0 auto; padding: 80px 24px 120px; }
   .chapter { margin-bottom: 100px; opacity: 0; transform: translateY(20px); transition: opacity 0.7s ease, transform 0.7s ease; }
   .chapter.visible { opacity: 1; transform: translateY(0); }
@@ -77,31 +50,34 @@
   .pull-quote { border-left: 3px solid var(--amber); padding: 4px 0 4px 24px; margin: 40px 0; font-family: 'Playfair Display', serif; font-size: 20px; font-style: italic; line-height: 1.5; color: var(--ink); }
   .section-break { text-align: center; margin: 48px 0; color: var(--amber); letter-spacing: 0.3em; font-size: 14px; }
 
-  /* FRAMEWORK BOX */
-  .framework { border: 1px solid var(--divider); padding: 32px; margin: 32px 0; background: rgba(200,133,42,0.03); }
-  .framework-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 24px; display: block; }
-  .framework-step { display: flex; gap: 20px; padding: 16px 0; border-bottom: 1px solid var(--divider); }
-  .framework-step:last-child { border-bottom: none; }
-  .framework-num { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 900; color: rgba(200,133,42,0.2); min-width: 32px; line-height: 1.1; }
-  .framework-content { flex: 1; }
-  .framework-title { font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 6px; }
-  .framework-desc { font-size: 14px; color: var(--muted); line-height: 1.7; }
+  /* Case study box */
+  .case { border: 1px solid var(--divider); padding: 28px 32px; margin: 32px 0; }
+  .case-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
+  .case-brand { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--ink); }
+  .case-tag { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); background: rgba(200,133,42,0.08); padding: 3px 10px; }
+  .case-intro { font-size: 13px; color: var(--muted); margin-bottom: 16px; line-height: 1.7; border-left: 2px solid var(--divider); padding-left: 14px; }
+  .case-body { font-size: 15px; color: #2E2416; line-height: 1.85; }
 
-  /* EXAMPLE BOX */
-  .example-box { border-left: 3px solid var(--divider); padding: 4px 0 4px 24px; margin: 32px 0; }
-  .example-label { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; display: block; }
-  .example-text { font-size: 15px; color: #2E2416; line-height: 1.8; }
+  /* Three-step framework */
+  .steps { margin: 32px 0; }
+  .step { display: flex; gap: 20px; padding: 20px 0; border-bottom: 1px solid var(--divider); }
+  .step:last-child { border-bottom: none; }
+  .step-num { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 900; color: rgba(200,133,42,0.2); min-width: 32px; line-height: 1.1; }
+  .step-content { flex: 1; }
+  .step-title { font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 6px; }
+  .step-desc { font-size: 14px; color: var(--muted); line-height: 1.7; }
 
-  /* CONTRAST TABLE */
+  /* Do/Don't contrast */
   .contrast { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--divider); margin: 32px 0; }
   .contrast-col { background: var(--cream); padding: 24px; }
-  .contrast-header { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--amber); margin-bottom: 16px; display: block; }
+  .contrast-header { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 16px; display: block; }
   .contrast-header.bad { color: var(--muted); }
-  .contrast-item { font-size: 14px; color: var(--muted); padding: 6px 0; border-bottom: 1px solid var(--divider); line-height: 1.6; }
+  .contrast-header.good { color: var(--amber); }
+  .contrast-item { font-size: 14px; color: var(--muted); padding: 7px 0; border-bottom: 1px solid var(--divider); line-height: 1.6; }
   .contrast-item:last-child { border-bottom: none; }
   .contrast-item.good { color: #2E2416; }
 
-  /* VOCAB */
+  /* Vocab */
   .vocab-section { background: rgba(200,133,42,0.06); border: 1px solid var(--divider); padding: 40px; margin-top: 80px; }
   .vocab-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 8px; display: block; }
   .vocab-hint { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
@@ -112,10 +88,8 @@
   .vocab-example { font-size: 13px; color: var(--amber); font-style: italic; margin-top: 4px; }
 
   footer { text-align: center; padding: 60px 24px; border-top: 1px solid var(--divider); font-size: 12px; color: var(--muted); letter-spacing: 0.1em; }
-
   @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes scrollPulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
-
   @media (max-width: 600px) {
     body { font-size: 16px; }
     .toc, .article { padding-left: 20px; padding-right: 20px; }
@@ -127,7 +101,6 @@
 </head>
 <body>
 
-<!-- TOOLTIP ELEMENT -->
 <div class="tooltip" id="tooltip">
   <div class="tooltip-term" id="tooltip-term"></div>
   <div id="tooltip-body"></div>
@@ -137,7 +110,7 @@
   <a class="back-link" href="index.html">← กลับหน้าหลัก</a>
   <p class="cover-label">บทที่ 5</p>
   <h1 class="cover-title">สร้างความสัมพันธ์กับ<em>ลูกค้ากลุ่มหลัก</em></h1>
-  <p class="cover-subtitle">ต่อจากบทที่ 1 — รู้จักลูกค้ากลุ่มหลักแล้ว จะทำให้เขากลับมาซ้ำและผูกพันกับแบรนด์ได้อย่างไร</p>
+  <p class="cover-subtitle">ต่อจากบทที่ 1 — รู้จักลูกค้ากลุ่มหลักแล้ว จะทำให้เขากลับมาซ้ำและผูกพันกับแบรนด์ได้อย่างไร เรียนรู้จากแบรนด์ไทยที่ทำสำเร็จมาแล้ว</p>
   <div class="cover-divider"></div>
   <p class="cover-meta">กลยุทธ์การตลาด &nbsp;·&nbsp; sirichokbook</p>
   <div class="scroll-hint"><span>เริ่มอ่าน</span><div class="scroll-arrow"></div></div>
@@ -146,10 +119,10 @@
 <nav class="toc">
   <p class="toc-label">สารบัญ</p>
   <a class="toc-item" href="#s1"><span class="toc-num">i</span><span class="toc-title">ทำไมลูกค้ากลุ่มหลักถึงหายไปโดยไม่บอก</span><span class="toc-dots"></span></a>
-  <a class="toc-item" href="#s2"><span class="toc-num">ii</span><span class="toc-title">ก่อนสร้างความสัมพันธ์ ต้องผ่านประตูบานแรกก่อน</span><span class="toc-dots"></span></a>
-  <a class="toc-item" href="#s3"><span class="toc-num">iii</span><span class="toc-title">สร้างจุดสัมผัสที่ถูกต้อง</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s2"><span class="toc-num">ii</span><span class="toc-title">สามด่านที่เขาต้องผ่านก่อนไว้ใจแบรนด์</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s3"><span class="toc-num">iii</span><span class="toc-title">ทุกจุดสัมผัสมีน้ำหนักเท่ากันหมด</span><span class="toc-dots"></span></a>
   <a class="toc-item" href="#s4"><span class="toc-num">iv</span><span class="toc-title">การสื่อสารที่ทำให้เขารู้สึกว่า "แบรนด์นี้เข้าใจฉัน"</span><span class="toc-dots"></span></a>
-  <a class="toc-item" href="#s5"><span class="toc-num">v</span><span class="toc-title">จาก Loyal Customer สู่ Brand Advocate</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s5"><span class="toc-num">v</span><span class="toc-title">จากลูกค้าประจำสู่คนที่ช่วยบอกต่อแทนเรา</span><span class="toc-dots"></span></a>
   <a class="toc-item" href="#s6"><span class="toc-num">vi</span><span class="toc-title">สิ่งที่ทำลายความสัมพันธ์ได้ในชั่วข้ามคืน</span><span class="toc-dots"></span></a>
   <a class="toc-item" href="#s7"><span class="toc-num">vii</span><span class="toc-title">บทสรุป: ความสัมพันธ์ไม่ได้สร้างด้วยโปรโมชั่น</span><span class="toc-dots"></span></a>
 </nav>
@@ -158,8 +131,8 @@
 
   <div class="chapter visible">
     <div class="chapter-body">
-      <p>ในบทที่ 1 เราพูดถึงลูกค้าสองกลุ่มที่ยืนอยู่ในแถวเดียวกัน กลุ่มแรกคือคนที่มาตามกระแสแล้วก็ไป กลุ่มที่สองคือลูกค้าที่มีมาตรฐานสูง ซื้อซ้ำ และเลี้ยงธุรกิจให้อยู่รอดได้จริงในระยะยาว</p>
-      <p>คำถามที่เหลืออยู่คือ เมื่อเราเจอเขาแล้ว จะทำให้เขากลับมาและผูกพันกับแบรนด์ได้อย่างไร นั่นคือสิ่งที่บทนี้จะตอบ</p>
+      <p>ในบทที่ 1 เราพูดถึงลูกค้าสองกลุ่มที่ยืนอยู่ในแถวเดียวกัน กลุ่มแรกมาตามกระแสแล้วก็ไป กลุ่มที่สองคือลูกค้าที่มีมาตรฐานสูง ซื้อซ้ำ และเลี้ยงธุรกิจให้อยู่รอดได้จริงในระยะยาว</p>
+      <p>คำถามที่เหลือคือ เมื่อเราเจอเขาแล้ว จะทำให้เขากลับมาและผูกพันกับแบรนด์ได้อย่างไร บทนี้จะตอบโดยเรียนรู้จากแบรนด์ไทยที่ทำสำเร็จมาแล้ว ตั้งแต่ร้านของหวาน น้ำหอม ไปจนถึงร้านรองเท้าผ้าใบ</p>
     </div>
   </div>
 
@@ -169,10 +142,10 @@
     <span class="chapter-num">i</span>
     <h2 class="chapter-title">ทำไมลูกค้ากลุ่มหลักถึงหายไปโดยไม่บอก</h2>
     <div class="chapter-body">
-      <p>ลูกค้ากลุ่มหลักที่หายไปส่วนใหญ่ไม่ได้หายเพราะสินค้าไม่ดี และพวกเขามักจะ<strong>ไม่บอกเหตุผล</strong> พวกเขาแค่หยุดกลับมา</p>
-      <p>เหตุผลที่พบบ่อยที่สุดไม่ใช่คู่แข่งราคาถูกกว่า แต่เป็นสิ่งที่ละเอียดอ่อนกว่านั้น ไม่ว่าจะเป็นความรู้สึกว่าแบรนด์ไม่ได้สนใจเขาเป็นพิเศษ ประสบการณ์ที่เคยดีเริ่มสม่ำเสมอน้อยลง หรือแค่รู้สึกว่าไม่มีเหตุผลพอที่จะกลับมา</p>
+      <p>ลูกค้ากลุ่มหลักที่หายไปส่วนใหญ่ไม่ได้หายเพราะสินค้าไม่ดี และที่น่ากลัวกว่านั้นคือพวกเขามักจะ<strong>ไม่บอกเหตุผล</strong> พวกเขาแค่หยุดกลับมา</p>
+      <p>เหตุผลที่พบบ่อยที่สุดไม่ใช่คู่แข่งราคาถูกกว่า แต่เป็นความรู้สึกที่ละเอียดอ่อนกว่านั้น ไม่ว่าจะเป็นความรู้สึกว่าแบรนด์ไม่ได้สนใจเขาเป็นพิเศษ ประสบการณ์ที่เคยดีเริ่มสม่ำเสมอน้อยลง หรือแค่รู้สึกว่าไม่มีเหตุผลพอที่จะกลับมา</p>
       <div class="pull-quote">ลูกค้ากลุ่มหลักไม่ได้ต้องการส่วนลด เขาต้องการความรู้สึกว่าเขาสำคัญ</div>
-      <p>นั่นคือความแตกต่างระหว่างการสร้างความสัมพันธ์กับการทำ<span class="term" data-term="Retention Marketing" data-def="กลยุทธ์การตลาดที่มุ่งเน้นการรักษาลูกค้าเดิมให้อยู่กับแบรนด์ แทนที่จะหาลูกค้าใหม่ตลอดเวลา มักถูกมองว่าคุ้มค่ากว่าการหาลูกค้าใหม่ 5-7 เท่า">Retention Marketing</span> แบบผิวเผิน ส่วนลดและโปรโมชั่นซื้อใจได้ชั่วคราว แต่ความสัมพันธ์ที่แท้จริงต้องสร้างจากการที่เขารู้สึกว่าแบรนด์เข้าใจและให้คุณค่ากับเขาจริงๆ</p>
+      <p>นั่นคือความแตกต่างระหว่างการสร้างความสัมพันธ์ที่แท้จริง กับการทำ<span class="term" data-term="Retention Marketing" data-def="กลยุทธ์รักษาลูกค้าเดิม แทนที่จะหาลูกค้าใหม่ตลอดเวลา โดยทั่วไปการรักษาลูกค้าเก่าคุ้มค่ากว่าการหาลูกค้าใหม่ประมาณ 5-7 เท่า">การตลาดเพื่อรักษาลูกค้า (Retention Marketing)</span> แบบผิวเผิน ส่วนลดและโปรโมชั่นซื้อใจได้ชั่วคราว แต่ความสัมพันธ์ที่แท้จริงต้องมาจากการที่เขารู้สึกว่าแบรนด์เข้าใจและให้คุณค่ากับเขาจริงๆ</p>
     </div>
   </div>
 
@@ -180,36 +153,42 @@
 
   <div class="chapter" id="s2">
     <span class="chapter-num">ii</span>
-    <h2 class="chapter-title">ก่อนสร้างความสัมพันธ์ ต้องผ่านประตูบานแรกก่อน</h2>
+    <h2 class="chapter-title">สามด่านที่เขาต้องผ่านก่อนไว้ใจแบรนด์</h2>
     <div class="chapter-body">
-      <p>ลูกค้ากลุ่มหลักมีกระบวนการตัดสินใจที่แตกต่างจากคนทั่วไป เขาไม่ได้ตัดสินใจที่จะ "เป็นลูกค้าประจำ" ตั้งแต่วันแรก แต่เขาจะผ่านสามด่านก่อนที่จะไว้วางใจแบรนด์ใดแบรนด์หนึ่งอย่างแท้จริง</p>
+      <p>ลูกค้ากลุ่มหลักไม่ได้ตัดสินใจเป็นลูกค้าประจำตั้งแต่วันแรก เขาจะผ่านสามด่านก่อนที่จะไว้วางใจแบรนด์ใดแบรนด์หนึ่งอย่างแท้จริง</p>
 
-      <div class="framework">
-        <span class="framework-label">สามด่านของลูกค้ากลุ่มหลัก</span>
-        <div class="framework-step">
-          <div class="framework-num">1</div>
-          <div class="framework-content">
-            <div class="framework-title">ทดสอบ (Test)</div>
-            <div class="framework-desc">ครั้งแรกที่เขาซื้อ เขากำลังทดสอบว่าแบรนด์ผ่านมาตรฐานของเขาหรือไม่ ถ้าไม่ผ่านแม้แต่จุดเดียว เขาจะไม่กลับมาและไม่บอกเหตุผล ถ้าผ่าน เขาจะเริ่มสังเกตต่อ</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <div class="step-title">ทดสอบ</div>
+            <div class="step-desc">ครั้งแรกที่เขาซื้อ เขากำลังทดสอบว่าแบรนด์ผ่านมาตรฐานของเขาหรือไม่ ถ้าไม่ผ่านแม้แต่จุดเดียว เขาจะไม่กลับมาและไม่บอกเหตุผล ถ้าผ่าน เขาจะเริ่มสังเกตต่อ</div>
           </div>
         </div>
-        <div class="framework-step">
-          <div class="framework-num">2</div>
-          <div class="framework-content">
-            <div class="framework-title">ยืนยัน (Confirm)</div>
-            <div class="framework-desc">เขาจะกลับมาอีก 2-3 ครั้งเพื่อยืนยันว่าครั้งแรกไม่ได้โชค ถ้าคุณภาพยังสม่ำเสมอ เขาเริ่มรู้สึกว่านี่คือแบรนด์ที่ไว้ใจได้ ช่วงนี้คือจุดที่สำคัญที่สุดและหลายแบรนด์พลาดตรงนี้</div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <div class="step-title">ยืนยัน</div>
+            <div class="step-desc">เขาจะกลับมาอีก 2-3 ครั้งเพื่อยืนยันว่าครั้งแรกไม่ได้โชค ถ้าคุณภาพยังสม่ำเสมอ เขาเริ่มรู้สึกว่านี่คือแบรนด์ที่ไว้ใจได้ ช่วงนี้คือจุดที่สำคัญที่สุดและหลายแบรนด์พลาดตรงนี้</div>
           </div>
         </div>
-        <div class="framework-step">
-          <div class="framework-num">3</div>
-          <div class="framework-content">
-            <div class="framework-title">ผูกพัน (Bond)</div>
-            <div class="framework-desc">เมื่อเขาผ่านสองด่านแรกแล้ว เขาจะเริ่มรู้สึกผูกพัน เขาจะแนะนำคนอื่น เขาจะปกป้องแบรนด์เมื่อถูกวิจารณ์ และเขาจะให้โอกาสแบรนด์มากกว่าคนอื่น แต่การไปถึงจุดนี้ต้องอาศัยเวลาและความสม่ำเสมอ</div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <div class="step-title">ผูกพัน</div>
+            <div class="step-desc">เมื่อผ่านสองด่านแรกแล้ว เขาจะเริ่มรู้สึกผูกพัน แนะนำคนอื่น ปกป้องแบรนด์เมื่อถูกวิจารณ์ และให้โอกาสแบรนด์มากกว่าคนอื่น แต่การไปถึงจุดนี้ต้องอาศัยเวลาและความสม่ำเสมอ</div>
           </div>
         </div>
       </div>
 
-      <p>สิ่งที่หลายแบรนด์ทำผิดคือพยายามสร้างความสัมพันธ์ก่อนที่จะผ่านด่านแรกด้วยซ้ำ ส่ง<span class="term" data-term="Newsletter" data-def="อีเมลหรือจดหมายข่าวที่ส่งให้ลูกค้าเป็นประจำ เพื่ออัปเดตข้อมูล โปรโมชั่น หรือเนื้อหาที่มีประโยชน์ เป็นเครื่องมือ Retention Marketing ที่นิยมใช้">Newsletter</span> ตั้งแต่วันแรก ขอให้รีวิวก่อนที่เขาจะมีเวลาตัดสินใจ สิ่งเหล่านี้ทำให้รู้สึกเร่งรีบและไม่เป็นธรรมชาติ</p>
+      <div class="case">
+        <div class="case-header">
+          <span class="case-brand">After You Dessert Café</span>
+          <span class="case-tag">ร้านขนมหวาน</span>
+        </div>
+        <p class="case-intro">ก่อตั้งปี 2550 โดย "เมย์" กุลพัท กนกวัฒนวรรณ เริ่มจากร้านเล็กๆ ที่ขาย Shibuya Honey Toast ก่อนจะขยายเป็นกว่า 30 สาขาทั่วไทย และจดทะเบียนในตลาดหลักทรัพย์ปี 2559 ในปี 2567 บริษัทรายงานผลประกอบการดีที่สุดในประวัติศาสตร์ ทั้งรายได้และกำไร</p>
+        <p class="case-body">สิ่งที่ After You ทำได้ดีมากคือการทำให้ลูกค้าผ่านสามด่านนี้ได้อย่างราบรื่น ครั้งแรกที่ใครก็ตามกินชิบุยะโทสต์ ถ้าผ่านเกณฑ์ เขาจะกลับมาลองเมนูอื่น และถ้าทุกอย่างสม่ำเสมอ เขาก็จะกลายเป็นคนที่พาเพื่อนมาเองโดยที่ After You ไม่ต้องทำอะไรเพิ่ม เมนูใหม่ที่ออกมาสม่ำเสมอยังช่วยให้ลูกค้าเก่ามีเหตุผลที่จะกลับมาลองอยู่เสมอ</p>
+      </div>
     </div>
   </div>
 
@@ -217,31 +196,37 @@
 
   <div class="chapter" id="s3">
     <span class="chapter-num">iii</span>
-    <h2 class="chapter-title">สร้างจุดสัมผัสที่ถูกต้อง</h2>
+    <h2 class="chapter-title">ทุกจุดสัมผัสมีน้ำหนักเท่ากันหมด</h2>
     <div class="chapter-body">
-      <p><span class="term" data-term="Touchpoint" data-def="ทุกจุดที่ลูกค้าสัมผัสหรือมีปฏิสัมพันธ์กับแบรนด์ ตั้งแต่การเห็นโฆษณา การเข้าร้าน การซื้อสินค้า ไปจนถึงการรับสินค้าที่บ้าน ทุก touchpoint ล้วนส่งผลต่อความรู้สึกที่มีต่อแบรนด์">Touchpoint</span> หรือจุดสัมผัสคือทุกช่วงเวลาที่ลูกค้ามีปฏิสัมพันธ์กับแบรนด์ของเรา ตั้งแต่การเห็นโฆษณา การเข้าร้าน การซื้อ ไปจนถึงหลังจากซื้อไปแล้ว และสำหรับลูกค้ากลุ่มหลัก ทุก touchpoint มีน้ำหนักเท่ากันหมด</p>
-      <p>เขาสังเกตทุกอย่าง ตั้งแต่วิธีที่พนักงานทักทาย ความสะอาดของพื้นที่ ไปจนถึงวิธีที่แบรนด์ตอบ DM ใน Instagram ความไม่สม่ำเสมอในจุดใดจุดหนึ่งสามารถทำลายความรู้สึกดีทั้งหมดได้</p>
+      <p>"จุดสัมผัส" หรือ<span class="term" data-term="Touchpoint" data-def="ทุกช่วงเวลาที่ลูกค้ามีปฏิสัมพันธ์กับแบรนด์ ตั้งแต่เห็นโฆษณา เข้าร้าน ซื้อสินค้า ไปจนถึงหลังจากซื้อกลับบ้าน ทุกจุดล้วนส่งผลต่อความรู้สึกที่มีต่อแบรนด์">Touchpoint</span> คือทุกช่วงเวลาที่ลูกค้ามีปฏิสัมพันธ์กับแบรนด์ของเรา และสำหรับลูกค้ากลุ่มหลัก ทุกจุดมีน้ำหนักเท่ากันหมด เขาสังเกตทุกอย่าง ตั้งแต่วิธีที่พนักงานทักทาย ไปจนถึงวิธีที่แบรนด์ตอบ DM ใน Instagram</p>
 
       <div class="contrast">
         <div class="contrast-col">
-          <span class="contrast-header bad">Touchpoint ที่ทำลายความสัมพันธ์</span>
-          <div class="contrast-item">พนักงานใหม่ไม่รู้จักเมนูดีพอ</div>
+          <span class="contrast-header bad">จุดสัมผัสที่ทำลายความสัมพันธ์</span>
+          <div class="contrast-item">พนักงานสาขาใหม่ยังไม่รู้จักสินค้าดีพอ</div>
           <div class="contrast-item">ตอบ comment ช้า หรือตอบแบบ copy-paste</div>
-          <div class="contrast-item">แพ็กเกจจิ้งขาด ส่งของช้ากว่าที่บอก</div>
+          <div class="contrast-item">แพ็กเกจจิ้งลดคุณภาพโดยไม่บอกล่วงหน้า</div>
           <div class="contrast-item">โปรโมชั่นที่ดีกว่าสำหรับลูกค้าใหม่</div>
           <div class="contrast-item">คุณภาพสินค้าแต่ละครั้งไม่เท่ากัน</div>
         </div>
         <div class="contrast-col">
-          <span class="contrast-header">Touchpoint ที่สร้างความสัมพันธ์</span>
+          <span class="contrast-header good">จุดสัมผัสที่สร้างความสัมพันธ์</span>
           <div class="contrast-item good">จำชื่อหรือสิ่งที่เขาชอบได้</div>
           <div class="contrast-item good">ตอบเร็ว ตอบด้วยข้อมูลจริง ไม่ใช่สคริปต์</div>
-          <div class="contrast-item good">แพ็กเกจจิ้งดีกว่าที่คาดหวัง ตรงเวลา</div>
+          <div class="contrast-item good">แพ็กเกจจิ้งดีกว่าที่คาดหวัง</div>
           <div class="contrast-item good">ลูกค้าเก่าได้สิทธิพิเศษก่อน</div>
           <div class="contrast-item good">คุณภาพเท่าเดิมทุกครั้ง ไม่มีข้อยกเว้น</div>
         </div>
       </div>
 
-      <p>จุดที่หลายธุรกิจมองข้ามที่สุดคือ<span class="term" data-term="Post-purchase Experience" data-def="ประสบการณ์ที่ลูกค้าได้รับหลังจากซื้อสินค้าแล้ว เช่น การแพ็กสินค้า การส่งของ การติดตามผล และการดูแลหลังการขาย มักมีผลต่อการตัดสินใจซื้อครั้งต่อไปมากกว่าประสบการณ์ตอนซื้อ">Post-purchase Experience</span> คือสิ่งที่เกิดขึ้น<em>หลังจาก</em>ลูกค้าจ่ายเงินไปแล้ว เพราะนั่นคือช่วงเวลาที่เขาจะตัดสินใจว่าจะกลับมาหรือเปล่า</p>
+      <div class="case">
+        <div class="case-header">
+          <span class="case-brand">Karmakamet</span>
+          <span class="case-tag">น้ำหอม / ไลฟ์สไตล์</span>
+        </div>
+        <p class="case-intro">แบรนด์น้ำหอมและผลิตภัณฑ์อโรมาเทอราพีสัญชาติไทย มีรากฐานมาจากปี 2514 ปัจจุบันมีกว่า 16 สาขาและขยายไปต่างประเทศทั้งญี่ปุ่นและที่อื่นๆ กลายเป็นหนึ่งในแบรนด์ที่นักท่องเที่ยวต่างชาติรู้จักดีที่สุดจากไทย</p>
+        <p class="case-body">Karmakamet เข้าใจเรื่องจุดสัมผัสอย่างลึกซึ้ง ทุกอย่างในร้านถูกออกแบบมาเพื่อสร้างประสบการณ์ที่สมบูรณ์ ตั้งแต่กลิ่นในร้านที่คัดเลือกมาเป็นพิเศษ ไปจนถึงวิธีที่พนักงานอธิบายเรื่องราวเบื้องหลังแต่ละกลิ่น สาขาที่ Lang 1919 ถูกออกแบบให้เข้ากับบรรยากาศโกดังเก่าของครอบครัวผู้ก่อตั้ง ทำให้ประสบการณ์การซื้อกลายเป็นสิ่งที่ลูกค้าอยากกลับมาสัมผัสซ้ำ ไม่ใช่แค่เพื่อซื้อสินค้า</p>
+      </div>
     </div>
   </div>
 
@@ -252,16 +237,18 @@
     <h2 class="chapter-title">การสื่อสารที่ทำให้เขารู้สึกว่า "แบรนด์นี้เข้าใจฉัน"</h2>
     <div class="chapter-body">
       <p>ลูกค้ากลุ่มหลักมีเรดาร์ที่ไวมากต่อการสื่อสารที่ไม่จริงใจ เขาจะรู้ทันทีว่าแบรนด์กำลังพูดกับ "คนทั่วไป" หรือกำลังพูดกับ "เขา" โดยเฉพาะ</p>
-      <p>การสื่อสารที่ดีกับกลุ่มนี้ไม่ได้แปลว่าต้องส่งข้อความส่วนตัวทุกคน แต่แปลว่าเนื้อหาที่สื่อสารออกไปต้องสะท้อนให้เห็นว่าแบรนด์เข้าใจว่าเขาคือใคร มีความสนใจอะไร และให้คุณค่ากับอะไร</p>
+      <p>การสื่อสารที่ดีกับกลุ่มนี้ไม่ได้แปลว่าต้องส่งข้อความส่วนตัวทุกคน แต่แปลว่าเนื้อหาที่สื่อสารออกไปต้องสะท้อนให้เห็นว่าแบรนด์เข้าใจว่าเขาคือใคร สนใจอะไร และให้คุณค่ากับอะไร</p>
 
-      <div class="example-box">
-        <span class="example-label">ตัวอย่าง — ร้านกาแฟ Specialty</span>
-        <p class="example-text"><strong>สื่อสารแบบทั่วไป:</strong> "กาแฟของเราอร่อย ใช้เมล็ดคุณภาพดี ลองมาชิมได้เลย"</p>
-        <p class="example-text" style="margin-top: 12px;"><strong>สื่อสารกับลูกค้ากลุ่มหลัก:</strong> "Lot ใหม่จาก Yirgacheffe มาแล้ว เมล็ดปีนี้ Fermentation Time สั้นกว่าปีที่แล้ว Acidity จะ Bright กว่า เหมาะกับคนที่ชอบ Citrus Note มาลองก่อนที่เราจะเปลี่ยน Lot ได้เลย"</p>
+      <div class="case">
+        <div class="case-header">
+          <span class="case-brand">Carnival</span>
+          <span class="case-tag">รองเท้าผ้าใบ / สตรีทแวร์</span>
+        </div>
+        <p class="case-intro">ร้านรองเท้าผ้าใบและสตรีทแวร์ชั้นนำของไทย ก่อตั้งปี 2553 โดย "ปิ๊น" อนุพงศ์ คุตติกุล เริ่มจากร้านเล็กๆ ในสยามสแควร์ที่ขาย Converse รุ่นหายาก ปัจจุบันมี 5 สาขาและเป็นร้านแรกในไทยที่ได้รับสิทธิ์จำหน่ายรองเท้าระดับ Top-tier จากแบรนด์ชั้นนำทั่วโลก มีผู้ติดตามบน Instagram กว่า 557,000 คน และ Facebook กว่า 1 ล้านคน</p>
+        <p class="case-body">Carnival สื่อสารในภาษาเดียวกับลูกค้ากลุ่มหลักของตัวเอง ไม่ใช่ภาษาของคนขายของ พวกเขาพูดเรื่องประวัติศาสตร์ของแต่ละรุ่น วัฒนธรรมที่อยู่เบื้องหลัง และเรื่องราวของการ collaborate กับแบรนด์ใหญ่ ทำให้ลูกค้ากลุ่มหลักรู้สึกว่าตัวเองกำลัง "เป็นส่วนหนึ่งของอะไรบางอย่าง" ไม่ใช่แค่ซื้อรองเท้า ปิ๊นเคยพูดในสัมภาษณ์ว่า "เราไม่ได้พยายามสร้างกระแส แต่สร้างสิ่งที่เราเชื่อ แล้วหาคนที่เชื่อแบบเดียวกัน"</p>
       </div>
 
-      <p>ความต่างไม่ใช่แค่รายละเอียด แต่คือการที่ลูกค้ากลุ่มหลักอ่านแล้วรู้สึกว่า <em>"แบรนด์นี้รู้ว่าฉันสนใจอะไร"</em> ซึ่งทำให้เขาอยากกลับมามากกว่าโปรโมชั่นราคาใดๆ ทั้งสิ้น</p>
-      <p>สิ่งที่ต้องระวังคือการสื่อสารที่ดูพยายามมากเกินไป เพราะลูกค้ากลุ่มนี้จะรู้สึกได้ว่ากำลังถูกขายของ ความจริงใจและความสม่ำเสมอในการสื่อสารสำคัญกว่าความถี่</p>
+      <div class="pull-quote">ความต่างไม่ใช่แค่รายละเอียด แต่คือการที่ลูกค้าอ่านแล้วรู้สึกว่า "แบรนด์นี้รู้ว่าฉันสนใจอะไร"</div>
     </div>
   </div>
 
@@ -269,14 +256,19 @@
 
   <div class="chapter" id="s5">
     <span class="chapter-num">v</span>
-    <h2 class="chapter-title">จาก Loyal Customer สู่ Brand Advocate</h2>
+    <h2 class="chapter-title">จากลูกค้าประจำสู่คนที่ช่วยบอกต่อแทนเรา</h2>
     <div class="chapter-body">
-      <p>เมื่อลูกค้ากลุ่มหลักผ่านสามด่านและรู้สึกผูกพันกับแบรนด์แล้ว บางคนจะก้าวไปอีกขั้นกลายเป็น <span class="term" data-term="Brand Advocate" data-def="ลูกค้าที่ไม่แค่ซื้อสินค้าซ้ำ แต่แนะนำแบรนด์ให้คนอื่นอย่างสมัครใจ โดยไม่ได้รับค่าตอบแทน เป็นรูปแบบการตลาดที่ทรงพลังที่สุดเพราะมาจากความเชื่อใจจริงๆ">Brand Advocate</span> คนที่แนะนำแบรนด์ให้คนอื่นอย่างสมัครใจ โพสต์รีวิวโดยไม่ได้รับเงิน และปกป้องแบรนด์เมื่อถูกวิจารณ์</p>
-      <p>สิ่งที่เร่งการเปลี่ยนจาก Loyal Customer สู่ Brand Advocate มีอยู่สามอย่าง</p>
-      <p><strong>หนึ่ง — ทำให้เขารู้สึกพิเศษก่อนคนอื่น</strong> การได้รับข้อมูล สินค้า หรือประสบการณ์ก่อนคนอื่นทำให้เขารู้สึกเป็นส่วนหนึ่งของกลุ่ม<span class="term" data-term="Insider" data-def="ในบริบทแบรนด์ หมายถึงกลุ่มลูกค้าที่ได้รับข้อมูลหรือสิทธิพิเศษก่อนคนอื่น ทำให้รู้สึกว่าตัวเองเป็นส่วนหนึ่งของแบรนด์มากกว่าแค่ผู้บริโภค">Insider</span> ซึ่งเป็นแรงผลักดันให้อยากบอกต่อ</p>
-      <p><strong>สอง — รับฟังและนำไปใช้จริง</strong> ถ้าลูกค้าให้<span class="term" data-term="Feedback" data-def="ความคิดเห็นหรือข้อมูลย้อนกลับจากลูกค้าเกี่ยวกับสินค้าหรือบริการ ลูกค้ากลุ่มหลักมักให้ feedback ที่มีคุณภาพสูงและตรงประเด็น เพราะเขาสังเกตรายละเอียดที่คนทั่วไปไม่เห็น">feedback</span> แล้วแบรนด์นำไปปรับใช้จริงและบอกเขา เขาจะรู้สึกเป็นเจ้าของบางส่วนของแบรนด์นั้น ความรู้สึกนี้แปลงเป็นความภักดีที่ยากจะทำลายได้</p>
-      <p><strong>สาม — สร้างชุมชนให้เขาได้เจอคนที่คล้ายกัน</strong> ดังที่พูดในบทที่ 1 ลูกค้ากลุ่มหลักของแบรนด์ราคาสูงมักมีความคิดและความสนใจคล้ายกันมาก การที่แบรนด์เป็นสื่อกลางให้เขาได้พบคนที่คล้ายกันทำให้เขาผูกพันกับแบรนด์ในระดับที่ลึกกว่าแค่สินค้า</p>
-      <div class="pull-quote">Brand Advocate ที่ดีที่สุดคือคนที่ไม่รู้ว่าตัวเองกำลังทำการตลาดให้คุณอยู่</div>
+      <p>เมื่อลูกค้ากลุ่มหลักผ่านสามด่านและรู้สึกผูกพันกับแบรนด์แล้ว บางคนจะก้าวไปอีกขั้นกลายเป็น<span class="term" data-term="Brand Advocate" data-def="ลูกค้าที่ไม่แค่ซื้อสินค้าซ้ำ แต่แนะนำแบรนด์ให้คนอื่นอย่างสมัครใจโดยไม่ได้รับค่าตอบแทน เป็นการตลาดที่ทรงพลังที่สุดเพราะมาจากความเชื่อใจจริงๆ">"คนที่ช่วยบอกต่อแทนเรา" (Brand Advocate)</span> คือคนที่แนะนำแบรนด์ให้คนอื่นอย่างสมัครใจ โพสต์รีวิวโดยไม่ได้รับเงิน และปกป้องแบรนด์เมื่อถูกวิจารณ์</p>
+
+      <p>สิ่งที่เร่งการเปลี่ยนนี้มีอยู่สามอย่าง</p>
+
+      <p><strong>หนึ่ง — ทำให้เขารู้สึกเป็นคนในก่อนคนอื่น</strong> การได้รับข้อมูล สินค้า หรือประสบการณ์ก่อนสาธารณะทำให้เขารู้สึกพิเศษและอยากบอกต่อ Carnival ทำสิ่งนี้ได้ดีมากกับลูกค้าที่ติดตามมานานผ่านการ early access สำหรับสินค้าดรอปใหม่</p>
+
+      <p><strong>สอง — รับฟังและนำไปใช้จริง</strong> ถ้าลูกค้าให้<span class="term" data-term="Feedback" data-def="ความคิดเห็นหรือข้อมูลย้อนกลับจากลูกค้าเกี่ยวกับสินค้าหรือบริการ">ความคิดเห็น</span>แล้วแบรนด์นำไปปรับใช้จริงและบอกเขา เขาจะรู้สึกเป็นเจ้าของบางส่วนของแบรนด์นั้น ความรู้สึกนี้แปลงเป็นความภักดีที่ยากจะทำลายได้</p>
+
+      <p><strong>สาม — สร้างชุมชนให้เขาได้เจอคนที่คล้ายกัน</strong> Carnival ทำสิ่งนี้ผ่านการจัด pop-up และ launching event ที่ไม่ใช่แค่งานขายของ แต่คือพื้นที่ที่คนที่มีความสนใจเดียวกันได้มาพบกัน สร้างความรู้สึกว่าการเป็น "ลูกค้า Carnival" คือการเป็นส่วนหนึ่งของชุมชนที่ใหญ่กว่าตัวเอง</p>
+
+      <div class="pull-quote">คนที่ช่วยบอกต่อแทนเราที่ดีที่สุดคือคนที่ไม่รู้ว่าตัวเองกำลังทำการตลาดให้เราอยู่</div>
     </div>
   </div>
 
@@ -286,11 +278,24 @@
     <span class="chapter-num">vi</span>
     <h2 class="chapter-title">สิ่งที่ทำลายความสัมพันธ์ได้ในชั่วข้ามคืน</h2>
     <div class="chapter-body">
-      <p>ความสัมพันธ์กับลูกค้ากลุ่มหลักนั้นสร้างยากแต่ทำลายง่าย และสิ่งที่ทำลายมันมักเป็นสิ่งที่แบรนด์ไม่คิดว่าจะเป็นปัญหา</p>
+      <p>ความสัมพันธ์กับลูกค้ากลุ่มหลักสร้างยากแต่ทำลายง่าย และสิ่งที่ทำลายมันมักเป็นสิ่งที่แบรนด์ไม่คิดว่าจะเป็นปัญหา</p>
+
       <p><strong>การลดคุณภาพโดยคิดว่าเขาจะไม่สังเกต</strong> เขาสังเกตทุกครั้ง และเมื่อสังเกตเห็นแล้ว ความไว้วางใจที่สร้างมาหลายปีจะพังทลายในครั้งเดียว</p>
-      <p><strong>การปฏิบัติกับลูกค้าเก่าแย่กว่าลูกค้าใหม่</strong> นี่คือความผิดพลาดที่พบบ่อยมากในธุรกิจ<span class="term" data-term="Subscription" data-def="รูปแบบธุรกิจที่ลูกค้าจ่ายเงินเป็นรายเดือนหรือรายปีเพื่อใช้สินค้าหรือบริการต่อเนื่อง เช่น Netflix, Spotify หรือบัตรสมาชิกร้านอาหาร">Subscription</span> และร้านที่มีโปรโมชั่นต้อนรับลูกค้าใหม่ที่ดีกว่าสิทธิ์ของลูกค้าเก่า สิ่งนี้ส่งสัญญาณให้ลูกค้าเก่ารู้สึกว่าเขาไม่ได้รับความสำคัญ</p>
+
+      <p><strong>การปฏิบัติกับลูกค้าเก่าแย่กว่าลูกค้าใหม่</strong> นี่คือความผิดพลาดที่พบบ่อยมากในธุรกิจที่มี<span class="term" data-term="Subscription" data-def="รูปแบบธุรกิจที่ลูกค้าจ่ายเงินเป็นรายเดือนหรือรายปีเพื่อใช้สินค้าหรือบริการต่อเนื่อง เช่น Netflix หรือบัตรสมาชิกร้านอาหาร">บัตรสมาชิกหรือบริการรายเดือน</span> โปรโมชั่นต้อนรับลูกค้าใหม่ที่ดีกว่าสิทธิ์ของลูกค้าเก่า ส่งสัญญาณให้ลูกค้าเก่ารู้สึกว่าตัวเองไม่ได้รับความสำคัญ</p>
+
       <p><strong>การเปลี่ยนแปลงโดยไม่อธิบาย</strong> ลูกค้ากลุ่มหลักสังเกตเมื่อสูตรเปลี่ยน วัตถุดิบเปลี่ยน หรือบรรจุภัณฑ์เปลี่ยน ถ้าแบรนด์ไม่อธิบายเหตุผล เขาจะตีความเองในทางที่แย่กว่าความเป็นจริงเสมอ</p>
+
       <p><strong>การตอบสนองต่อวิกฤตได้ไม่ดี</strong> ทุกแบรนด์มีวันที่พลาด สิ่งที่ทำให้ความสัมพันธ์แข็งแกร่งขึ้นหรืออ่อนแอลงไม่ใช่ว่าพลาดหรือเปล่า แต่คือแบรนด์ตอบสนองอย่างไรเมื่อพลาด</p>
+
+      <div class="case">
+        <div class="case-header">
+          <span class="case-brand">บทเรียนจาก Karmakamet</span>
+          <span class="case-tag">กรณีศึกษา</span>
+        </div>
+        <p class="case-intro">เหตุผลหนึ่งที่ Karmakamet ยังอยู่ได้มาหลายสิบปีในขณะที่แบรนด์น้ำหอมอื่นๆ มาแล้วก็ไปคือการที่พวกเขาไม่เคยลดทอนคุณภาพเพื่อลดต้นทุน</p>
+        <p class="case-body">แม้จะมีโอกาสขยายสาขาได้เร็วกว่านี้มาก แต่ Karmakamet เลือกขยายอย่างระมัดระวัง เพราะพวกเขารู้ดีว่าลูกค้ากลุ่มหลักของตัวเองนั้นซื้อประสบการณ์ทั้งหมด ไม่ใช่แค่ขวดน้ำหอม ถ้าสาขาใหม่ทำให้ประสบการณ์นั้นลดลง ความสัมพันธ์ที่สร้างมาทั้งหมดก็จะพังตามไปด้วย</p>
+      </div>
     </div>
   </div>
 
@@ -301,42 +306,41 @@
     <h2 class="chapter-title">บทสรุป: ความสัมพันธ์ไม่ได้สร้างด้วยโปรโมชั่น</h2>
     <div class="chapter-body">
       <p>ถ้าจะสรุปทุกอย่างในบทนี้ให้เหลือหลักการเดียว มันคือสิ่งนี้ ลูกค้ากลุ่มหลักไม่ได้ต้องการราคาที่ถูกกว่า เขาต้องการ<em>ประสบการณ์ที่ดีกว่า</em> และความรู้สึกว่า<em>แบรนด์เข้าใจเขา</em></p>
-      <p>โปรโมชั่นซื้อใจได้ชั่วคราวและดึงดูดคนผิดกลุ่ม ความสม่ำเสมอในคุณภาพ ความจริงใจในการสื่อสาร และการให้คุณค่ากับลูกค้าเก่ามากกว่าลูกค้าใหม่ คือสิ่งที่สร้างความสัมพันธ์ที่คู่แข่งลอกเลียนแบบได้ยากที่สุด</p>
+      <p>After You ทำให้ลูกค้าผ่านสามด่านได้ด้วยความสม่ำเสมอของคุณภาพ Karmakamet สร้างประสบการณ์ที่ครบทุกจุดสัมผัสจนเป็นเหตุผลให้ลูกค้ากลับมา Carnival สื่อสารในภาษาเดียวกับลูกค้าและสร้างชุมชนที่ทำให้การซื้อรองเท้ากลายเป็นมากกว่าแค่การซื้อรองเท้า</p>
       <div class="pull-quote">แบรนด์ที่ดีที่สุดไม่ได้สร้างลูกค้า แต่สร้างคนที่รู้สึกว่าตัวเองโชคดีที่เจอแบรนด์นี้</div>
-      <p>และเมื่อลูกค้ารู้สึกแบบนั้น เขาจะไม่มีวันเดินออกไปหาคู่แข่งเพียงเพราะราคาถูกกว่า เพราะสิ่งที่เขาได้จากแบรนด์นั้นมันไม่มีราคาที่จะเปรียบได้</p>
+      <p>และเมื่อลูกค้ารู้สึกแบบนั้น เขาจะไม่มีวันเดินออกไปหาคู่แข่งเพียงเพราะราคาถูกกว่า เพราะสิ่งที่เขาได้จากแบรนด์นั้นไม่มีราคาที่จะเปรียบได้</p>
     </div>
   </div>
 
-  <!-- VOCAB -->
   <div class="chapter" id="vocab">
     <div class="vocab-section">
       <span class="vocab-label">คลังคำศัพท์ · บทที่ 5</span>
       <p class="vocab-hint">* คำที่ขีดเส้นใต้สีทองในเนื้อหา กดได้เพื่อดูความหมายทันที</p>
 
       <div class="vocab-item">
-        <div class="vocab-term">Retention Marketing</div>
-        <div class="vocab-meaning">กลยุทธ์การตลาดที่มุ่งเน้นการรักษาลูกค้าเดิมให้อยู่กับแบรนด์ แทนที่จะหาลูกค้าใหม่ตลอดเวลา โดยทั่วไปการรักษาลูกค้าเก่าคุ้มค่ากว่าการหาลูกค้าใหม่ 5-7 เท่า</div>
-        <div class="vocab-example">ใช้ได้ว่า: "แทนที่จะยิงโฆษณาหาลูกค้าใหม่ตลอด ลองลงทุนกับ retention marketing ดูก่อน"</div>
+        <div class="vocab-term">การตลาดเพื่อรักษาลูกค้า (Retention Marketing)</div>
+        <div class="vocab-meaning">กลยุทธ์ที่มุ่งรักษาลูกค้าเดิมให้อยู่กับแบรนด์ แทนที่จะหาลูกค้าใหม่ตลอดเวลา งานวิจัยหลายชิ้นชี้ว่าการรักษาลูกค้าเก่าคุ้มค่ากว่าการหาลูกค้าใหม่ประมาณ 5-7 เท่า</div>
+        <div class="vocab-example">ใช้ได้ว่า: "แทนที่จะยิงโฆษณาหาลูกค้าใหม่ตลอด ลองลงทุนกับการรักษาลูกค้าเดิมดูก่อน"</div>
       </div>
       <div class="vocab-item">
-        <div class="vocab-term">Touchpoint</div>
-        <div class="vocab-meaning">ทุกจุดที่ลูกค้าสัมผัสหรือมีปฏิสัมพันธ์กับแบรนด์ ตั้งแต่การเห็นโฆษณา การเข้าร้าน ไปจนถึงการรับสินค้าที่บ้านและการบริการหลังการขาย</div>
-        <div class="vocab-example">ใช้ได้ว่า: "ต้องทำ touchpoint map ดูก่อนว่าลูกค้าเจออะไรบ้างตั้งแต่รู้จักเราจนถึงซื้อซ้ำ"</div>
+        <div class="vocab-term">จุดสัมผัส (Touchpoint)</div>
+        <div class="vocab-meaning">ทุกช่วงเวลาที่ลูกค้ามีปฏิสัมพันธ์กับแบรนด์ ตั้งแต่เห็นโฆษณา เข้าร้าน ซื้อสินค้า ไปจนถึงการรับสินค้าที่บ้านและบริการหลังการขาย ทุกจุดล้วนส่งผลต่อความรู้สึก</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ต้องดูทุกจุดสัมผัสให้ครบ ตั้งแต่ลูกค้ารู้จักเราจนถึงซื้อซ้ำ"</div>
       </div>
       <div class="vocab-item">
-        <div class="vocab-term">Post-purchase Experience</div>
-        <div class="vocab-meaning">ประสบการณ์ที่ลูกค้าได้รับหลังจากซื้อสินค้าแล้ว เช่น การแพ็กสินค้า การส่งของ และการดูแลหลังการขาย มักมีผลต่อการซื้อซ้ำมากกว่าประสบการณ์ตอนซื้อ</div>
-        <div class="vocab-example">ใช้ได้ว่า: "ลูกค้าให้ feedback ว่า post-purchase experience แย่กว่าตอนซื้อมาก ต้องแก้ด่วน"</div>
+        <div class="vocab-term">ผู้บอกต่อแบรนด์ (Brand Advocate)</div>
+        <div class="vocab-meaning">ลูกค้าที่ไม่แค่ซื้อสินค้าซ้ำ แต่แนะนำแบรนด์ให้คนอื่นอย่างสมัครใจโดยไม่ได้รับค่าตอบแทน เป็นการตลาดที่ทรงพลังที่สุดเพราะมาจากความเชื่อใจจริงๆ</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ผู้บอกต่อที่ดีมีค่ากว่า influencer ที่จ้างมาหลายเท่า เพราะคนเชื่อเพื่อนมากกว่าโฆษณา"</div>
       </div>
       <div class="vocab-item">
-        <div class="vocab-term">Brand Advocate</div>
-        <div class="vocab-meaning">ลูกค้าที่ไม่แค่ซื้อสินค้าซ้ำ แต่แนะนำแบรนด์ให้คนอื่นอย่างสมัครใจโดยไม่ได้รับค่าตอบแทน เป็นรูปแบบการตลาดที่ทรงพลังที่สุดเพราะมาจากความเชื่อใจจริงๆ</div>
-        <div class="vocab-example">ใช้ได้ว่า: "Brand advocate ที่ดีมีค่ากว่า influencer ที่จ้างมาหลายเท่า เพราะคนเชื่อเพื่อนมากกว่าโฆษณา"</div>
-      </div>
-      <div class="vocab-item">
-        <div class="vocab-term">Customer Lifetime Value (CLV)</div>
+        <div class="vocab-term">มูลค่าตลอดช่วงเวลาของลูกค้า (Customer Lifetime Value)</div>
         <div class="vocab-meaning">มูลค่ารวมที่ลูกค้าคนหนึ่งจะสร้างให้กับธุรกิจตลอดช่วงเวลาที่เขาเป็นลูกค้า ใช้วัดว่าลูกค้าแต่ละกลุ่มคุ้มค่าแค่ไหนที่จะลงทุนรักษาไว้</div>
-        <div class="vocab-example">ใช้ได้ว่า: "CLV ของลูกค้ากลุ่มหลักสูงกว่าลูกค้าทั่วไปหลายเท่า ทำให้คุ้มที่จะลงทุนดูแลเขาเป็นพิเศษ"</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ลูกค้ากลุ่มหลักมีมูลค่าตลอดช่วงเวลาสูงกว่าลูกค้าทั่วไปหลายเท่า ทำให้คุ้มที่จะดูแลเป็นพิเศษ"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">ประสบการณ์หลังการซื้อ (Post-purchase Experience)</div>
+        <div class="vocab-meaning">สิ่งที่ลูกค้าได้รับหลังจากจ่ายเงินไปแล้ว เช่น การแพ็กสินค้า การส่งของ และการดูแลหลังการขาย มักมีผลต่อการซื้อซ้ำมากกว่าประสบการณ์ตอนซื้อ</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ลูกค้าบอกว่าตอนซื้อดี แต่ประสบการณ์หลังการซื้อแย่มาก ต้องแก้ด่วน"</div>
       </div>
     </div>
   </div>
@@ -348,7 +352,6 @@
 </footer>
 
 <script>
-  // Scroll animations
   const chapters = document.querySelectorAll('.chapter:not(.visible)');
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -357,7 +360,6 @@
   }, { threshold: 0.1 });
   chapters.forEach(ch => observer.observe(ch));
 
-  // Smooth scroll TOC
   document.querySelectorAll('a[href^="#"]').forEach(a => {
     a.addEventListener('click', e => {
       e.preventDefault();
@@ -366,7 +368,6 @@
     });
   });
 
-  // Tooltip system
   const tooltip = document.getElementById('tooltip');
   const tooltipTerm = document.getElementById('tooltip-term');
   const tooltipBody = document.getElementById('tooltip-body');
@@ -376,34 +377,23 @@
     el.addEventListener('click', (e) => {
       e.stopPropagation();
       clearTimeout(hideTimeout);
-
-      const term = el.getAttribute('data-term');
-      const def = el.getAttribute('data-def');
-      tooltipTerm.textContent = term;
-      tooltipBody.textContent = def;
-
-      // Position tooltip
+      tooltipTerm.textContent = el.getAttribute('data-term');
+      tooltipBody.textContent = el.getAttribute('data-def');
       const rect = el.getBoundingClientRect();
       const tipW = 260;
       let left = rect.left;
       let top = rect.bottom + 8;
-
-      // Keep within viewport
       if (left + tipW > window.innerWidth - 16) left = window.innerWidth - tipW - 16;
       if (left < 16) left = 16;
-      if (top + 120 > window.innerHeight) top = rect.top - 120;
-
+      if (top + 120 > window.innerHeight) top = rect.top - 130;
       tooltip.style.left = left + 'px';
       tooltip.style.top = top + 'px';
       tooltip.classList.add('show');
-
       hideTimeout = setTimeout(() => tooltip.classList.remove('show'), 4000);
     });
   });
 
-  document.addEventListener('click', () => {
-    tooltip.classList.remove('show');
-  });
+  document.addEventListener('click', () => tooltip.classList.remove('show'));
 </script>
 </body>
 </html>
