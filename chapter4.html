@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เลือกโน้ตบุคสำหรับทำงานกับ AI · sirichokbook</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,600;1,300&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root { --cream: #F5F0E8; --ink: #1A1208; --amber: #C8852A; --muted: #7A6E5F; --divider: #D9CFC0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background-color: var(--cream); color: var(--ink); font-family: 'Sarabun', sans-serif; font-weight: 300; line-height: 1.9; font-size: 17px; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 100; opacity: 0.4; }
+
+  /* TOOLTIP */
+  .term { color: var(--amber); font-weight: 400; border-bottom: 1px dashed var(--amber); cursor: pointer; position: relative; display: inline; }
+  .tooltip { display: none; position: fixed; background: var(--ink); color: var(--cream); font-size: 13px; line-height: 1.6; padding: 12px 16px; max-width: 260px; z-index: 9999; pointer-events: none; font-family: 'Sarabun', sans-serif; font-weight: 300; border-left: 3px solid var(--amber); }
+  .tooltip.show { display: block; }
+  .tooltip-term { font-weight: 600; font-size: 12px; letter-spacing: 0.1em; color: var(--amber); margin-bottom: 4px; text-transform: uppercase; }
+
+  .cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 60px 24px; position: relative; border-bottom: 1px solid var(--divider); overflow: hidden; }
+  .cover::after { content: ''; position: absolute; bottom: -80px; left: 50%; transform: translateX(-50%); width: 500px; height: 500px; background: radial-gradient(circle, rgba(200,133,42,0.08) 0%, transparent 70%); pointer-events: none; }
+  .cover-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 32px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.2s; }
+  .cover-title { font-family: 'Playfair Display', serif; font-size: clamp(34px, 7vw, 64px); font-weight: 900; line-height: 1.1; letter-spacing: -0.02em; color: var(--ink); max-width: 700px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.4s; }
+  .cover-title em { font-style: italic; color: var(--amber); }
+  .cover-subtitle { margin-top: 24px; font-size: 15px; color: var(--muted); max-width: 440px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.6s; }
+  .cover-divider { width: 48px; height: 2px; background: var(--amber); margin: 40px auto; opacity: 0; animation: fadeUp 0.8s ease forwards 0.8s; }
+  .cover-meta { font-size: 12px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; opacity: 0; animation: fadeUp 0.8s ease forwards 1s; }
+  .scroll-hint { position: absolute; bottom: 32px; display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: 0; animation: fadeUp 0.8s ease forwards 1.4s; }
+  .scroll-hint span { font-size: 11px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; }
+  .scroll-arrow { width: 1px; height: 32px; background: linear-gradient(to bottom, var(--amber), transparent); animation: scrollPulse 2s ease-in-out infinite; }
+  .back-link { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); text-decoration: none; position: absolute; top: 32px; left: 32px; transition: color 0.2s; opacity: 0; animation: fadeUp 0.8s ease forwards 0.1s; }
+  .back-link:hover { color: var(--amber); }
+
+  .toc { max-width: 680px; margin: 0 auto; padding: 80px 24px; border-bottom: 1px solid var(--divider); }
+  .toc-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 40px; }
+  .toc-item { display: flex; align-items: baseline; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--divider); text-decoration: none; color: var(--ink); transition: color 0.2s; }
+  .toc-item:hover { color: var(--amber); }
+  .toc-num { font-family: 'Playfair Display', serif; font-size: 13px; color: var(--amber); min-width: 24px; font-style: italic; }
+  .toc-title { font-size: 15px; font-weight: 400; flex: 1; }
+  .toc-dots { flex: 1; border-bottom: 1px dotted var(--divider); margin: 0 8px; min-width: 20px; }
+
+  .article { max-width: 680px; margin: 0 auto; padding: 80px 24px 120px; }
+  .chapter { margin-bottom: 100px; opacity: 0; transform: translateY(20px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .chapter.visible { opacity: 1; transform: translateY(0); }
+  .chapter-num { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 16px; display: block; }
+  .chapter-title { font-family: 'Playfair Display', serif; font-size: clamp(24px, 5vw, 36px); font-weight: 700; line-height: 1.2; margin-bottom: 40px; color: var(--ink); }
+  .chapter-body p { margin-bottom: 24px; color: #2E2416; }
+  .chapter-body strong { font-weight: 600; color: var(--ink); }
+  .chapter-body em { font-style: italic; color: var(--amber); }
+  .pull-quote { border-left: 3px solid var(--amber); padding: 4px 0 4px 24px; margin: 40px 0; font-family: 'Playfair Display', serif; font-size: 20px; font-style: italic; line-height: 1.5; color: var(--ink); }
+  .section-break { text-align: center; margin: 48px 0; color: var(--amber); letter-spacing: 0.3em; font-size: 14px; }
+
+  /* Priority matrix */
+  .priority-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 32px 0; }
+  .priority-card { border: 1px solid var(--divider); padding: 20px; }
+  .priority-card.high { border-color: var(--amber); background: rgba(200,133,42,0.04); }
+  .priority-label { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; display: block; }
+  .priority-label.high { color: var(--amber); }
+  .priority-title { font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+  .priority-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* Device cards */
+  .device-card { border: 1px solid var(--divider); padding: 32px; margin: 24px 0; position: relative; }
+  .device-card.top { border-color: var(--amber); }
+  .device-badge { position: absolute; top: -1px; right: 24px; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; padding: 4px 12px; }
+  .device-badge.gold { background: var(--amber); color: var(--cream); }
+  .device-badge.silver { background: var(--muted); color: var(--cream); }
+  .device-name { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+  .device-price { font-size: 13px; color: var(--amber); margin-bottom: 20px; }
+  .spec-row { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--divider); font-size: 14px; }
+  .spec-row:last-child { border-bottom: none; }
+  .spec-label { color: var(--muted); }
+  .spec-value { color: var(--ink); text-align: right; max-width: 60%; }
+  .device-verdict { margin-top: 20px; font-size: 14px; color: var(--muted); line-height: 1.7; padding-top: 20px; border-top: 1px solid var(--divider); }
+
+  /* Setup checklist */
+  .checklist { margin: 24px 0; }
+  .check-item { display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--divider); font-size: 14px; color: #2E2416; align-items: flex-start; }
+  .check-item:last-child { border-bottom: none; }
+  .check-icon { color: var(--amber); min-width: 20px; padding-top: 2px; }
+
+  /* Vocab */
+  .vocab-section { background: rgba(200,133,42,0.06); border: 1px solid var(--divider); padding: 40px; margin-top: 80px; }
+  .vocab-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 8px; display: block; }
+  .vocab-hint { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+  .vocab-item { padding: 16px 0; border-bottom: 1px solid var(--divider); }
+  .vocab-item:last-child { border-bottom: none; }
+  .vocab-term { font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 4px; }
+  .vocab-meaning { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .vocab-example { font-size: 13px; color: var(--amber); font-style: italic; margin-top: 4px; }
+
+  footer { text-align: center; padding: 60px 24px; border-top: 1px solid var(--divider); font-size: 12px; color: var(--muted); letter-spacing: 0.1em; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes scrollPulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+  @media (max-width: 600px) {
+    body { font-size: 16px; }
+    .toc, .article { padding-left: 20px; padding-right: 20px; }
+    .back-link { top: 20px; left: 20px; }
+    .priority-grid { grid-template-columns: 1fr; }
+    .tooltip { max-width: 200px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="tooltip" id="tooltip">
+  <div class="tooltip-term" id="tooltip-term"></div>
+  <div id="tooltip-body"></div>
+</div>
+
+<section class="cover">
+  <a class="back-link" href="index.html">← กลับหน้าหลัก</a>
+  <p class="cover-label">บทที่ 4</p>
+  <h1 class="cover-title">เลือกโน้ตบุค<em>สำหรับทำงานกับ AI</em></h1>
+  <p class="cover-subtitle">ไม่ใช่แค่สเปคดีที่สุด แต่คือเครื่องที่เหมาะกับวิธีทำงานของคนที่ใช้ AI เป็นเครื่องมือหลักในชีวิต</p>
+  <div class="cover-divider"></div>
+  <p class="cover-meta">เทคโนโลยี · อุปกรณ์ &nbsp;·&nbsp; sirichokbook</p>
+  <div class="scroll-hint"><span>เริ่มอ่าน</span><div class="scroll-arrow"></div></div>
+</section>
+
+<nav class="toc">
+  <p class="toc-label">สารบัญ</p>
+  <a class="toc-item" href="#s1"><span class="toc-num">i</span><span class="toc-title">คนทำงานกับ AI ต้องการอะไรจากเครื่อง</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s2"><span class="toc-num">ii</span><span class="toc-title">Mac หรือ Windows — ตอบให้ชัดก่อน</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s3"><span class="toc-num">iii</span><span class="toc-title">ตัวเลือกที่แนะนำในงบ 20,000–40,000</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s4"><span class="toc-num">iv</span><span class="toc-title">ตั้งค่าเครื่องใหม่ให้พร้อมทำงานกับ AI</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s5"><span class="toc-num">v</span><span class="toc-title">บทสรุป: สเปคไม่ใช่คำตอบ วิธีใช้ต่างหากที่สำคัญ</span><span class="toc-dots"></span></a>
+</nav>
+
+<article class="article">
+
+  <div class="chapter visible">
+    <div class="chapter-body">
+      <p>คำถามว่า "ควรซื้อโน้ตบุครุ่นไหน" มักได้คำตอบที่มุ่งไปที่สเปคเป็นหลัก RAM เท่าไหร่ กราฟิกการ์ดรุ่นอะไร ความจุเท่าไหร่</p>
+      <p>แต่สำหรับคนที่ต้องการใช้ AI เป็นเครื่องมือหลักในการทำงาน คำถามที่สำคัญกว่านั้นคือ เครื่องนี้จะช่วยให้การทำงานกับ AI ราบลื่นแค่ไหน และมันจะยังตอบโจทย์ได้ในอีก 3-4 ปีข้างหน้าไหม</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s1">
+    <span class="chapter-num">i</span>
+    <h2 class="chapter-title">คนทำงานกับ AI ต้องการอะไรจากเครื่อง</h2>
+    <div class="chapter-body">
+      <p>ก่อนดูตัวเลือก ต้องเข้าใจก่อนว่าการทำงานกับ AI ในชีวิตประจำวันต้องการอะไรจากเครื่องบ้าง เพราะมันต่างจากการเล่นเกมหรือตัดต่อวิดีโออย่างมาก</p>
+
+      <div class="priority-grid">
+        <div class="priority-card high">
+          <span class="priority-label high">สำคัญมาก</span>
+          <div class="priority-title">แบตอยู่ได้นาน</div>
+          <div class="priority-desc">การใช้ Claude Code และ Terminal ต่อเนื่องทั้งวันโดยไม่มีปลั๊กต้องการแบตที่เชื่อถือได้จริง ไม่ใช่แบตที่บอกว่า 10 ชั่วโมงแต่ได้จริง 6</div>
+        </div>
+        <div class="priority-card high">
+          <span class="priority-label high">สำคัญมาก</span>
+          <div class="priority-title">Terminal ใช้งานได้ลื่น</div>
+          <div class="priority-desc">Claude Code ทำงานผ่าน Terminal การที่ Terminal ตั้งค่าง่ายและใช้งานได้ทันทีช่วยประหยัดเวลาและลดความหงุดหงิดได้มาก</div>
+        </div>
+        <div class="priority-card">
+          <span class="priority-label">สำคัญปานกลาง</span>
+          <div class="priority-title">จอสบายตา</div>
+          <div class="priority-desc">อ่านข้อความและโค้ดนานๆ จอที่ดีลด eye strain ได้มาก ความสว่างและ color accuracy สำคัญกว่าขนาด</div>
+        </div>
+        <div class="priority-card">
+          <span class="priority-label">สำคัญปานกลาง</span>
+          <div class="priority-title">น้ำหนักเบา</div>
+          <div class="priority-desc">ถ้าพกทุกวันน้ำหนักสะสมกลายเป็นเรื่องใหญ่ ต่างกัน 300-400 กรัมฟังดูน้อย แต่รู้สึกได้ชัดหลังพกไปสัปดาห์หนึ่ง</div>
+        </div>
+      </div>
+
+      <p>สิ่งที่<strong>ไม่จำเป็น</strong>สำหรับการทำงานกับ AI ในชีวิตประจำวันคือ กราฟิกการ์ดแยก เพราะ Claude Code และ AI tools ทำงานบน Cloud ทั้งหมด ไม่ต้องการ GPU ในเครื่อง และ RAM เกิน 16GB เพราะงานส่วนใหญ่เป็นการพิมพ์ คิด และสั่งงาน AI ไม่ใช่การ render หรือประมวลผลหนักๆ</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s2">
+    <span class="chapter-num">ii</span>
+    <h2 class="chapter-title">Mac หรือ Windows — ตอบให้ชัดก่อน</h2>
+    <div class="chapter-body">
+      <p>นี่คือคำถามที่ต้องตอบก่อนทุกอย่าง และคำตอบไม่ได้ขึ้นอยู่กับความชอบส่วนตัว แต่ขึ้นอยู่กับ<strong>โปรแกรมที่ต้องใช้ในงาน</strong></p>
+
+      <div class="pull-quote">ถ้างานต้องการโปรแกรม Windows เฉพาะ — เลือก Windows ถ้าไม่มีข้อจำกัดนั้น — Mac ตอบโจทย์การทำงานกับ AI ได้ดีกว่า</div>
+
+      <p><strong>เหตุผลที่ Mac ได้เปรียบสำหรับงาน AI โดยเฉพาะ</strong> คือ<span class="term" data-term="Terminal" data-def="โปรแกรมที่ให้เราพิมพ์คำสั่งโดยตรงกับระบบปฏิบัติการ แทนการกดปุ่มในหน้าต่าง ใช้รัน Claude Code, Git และเครื่องมือ developer อื่นๆ บน Mac เปิดใช้ได้ทันทีโดยไม่ต้องตั้งค่า">Terminal</span> บน Mac ใช้ได้ทันทีโดยไม่ต้องตั้งค่าอะไรเพิ่ม ในขณะที่ Windows ต้องติดตั้ง<span class="term" data-term="WSL2 (Windows Subsystem for Linux)" data-def="ระบบที่ทำให้ Windows รัน Terminal แบบ Linux ได้ จำเป็นสำหรับ Claude Code และ Git บน Windows ติดตั้งครั้งเดียวผ่าน Microsoft Store ไม่ยาก แต่ต้องทำก่อนเริ่มใช้งาน">WSL2</span> เพิ่มก่อน นอกจากนี้ชิป<span class="term" data-term="Apple Silicon (M-series)" data-def="ชิปที่ Apple พัฒนาเอง ใช้สถาปัตยกรรม ARM ที่ประหยัดพลังงานกว่า Intel/AMD ทำให้แบตอยู่ได้นานกว่า 2 เท่าในราคาเดียวกัน และเครื่องไม่ร้อนแม้ใช้งานหนัก">Apple Silicon</span> ทำให้แบตอยู่ได้จริง 12-18 ชั่วโมง ซึ่งต่างจาก Windows ในระดับราคาเดียวกันอย่างชัดเจน</p>
+
+      <p><strong>เหตุผลที่ควรเลือก Windows</strong> คือถ้างานต้องใช้โปรแกรมที่รองรับแค่ Windows เช่นโปรแกรมเฉพาะขององค์กร ระบบ ERP บางตัว หรือซอฟต์แวร์เฉพาะทาง การซื้อ Mac แล้วต้องติดตั้ง Windows เพิ่มผ่าน<span class="term" data-term="Parallels" data-def="โปรแกรมที่ทำให้รัน Windows บน Mac ได้พร้อมกัน มีค่าใช้จ่ายเพิ่มประมาณ 3,500 บาท และกินแบตมากกว่าปกติเมื่อเปิด Windows อยู่">Parallels</span> จะเสียทั้งเงินและประสิทธิภาพ</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s3">
+    <span class="chapter-num">iii</span>
+    <h2 class="chapter-title">ตัวเลือกที่แนะนำในงบ 20,000–40,000</h2>
+    <div class="chapter-body">
+
+      <div class="device-card top">
+        <div class="device-badge gold">แนะนำ — ถ้าไม่มีข้อจำกัด Windows</div>
+        <div class="device-name">MacBook Air M3 (13 นิ้ว)</div>
+        <div class="device-price">ประมาณ 35,000–38,000 บาท</div>
+        <div class="spec-row"><span class="spec-label">น้ำหนัก</span><span class="spec-value">1.24 กิโล</span></div>
+        <div class="spec-row"><span class="spec-label">แบตจริง</span><span class="spec-value">12–18 ชั่วโมง ใช้งานทั่วไป</span></div>
+        <div class="spec-row"><span class="spec-label">Terminal / Claude Code</span><span class="spec-value">เปิดใช้ได้ทันที ไม่ต้องตั้งค่า</span></div>
+        <div class="spec-row"><span class="spec-label">ความร้อน</span><span class="spec-value">ไม่มีพัดลม เงียบและเย็นตลอด</span></div>
+        <div class="spec-row"><span class="spec-label">อายุการใช้งาน</span><span class="spec-value">5–7 ปีขึ้นไปสบาย</span></div>
+        <div class="device-verdict">ตัวเลือกที่ดีที่สุดสำหรับการทำงานกับ AI ในระยะยาว แบตอยู่ได้ทั้งวันโดยไม่ต้องพกสายชาร์จ Terminal พร้อมใช้ทันที และเครื่องไม่ร้อนแม้รัน Claude Code หนักๆ ข้อเสียเดียวคือราคาสูงกว่า Windows ในสเปคใกล้เคียงกัน</div>
+      </div>
+
+      <div class="device-card top">
+        <div class="device-badge silver">แนะนำ — ถ้าต้องใช้ Windows</div>
+        <div class="device-name">ASUS Zenbook 14 OLED</div>
+        <div class="device-price">ประมาณ 25,000–32,000 บาท</div>
+        <div class="spec-row"><span class="spec-label">น้ำหนัก</span><span class="spec-value">1.2 กิโล</span></div>
+        <div class="spec-row"><span class="spec-label">แบตจริง</span><span class="spec-value">8–10 ชั่วโมง ใช้งานทั่วไป</span></div>
+        <div class="spec-row"><span class="spec-label">จอ</span><span class="spec-value">OLED อ่านข้อความสบายตามาก</span></div>
+        <div class="spec-row"><span class="spec-label">Terminal (WSL2)</span><span class="spec-value">ต้องติดตั้งครั้งแรก Claude ช่วยได้</span></div>
+        <div class="spec-row"><span class="spec-label">ราคา</span><span class="spec-value">เหลืองบไปใช้ที่อื่นได้อีก</span></div>
+        <div class="device-verdict">ดีที่สุดในงบสำหรับ Windows จอ OLED ทำให้อ่านโค้ดและข้อความนานๆ ไม่เมื่อยตา น้ำหนักเบาเทียบเท่า Mac ข้อที่ต้องยอมรับคือแบตสั้นกว่า Mac พอสมควร ถ้าทำงานนอกสถานที่เยอะควรพกสายชาร์จไว้ด้วยเสมอ</div>
+      </div>
+
+      <div class="device-card">
+        <div class="device-name">Lenovo ThinkBook 14</div>
+        <div class="device-price">ประมาณ 22,000–28,000 บาท</div>
+        <div class="spec-row"><span class="spec-label">น้ำหนัก</span><span class="spec-value">1.4 กิโล</span></div>
+        <div class="spec-row"><span class="spec-label">แบตจริง</span><span class="spec-value">8–10 ชั่วโมง ใช้งานทั่วไป</span></div>
+        <div class="spec-row"><span class="spec-label">คีย์บอร์ด</span><span class="spec-value">ดีที่สุดในสามตัว เหมาะพิมพ์เยอะ</span></div>
+        <div class="spec-row"><span class="spec-label">ความทนทาน</span><span class="spec-value">สูง ออกแบบมาใช้งานหนัก</span></div>
+        <div class="spec-row"><span class="spec-label">ราคา</span><span class="spec-value">ประหยัดที่สุด เหลืองบไว้ซื้ออุปกรณ์เสริม</span></div>
+        <div class="device-verdict">เหมาะถ้าพิมพ์เยอะและต้องการเครื่องที่ทนทานสูงสุด Lenovo มีชื่อเรื่องการซ่อมบำรุงง่ายและหาอะไหล่ได้ในไทย ราคาที่ประหยัดกว่าทำให้เหลืองบไปสมัคร Claude Pro ได้หลายปี จอไม่สวยเท่า Zenbook แต่ใช้งานได้ดีทุกอย่าง</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s4">
+    <span class="chapter-num">iv</span>
+    <h2 class="chapter-title">ตั้งค่าเครื่องใหม่ให้พร้อมทำงานกับ AI</h2>
+    <div class="chapter-body">
+      <p>ได้เครื่องมาแล้วมีลำดับที่แนะนำให้ทำก่อนเริ่มใช้งานจริง เพราะถ้าตั้งค่าถูกตั้งแต่แรก จะไม่ต้องแก้ปัญหาทีหลัง</p>
+
+      <div class="checklist">
+        <div class="check-item">
+          <span class="check-icon">→</span>
+          <div><strong>สมัคร Claude Pro ($20/เดือน)</strong><br>นี่คือเหตุผลหลักที่ซื้อเครื่อง ได้ทั้ง Claude.ai และ Claude Code ในราคาเดียว เข้าถึง Claude Code ได้ที่ claude.ai/code ไม่ต้องติดตั้งอะไรเพิ่ม</div>
+        </div>
+        <div class="check-item">
+          <span class="check-icon">→</span>
+          <div><strong>ตั้งค่า Terminal</strong><br>บน Mac เปิด Terminal แล้วใช้ได้ทันที บน Windows ติดตั้ง WSL2 ผ่าน Microsoft Store แล้วบอก Claude ว่า "ช่วยแนะนำขั้นตอนตั้งค่า WSL2 ทีละขั้น" มันจะอธิบายให้ครบ</div>
+        </div>
+        <div class="check-item">
+          <span class="check-icon">→</span>
+          <div><strong>ติดตั้ง Git</strong><br>ใช้สำหรับอัปโหลดไฟล์ขึ้น<span class="term" data-term="GitHub" data-def="บริการเก็บไฟล์และโค้ดบน Cloud ของ Microsoft ใช้ร่วมกับ Git เพื่ออัปโหลดและจัดการไฟล์ผ่าน Terminal และยังใช้เป็นที่โฮสต์เว็บไซต์ฟรีผ่าน GitHub Pages">GitHub</span> ผ่าน Terminal แทนการลากไฟล์ทีละครั้ง ตั้งค่าครั้งเดียวใช้ได้ตลอด บน Mac ติดตั้งผ่าน Homebrew บน Windows ดาวน์โหลดจาก git-scm.com</div>
+        </div>
+        <div class="check-item">
+          <span class="check-icon">→</span>
+          <div><strong>สร้าง Notebook แรกใน NotebookLM</strong><br>ไปที่ notebooklm.google.com สร้าง Notebook สำหรับหัวข้อที่กำลังเรียนรู้อยู่ตอนนี้ เริ่มสะสมเนื้อหาทันที เพราะยิ่งมีข้อมูลมากเท่าไหร่ยิ่งถามได้ลึกขึ้นเท่านั้น</div>
+        </div>
+        <div class="check-item">
+          <span class="check-icon">→</span>
+          <div><strong>ทดลอง Claude Code ครั้งแรก</strong><br>ลองสั่งอะไรง่ายๆ เช่น "สร้างไฟล์ HTML หน้าสรุปโน้ตส่วนตัว" แล้วดูว่ามันทำอะไรได้บ้าง ไม่ต้องรู้โค้ดก็ทำได้ แค่อธิบายว่าต้องการอะไร</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s5">
+    <span class="chapter-num">v</span>
+    <h2 class="chapter-title">บทสรุป: สเปคไม่ใช่คำตอบ วิธีใช้ต่างหากที่สำคัญ</h2>
+    <div class="chapter-body">
+      <p>โน้ตบุคที่ดีไม่ได้ทำให้คุณทำงานกับ AI ได้เก่งขึ้น แต่มันขจัดอุปสรรคที่ไม่จำเป็นออกไป ไม่ต้องกังวลว่าแบตจะหมดกลางวัน ไม่ต้องเสียเวลาแก้ปัญหา Terminal ไม่ต้องรอเครื่องช้า</div>
+      <div class="pull-quote">เวลาที่ประหยัดได้จากเครื่องที่ใช่ คือเวลาที่เอาไปใช้กับสิ่งที่สำคัญกว่า</div>
+      <p>สำหรับคนที่ไม่มีข้อจำกัดเรื่อง Windows เลือก MacBook Air M3 ถ้าต้องใช้ Windows เลือก ASUS Zenbook 14 OLED ถ้างบจำกัดหรืออยากได้เครื่องทนทาน เลือก Lenovo ThinkBook 14</p>
+      <p>แต่สิ่งที่สำคัญที่สุดคือ เครื่องที่ดีที่สุดในโลก ถ้าเปิดแค่ดูหนังและเลื่อน feed ก็ไม่ต่างอะไรกับเครื่องราคาหมื่นบาทครับ</p>
+    </div>
+  </div>
+
+  <div class="chapter" id="vocab">
+    <div class="vocab-section">
+      <span class="vocab-label">คลังคำศัพท์ · บทที่ 4</span>
+      <p class="vocab-hint">* คำที่ขีดเส้นใต้สีทองในเนื้อหา กดได้เพื่อดูความหมายทันที</p>
+
+      <div class="vocab-item">
+        <div class="vocab-term">Terminal</div>
+        <div class="vocab-meaning">โปรแกรมที่ให้เราพิมพ์คำสั่งโดยตรงกับระบบปฏิบัติการ แทนการกดปุ่มในหน้าต่าง ใช้รัน Claude Code, Git และเครื่องมือ developer อื่นๆ บน Mac เปิดใช้ได้ทันที บน Windows ต้องติดตั้ง WSL2 ก่อน</div>
+        <div class="vocab-example">ใช้ได้ว่า: "Claude Code ทำงานผ่าน terminal ทำให้สั่งงานได้เร็วและทำหลายขั้นตอนพร้อมกันได้"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">WSL2 (Windows Subsystem for Linux)</div>
+        <div class="vocab-meaning">ระบบที่ทำให้ Windows รัน Terminal แบบ Linux ได้ จำเป็นสำหรับการใช้ Claude Code และ Git บน Windows อย่างเต็มประสิทธิภาพ ติดตั้งครั้งเดียวแล้วใช้ได้ตลอด</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ลง WSL2 แล้ว Windows ใช้ Terminal ได้เหมือน Mac เลย"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Apple Silicon (M-series)</div>
+        <div class="vocab-meaning">ชิปที่ Apple พัฒนาเอง ใช้สถาปัตยกรรม ARM ที่ประหยัดพลังงานกว่า Intel/AMD ทำให้แบตอยู่ได้นานกว่า และเครื่องไม่ร้อนแม้ใช้งานหนัก เป็นเหตุผลหลักที่ MacBook Air มีแบตยาวกว่าโน้ตบุค Windows ในราคาเดียวกัน</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ที่ MacBook แบตอยู่ได้นานกว่าเพราะ Apple Silicon ไม่ใช่เพราะแบตใหญ่กว่า"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Git</div>
+        <div class="vocab-meaning">โปรแกรมที่ใช้จัดการและอัปโหลดไฟล์ขึ้น GitHub ผ่าน Terminal แทนการลากไฟล์ด้วยมือ ทำให้อัปเดตเว็บไซต์หรือโปรเจกต์ได้ด้วยคำสั่งไม่กี่บรรทัด</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ใช้ git push ครั้งเดียวแทนการอัปโหลดทีละไฟล์ ประหยัดเวลามาก"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">OLED vs IPS</div>
+        <div class="vocab-meaning">เทคโนโลยีหน้าจอสองแบบ OLED สีสดกว่า ดำลึกกว่า อ่านข้อความสบายตากว่า แต่ราคาสูงกว่า IPS เป็นมาตรฐานทั่วไปที่ใช้งานได้ดี ถ้าอ่านข้อความหรือโค้ดนานๆ OLED คุ้มค่ากับสายตาในระยะยาว</div>
+        <div class="vocab-example">ใช้ได้ว่า: "จ่ายเพิ่มนิดเดียวเพื่อได้จอ OLED คุ้มมากถ้าต้องจ้องหน้าจอทั้งวัน"</div>
+      </div>
+    </div>
+  </div>
+
+</article>
+
+<footer>
+  <p>บทที่ 4 &nbsp;·&nbsp; เลือกโน้ตบุคสำหรับทำงานกับ AI &nbsp;·&nbsp; sirichokbook</p>
+</footer>
+
+<script>
+  const chapters = document.querySelectorAll('.chapter:not(.visible)');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); }
+    });
+  }, { threshold: 0.1 });
+  chapters.forEach(ch => observer.observe(ch));
+
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  // Tooltip
+  const tooltip = document.getElementById('tooltip');
+  const tooltipTerm = document.getElementById('tooltip-term');
+  const tooltipBody = document.getElementById('tooltip-body');
+  let hideTimeout;
+
+  document.querySelectorAll('.term').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      clearTimeout(hideTimeout);
+      tooltipTerm.textContent = el.getAttribute('data-term');
+      tooltipBody.textContent = el.getAttribute('data-def');
+      const rect = el.getBoundingClientRect();
+      const tipW = 260;
+      let left = rect.left;
+      let top = rect.bottom + 8;
+      if (left + tipW > window.innerWidth - 16) left = window.innerWidth - tipW - 16;
+      if (left < 16) left = 16;
+      if (top + 120 > window.innerHeight) top = rect.top - 130;
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+      tooltip.classList.add('show');
+      hideTimeout = setTimeout(() => tooltip.classList.remove('show'), 4000);
+    });
+  });
+
+  document.addEventListener('click', () => tooltip.classList.remove('show'));
+</script>
+</body>
+</html>
