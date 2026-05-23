@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>หุ้น Quantum Computing — คู่มือนักลงทุน 2026</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #F4F6F9;
+    color: #1a1a1a;
+    line-height: 1.7;
+  }
+  .page { max-width: 720px; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+
+  /* Hero */
+  .hero {
+    background: #fff;
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #DDE3EE;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, #1D6FD8, #8B5CF6);
+  }
+  .tag {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    padding: 4px 12px; border-radius: 999px;
+    background: #EEE9FD; color: #5B21B6;
+    margin-bottom: 1rem; letter-spacing: 0.04em;
+  }
+  .hero h1 { font-size: 22px; font-weight: 700; color: #111; line-height: 1.4; margin-bottom: 0.6rem; }
+  .hero p { font-size: 14px; color: #666; line-height: 1.7; }
+
+  /* Section */
+  .section { margin-bottom: 1.75rem; }
+  .section-title {
+    font-size: 12px; font-weight: 700; color: #999;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    margin-bottom: 1rem; padding-bottom: 0.6rem;
+    border-bottom: 1px solid #DDE3EE;
+  }
+
+  /* Risk header badges */
+  .risk-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 0.75rem;
+  }
+  .risk-badge {
+    font-size: 11px; font-weight: 700; padding: 3px 10px;
+    border-radius: 999px; letter-spacing: 0.04em;
+  }
+  .badge-green { background: #D1FAE5; color: #065F46; }
+  .badge-yellow { background: #FEF3C7; color: #92400E; }
+  .badge-red { background: #FEE2E2; color: #991B1B; }
+  .badge-blue { background: #DBEAFE; color: #1E40AF; }
+
+  /* Stock cards */
+  .stock-cards { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.25rem; }
+  .scard {
+    background: #fff; border: 1px solid #DDE3EE;
+    border-radius: 12px; padding: 14px 16px;
+    display: flex; gap: 14px;
+  }
+  .scard-left { flex-shrink: 0; }
+  .ticker {
+    font-size: 13px; font-weight: 800; color: #fff;
+    background: #1D6FD8; padding: 4px 10px;
+    border-radius: 8px; display: inline-block;
+    letter-spacing: 0.03em;
+  }
+  .ticker.purple { background: #7C3AED; }
+  .ticker.teal { background: #0F766E; }
+  .ticker.gray { background: #4B5563; }
+  .ticker.red { background: #B91C1C; }
+  .scard-body { flex: 1; }
+  .scard-name { font-size: 15px; font-weight: 700; color: #111; margin-bottom: 3px; }
+  .scard-desc { font-size: 13px; color: #555; line-height: 1.6; }
+  .scard-tag {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    padding: 2px 8px; border-radius: 6px;
+    background: #F3F4F6; color: #374151;
+    margin-top: 6px; margin-right: 4px;
+  }
+  .scard-tag.hot { background: #FEF3C7; color: #92400E; }
+  .scard-tag.safe { background: #D1FAE5; color: #065F46; }
+  .scard-tag.risky { background: #FEE2E2; color: #991B1B; }
+
+  /* ETF box */
+  .etf-box {
+    background: #F0F7FD; border: 1px solid #93C5FD;
+    border-radius: 12px; padding: 16px 18px;
+    margin-bottom: 1.75rem;
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .etf-icon { font-size: 26px; flex-shrink: 0; margin-top: 2px; }
+  .etf-title { font-size: 15px; font-weight: 700; color: #1E40AF; margin-bottom: 4px; }
+  .etf-desc { font-size: 13px; color: #1D4ED8; line-height: 1.65; }
+
+  /* Trigger table */
+  .trigger-list { display: flex; flex-direction: column; gap: 10px; }
+  .trigger {
+    background: #fff; border: 1px solid #DDE3EE;
+    border-radius: 12px; padding: 14px 16px;
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .trigger-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+  .trigger-body { flex: 1; }
+  .trigger-title { font-size: 14px; font-weight: 700; color: #111; margin-bottom: 4px; }
+  .trigger-desc { font-size: 13px; color: #555; line-height: 1.6; }
+  .trigger-when {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    padding: 2px 10px; border-radius: 999px;
+    background: #EEE9FD; color: #5B21B6;
+    margin-top: 6px;
+  }
+  .trigger-impact {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    padding: 2px 10px; border-radius: 999px;
+    background: #FEF3C7; color: #92400E;
+    margin-top: 6px; margin-left: 4px;
+  }
+
+  /* Warning */
+  .warning {
+    background: #FFFBEB; border: 1px solid #F59E0B;
+    border-radius: 12px; padding: 16px 18px;
+    margin-bottom: 1.75rem;
+  }
+  .warning-title { font-size: 13px; font-weight: 700; color: #78350F; margin-bottom: 6px; }
+  .warning-desc { font-size: 13px; color: #92400E; line-height: 1.65; }
+
+  /* Timeline quick ref */
+  .timeline { display: flex; flex-direction: column; gap: 0; }
+  .tl-item { display: flex; gap: 14px; }
+  .tl-left { display: flex; flex-direction: column; align-items: center; width: 28px; flex-shrink: 0; }
+  .tl-dot { width: 11px; height: 11px; border-radius: 50%; background: #1D6FD8; margin-top: 5px; flex-shrink: 0; }
+  .tl-line { width: 1.5px; background: #DDE3EE; flex: 1; margin-top: 4px; }
+  .tl-item:last-child .tl-line { display: none; }
+  .tl-body { padding-bottom: 1.25rem; flex: 1; }
+  .tl-year { font-size: 11px; font-weight: 700; color: #1D6FD8; margin-bottom: 2px; letter-spacing: 0.04em; }
+  .tl-text { font-size: 13px; color: #333; line-height: 1.6; }
+
+  /* Footer */
+  .footer {
+    font-size: 12px; color: #aaa; text-align: center;
+    padding-top: 1.25rem; border-top: 1px solid #DDE3EE;
+    margin-top: 2rem; line-height: 1.7;
+  }
+
+  @media (max-width: 500px) {
+    .hero h1 { font-size: 19px; }
+    .scard { flex-direction: column; gap: 8px; }
+  }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="page">
+
+  <div class="hero">
+    <span class="tag">Quantum Computing · คู่มือนักลงทุน 2026</span>
+    <h1>หุ้น Quantum ตัวไหนน่าสนใจ<br>และมันจะโตตอนไหน?</h1>
+    <p>สรุปหุ้น 3 กลุ่มความเสี่ยง + 4 Trigger หลักที่จะทำให้ตลาด Quantum เปลี่ยนเกม ข้อมูล ณ พฤษภาคม 2026 · ไม่ใช่คำแนะนำในการลงทุน</p>
+  </div>
+
+  <!-- LOW RISK -->
+  <div class="section">
+    <div class="section-title">กลุ่มหุ้น Quantum</div>
+
+    <div class="risk-header">
+      <span class="risk-badge badge-green">🟢 Low Risk — Big Tech</span>
+      <span style="font-size:13px;color:#666;">มี Quantum R&D + ธุรกิจหลักหนุน</span>
+    </div>
+    <div class="stock-cards">
+      <div class="scard">
+        <div class="scard-left"><span class="ticker">GOOGL</span></div>
+        <div class="scard-body">
+          <div class="scard-name">Alphabet (Google)</div>
+          <div class="scard-desc">ชิป Willow 105-qubit ทำ algorithm เร็วกว่า Supercomputer 13,000 เท่า วางเป้า Fault-Tolerant ปี 2029 และกำลังเปิด Early Access ผ่าน Google Cloud ธุรกิจโฆษณา + Cloud หนุนงบ R&D ได้ไม่จำกัด</div>
+          <span class="scard-tag safe">ความเสี่ยงต่ำ</span>
+          <span class="scard-tag hot">มี Willow Chip แล้ว</span>
+        </div>
+      </div>
+      <div class="scard">
+        <div class="scard-left"><span class="ticker">IBM</span></div>
+        <div class="scard-body">
+          <div class="scard-name">IBM</div>
+          <div class="scard-desc">ติดตั้ง Quantum systems ไปแล้วกว่า 85 ระบบทั่วโลก รันโปรแกรมกว่า 3 ล้านล้านครั้ง ราคาหุ้น PE ~20x สมเหตุสมผลกว่า Pure Play มาก มีปันผล ~2.9% ด้วย</div>
+          <span class="scard-tag safe">ราคาสมเหตุสมผล</span>
+          <span class="scard-tag">มีปันผล</span>
+        </div>
+      </div>
+      <div class="scard">
+        <div class="scard-left"><span class="ticker purple">MSFT</span></div>
+        <div class="scard-body">
+          <div class="scard-name">Microsoft</div>
+          <div class="scard-desc">เปิดตัวชิป Majorana 1 ในปี 2025 ใช้ Topological Qubits ที่ออกแบบให้ขยายสเกลได้ถึง 1 ล้าน Qubits และทนต่อ Error โดยธรรมชาติ ต่างจากสถาปัตยกรรมของคู่แข่ง</div>
+          <span class="scard-tag safe">เทคโนโลยีแตกต่าง</span>
+          <span class="scard-tag">Topological Qubits</span>
+        </div>
+      </div>
+      <div class="scard">
+        <div class="scard-left"><span class="ticker teal">NVDA</span></div>
+        <div class="scard-body">
+          <div class="scard-name">Nvidia</div>
+          <div class="scard-desc">ไม่ใช่ Pure Play แต่ GPU ของ Nvidia คือพาหนะที่ Quantum systems ใช้ประมวลผลแบบ Hybrid อยู่ในปัจจุบัน ตลาด Quantum เติบโต Nvidia ก็ได้ประโยชน์โดยตรง</div>
+          <span class="scard-tag safe">กำไรสม่ำเสมอ</span>
+          <span class="scard-tag">Hybrid Computing</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="risk-header">
+      <span class="risk-badge badge-yellow">🟡 Medium Risk — Pure Play มีรายได้แล้ว</span>
+    </div>
+    <div class="stock-cards">
+      <div class="scard">
+        <div class="scard-left"><span class="ticker" style="background:#D97706">IONQ</span></div>
+        <div class="scard-body">
+          <div class="scard-name">IonQ</div>
+          <div class="scard-desc">รายได้โตจาก $2M ในปี 2021 → $130M ปี 2025 นักวิเคราะห์คาด $600M ในปี 2028 ใช้ Trapped-Ion Technology ที่ยืดหยุ่นและแม่นยำ มีสัญญารัฐบาลใหญ่หลายก้อน แต่ยังขาดทุนอยู่และ Valuation แพง (28x ยอดขายปี 2028)</div>
+          <span class="scard-tag hot">รายได้โตเร็ว</span>
+          <span class="scard-tag risky">ยังขาดทุน</span>
+        </div>
+      </div>
+      <div class="scard">
+        <div class="scard-left"><span class="ticker" style="background:#0F766E">QBTS</span></div>
+        <div class="scard-body">
+          <div class="scard-name">D-Wave Quantum</div>
+          <div class="scard-desc">เน้น Quantum Annealing สำหรับแก้ปัญหา Optimization เป็นเจ้าเดียวที่มีลูกค้า Commercial จริงแล้วในปัจจุบัน ใน Logistics, Manufacturing และ Supply Chain</div>
+          <span class="scard-tag safe">มีลูกค้าจริงแล้ว</span>
+          <span class="scard-tag">Optimization Focus</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="risk-header">
+      <span class="risk-badge badge-red">🔴 High Risk — Speculative</span>
+    </div>
+    <div class="stock-cards">
+      <div class="scard">
+        <div class="scard-left"><span class="ticker red">RGTI</span></div>
+        <div class="scard-body">
+          <div class="scard-name">Rigetti Computing</div>
+          <div class="scard-desc">ราคาร่วงลงกว่า 27% ตั้งแต่ต้นปี 2026 ผลประกอบการล่าสุดรายได้ $1.9M ต่ำกว่าที่ตลาดคาด ($2.3M) ความเป็นไปได้สูงแต่ความเสี่ยงก็สูงมากเช่นกัน</div>
+          <span class="scard-tag risky">รายได้ยังน้อย</span>
+          <span class="scard-tag risky">ราคาร่วงแรง</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ETF -->
+  <div class="etf-box">
+    <div class="etf-icon">📦</div>
+    <div>
+      <div class="etf-title">QTUM — ถ้าไม่อยากเลือกเอง</div>
+      <div class="etf-desc">ETF ที่กระจายลงทุนในหุ้น Quantum ทั้ง Big Tech และ Pure Play พร้อมกัน ลด Concentration Risk จากการที่บริษัทเล็กๆ อาจอยู่ไม่รอด เหมาะสำหรับคนที่อยากมี Exposure กับ Quantum โดยไม่ต้องเดิมพันกับบริษัทใดบริษัทหนึ่ง</div>
+    </div>
+  </div>
+
+  <!-- Triggers -->
+  <div class="section">
+    <div class="section-title">4 Trigger ที่จะทำให้หุ้น Quantum วิ่ง</div>
+    <div class="trigger-list">
+      <div class="trigger">
+        <div class="trigger-icon">🤖</div>
+        <div class="trigger-body">
+          <div class="trigger-title">Quantum รัน AI ได้จริงในระดับ Production</div>
+          <div class="trigger-desc">อนาคตจะเป็น Hybrid — ไม่ใช่ Quantum ล้วนๆ แต่เป็นการ "เสียบ" Quantum optimization เข้าไปใน AI pipeline โดยที่ Engineer ไม่ต้องรื้อระบบใหม่ทั้งหมด การที่ทำได้จริงจะเปลี่ยนเกม Machine Learning และ Optimization อย่างสิ้นเชิง</div>
+          <span class="trigger-when">⏱ คาด 2027–2030</span>
+          <span class="trigger-impact">🚀🚀 ผลกระทบสูงมาก</span>
+        </div>
+      </div>
+      <div class="trigger">
+        <div class="trigger-icon">⚙️</div>
+        <div class="trigger-body">
+          <div class="trigger-title">Fault-Tolerant Quantum — แก้ Error ได้ในระดับ Production</div>
+          <div class="trigger-desc">ตอนนี้ต้องใช้ Physical Qubits หลายร้อยตัวเพื่อสร้าง Logical Qubit ที่เชื่อถือได้แค่ตัวเดียว วันที่ทำได้ถูกกว่าและเสถียรพอ คือจุดที่ Quantum จะเริ่ม "ใช้งานได้จริง" ในอุตสาหกรรม IBM วางเป้าปี 2029</div>
+          <span class="trigger-when">⏱ คาด 2029+</span>
+          <span class="trigger-impact">🚀🚀🚀 ผลกระทบใหญ่ที่สุด</span>
+        </div>
+      </div>
+      <div class="trigger">
+        <div class="trigger-icon">🏦</div>
+        <div class="trigger-body">
+          <div class="trigger-title">Big Money Institution เทเงินเข้า</div>
+          <div class="trigger-desc">JPMorgan Chase ประกาศแผน 10 ปีมูลค่า $1.5 ล้านล้าน โดยระบุ Quantum computing เป็นหนึ่งในเป้าหมายหลัก เมื่อ Institution ใหญ่เริ่มเข้า ราคาหุ้นตามมาเสมอ และสัญญาณนี้กำลังเกิดขึ้นแล้ว</div>
+          <span class="trigger-when">⏱ กำลังเกิดอยู่แล้ว</span>
+          <span class="trigger-impact">📈 ค่อยๆขึ้น</span>
+        </div>
+      </div>
+      <div class="trigger">
+        <div class="trigger-icon">🌍</div>
+        <div class="trigger-body">
+          <div class="trigger-title">สงครามเทคโนโลยี สหรัฐ vs จีน</div>
+          <div class="trigger-desc">งบรัฐบาลทั่วโลกสำหรับ Quantum พุ่งขึ้น 310% ในปี 2025 รวมเป็น $12.7 พันล้าน และคาดว่าปี 2026 จะเกิน $20 พันล้าน การแข่งขันด้านภูมิรัฐศาสตร์ระหว่างสหรัฐกับจีนคือตัวเร่งหลัก</div>
+          <span class="trigger-when">⏱ ทุกปี ต่อเนื่อง</span>
+          <span class="trigger-impact">📈 ระยะสั้น-กลาง</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Timeline -->
+  <div class="section">
+    <div class="section-title">Timeline คร่าวๆ ที่นักลงทุนต้องรู้</div>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+        <div class="tl-body">
+          <div class="tl-year">ตอนนี้ (2026)</div>
+          <div class="tl-text">ยังเป็น Hybrid Mode — Quantum + Supercomputer ทำงานร่วมกัน มีการทดลองกับ Finance, Pharma, Logistics บ้างแล้ว แต่ยังไม่ใช่ Production จริง</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-dot" style="background:#7C3AED"></div><div class="tl-line"></div></div>
+        <div class="tl-body">
+          <div class="tl-year" style="color:#7C3AED">2027–2029</div>
+          <div class="tl-text">คาดว่า Quantum + AI จะเริ่มใช้งานได้จริงในบางอุตสาหกรรม IBM และ Google วางเป้า Fault-Tolerant ในช่วงนี้</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-dot" style="background:#1D9E75"></div></div>
+        <div class="tl-body">
+          <div class="tl-year" style="color:#1D9E75">2030+</div>
+          <div class="tl-text">ตลาด Quantum คาดเติบโตจาก $3.5 พันล้าน (2025) ไปถึง $20.2 พันล้าน ถ้า Breakthrough เกิดขึ้นจริงในช่วงนี้ หุ้น Pure Play อาจโตแบบก้าวกระโดด</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Warning -->
+  <div class="warning">
+    <div class="warning-title">⚠️ ความเสี่ยงที่ต้องรู้ก่อนลงทุน</div>
+    <div class="warning-desc">หุ้น Pure Play ส่วนใหญ่ยังขาดทุนอยู่และ Overhype มาก ต้องพร้อมถือยาวหลายปีโดยไม่รู้ว่า Breakthrough จะเกิดขึ้นเมื่อไหร่ ถ้าไม่แน่ใจ ทางเลือกที่ปลอดภัยกว่าคือ Big Tech ที่มี Quantum เป็นส่วนหนึ่งของธุรกิจ หรือ ETF QTUM ที่กระจายความเสี่ยงให้อัตโนมัติ</div>
+  </div>
+
+  <div class="footer">
+    สรุปจากข้อมูลสาธารณะและบทวิเคราะห์ต่างๆ ณ พฤษภาคม 2026<br>
+    เนื้อหานี้เป็นการให้ความรู้เท่านั้น <strong>ไม่ใช่คำแนะนำในการลงทุน</strong>
+  </div>
+
+</div>
+</body>
+</html>
