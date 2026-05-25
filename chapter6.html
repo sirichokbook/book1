@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เมื่อ AI เปลี่ยนวิธีที่คนหาข้อมูล · sirichokbook</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,600;1,300&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root { --cream: #F5F0E8; --ink: #1A1208; --amber: #C8852A; --muted: #7A6E5F; --divider: #D9CFC0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background-color: var(--cream); color: var(--ink); font-family: 'Sarabun', sans-serif; font-weight: 300; line-height: 1.9; font-size: 17px; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 100; opacity: 0.4; }
+
+  .term { color: var(--amber); font-weight: 400; border-bottom: 1px dashed var(--amber); cursor: pointer; display: inline; }
+  .tooltip { display: none; position: fixed; background: var(--ink); color: var(--cream); font-size: 13px; line-height: 1.6; padding: 12px 16px; max-width: 260px; z-index: 9999; pointer-events: none; font-family: 'Sarabun', sans-serif; font-weight: 300; border-left: 3px solid var(--amber); }
+  .tooltip.show { display: block; }
+  .tooltip-term { font-weight: 600; font-size: 12px; letter-spacing: 0.1em; color: var(--amber); margin-bottom: 4px; text-transform: uppercase; }
+
+  .cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 60px 24px; position: relative; border-bottom: 1px solid var(--divider); overflow: hidden; }
+  .cover::after { content: ''; position: absolute; bottom: -80px; left: 50%; transform: translateX(-50%); width: 500px; height: 500px; background: radial-gradient(circle, rgba(200,133,42,0.08) 0%, transparent 70%); pointer-events: none; }
+  .cover-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 32px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.2s; }
+  .cover-title { font-family: 'Playfair Display', serif; font-size: clamp(34px, 7vw, 64px); font-weight: 900; line-height: 1.1; letter-spacing: -0.02em; color: var(--ink); max-width: 700px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.4s; }
+  .cover-title em { font-style: italic; color: var(--amber); }
+  .cover-subtitle { margin-top: 24px; font-size: 15px; color: var(--muted); max-width: 440px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.6s; }
+  .cover-divider { width: 48px; height: 2px; background: var(--amber); margin: 40px auto; opacity: 0; animation: fadeUp 0.8s ease forwards 0.8s; }
+  .cover-meta { font-size: 12px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; opacity: 0; animation: fadeUp 0.8s ease forwards 1s; }
+  .scroll-hint { position: absolute; bottom: 32px; display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: 0; animation: fadeUp 0.8s ease forwards 1.4s; }
+  .scroll-hint span { font-size: 11px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; }
+  .scroll-arrow { width: 1px; height: 32px; background: linear-gradient(to bottom, var(--amber), transparent); animation: scrollPulse 2s ease-in-out infinite; }
+  .back-link { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); text-decoration: none; position: absolute; top: 32px; left: 32px; transition: color 0.2s; opacity: 0; animation: fadeUp 0.8s ease forwards 0.1s; }
+  .back-link:hover { color: var(--amber); }
+
+  .toc { max-width: 680px; margin: 0 auto; padding: 80px 24px; border-bottom: 1px solid var(--divider); }
+  .toc-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 40px; }
+  .toc-item { display: flex; align-items: baseline; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--divider); text-decoration: none; color: var(--ink); transition: color 0.2s; }
+  .toc-item:hover { color: var(--amber); }
+  .toc-num { font-family: 'Playfair Display', serif; font-size: 13px; color: var(--amber); min-width: 24px; font-style: italic; }
+  .toc-title { font-size: 15px; font-weight: 400; flex: 1; }
+  .toc-dots { flex: 1; border-bottom: 1px dotted var(--divider); margin: 0 8px; min-width: 20px; }
+
+  .article { max-width: 680px; margin: 0 auto; padding: 80px 24px 120px; }
+  .chapter { margin-bottom: 100px; opacity: 0; transform: translateY(20px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .chapter.visible { opacity: 1; transform: translateY(0); }
+  .chapter-num { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 16px; display: block; }
+  .chapter-title { font-family: 'Playfair Display', serif; font-size: clamp(24px, 5vw, 36px); font-weight: 700; line-height: 1.2; margin-bottom: 40px; color: var(--ink); }
+  .chapter-body p { margin-bottom: 24px; color: #2E2416; }
+  .chapter-body strong { font-weight: 600; color: var(--ink); }
+  .chapter-body em { font-style: italic; color: var(--amber); }
+  .pull-quote { border-left: 3px solid var(--amber); padding: 4px 0 4px 24px; margin: 40px 0; font-family: 'Playfair Display', serif; font-size: 20px; font-style: italic; line-height: 1.5; color: var(--ink); }
+  .section-break { text-align: center; margin: 48px 0; color: var(--amber); letter-spacing: 0.3em; font-size: 14px; }
+
+  /* Stat cards */
+  .stat-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 32px 0; }
+  .stat-card { border: 1px solid var(--divider); padding: 20px 16px; text-align: center; }
+  .stat-num { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 900; color: var(--amber); line-height: 1; margin-bottom: 8px; }
+  .stat-label { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* Search type grid */
+  .search-grid { margin: 32px 0; }
+  .search-item { display: flex; gap: 16px; padding: 18px 0; border-bottom: 1px solid var(--divider); align-items: flex-start; }
+  .search-item:last-child { border-bottom: none; }
+  .search-pct { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--amber); min-width: 52px; line-height: 1.1; padding-top: 2px; }
+  .search-content { flex: 1; }
+  .search-name { font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 4px; }
+  .search-desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .search-example { font-size: 13px; color: var(--amber); font-style: italic; margin-top: 4px; }
+
+  /* Process box */
+  .process { border: 1px solid var(--divider); padding: 32px; margin: 32px 0; background: rgba(200,133,42,0.03); }
+  .process-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 24px; display: block; }
+  .process-step { display: flex; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--divider); font-size: 14px; color: #2E2416; }
+  .process-step:last-child { border-bottom: none; }
+  .process-num { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: rgba(200,133,42,0.3); min-width: 28px; }
+  .process-text { flex: 1; line-height: 1.7; }
+
+  /* Before/After */
+  .shift { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--divider); margin: 32px 0; }
+  .shift-col { background: var(--cream); padding: 24px; }
+  .shift-header { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 16px; display: block; }
+  .shift-header.old { color: var(--muted); }
+  .shift-header.new { color: var(--amber); }
+  .shift-item { font-size: 14px; padding: 7px 0; border-bottom: 1px solid var(--divider); line-height: 1.6; }
+  .shift-item:last-child { border-bottom: none; }
+  .shift-item.old { color: var(--muted); }
+  .shift-item.new { color: #2E2416; }
+
+  /* Vocab */
+  .vocab-section { background: rgba(200,133,42,0.06); border: 1px solid var(--divider); padding: 40px; margin-top: 80px; }
+  .vocab-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 8px; display: block; }
+  .vocab-hint { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+  .vocab-item { padding: 16px 0; border-bottom: 1px solid var(--divider); }
+  .vocab-item:last-child { border-bottom: none; }
+  .vocab-term { font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 4px; }
+  .vocab-meaning { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .vocab-example { font-size: 13px; color: var(--amber); font-style: italic; margin-top: 4px; }
+
+  footer { text-align: center; padding: 60px 24px; border-top: 1px solid var(--divider); font-size: 12px; color: var(--muted); letter-spacing: 0.1em; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes scrollPulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+  @media (max-width: 600px) {
+    body { font-size: 16px; }
+    .toc, .article { padding-left: 20px; padding-right: 20px; }
+    .back-link { top: 20px; left: 20px; }
+    .stat-row { grid-template-columns: 1fr 1fr; }
+    .shift { grid-template-columns: 1fr; }
+    .tooltip { max-width: 200px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="tooltip" id="tooltip">
+  <div class="tooltip-term" id="tooltip-term"></div>
+  <div id="tooltip-body"></div>
+</div>
+
+<section class="cover">
+  <a class="back-link" href="index.html">← กลับหน้าหลัก</a>
+  <p class="cover-label">บทที่ 6</p>
+  <h1 class="cover-title">เมื่อ AI เปลี่ยนวิธีที่<em>คนหาข้อมูล</em></h1>
+  <p class="cover-subtitle">ยุคของ AI Search มาถึงแล้ว แบรนด์ที่ยังรอดูอยู่กำลังเสียโอกาสทุกวัน และนี่คือสิ่งที่ต้องเข้าใจก่อนจะสายเกินไป</p>
+  <div class="cover-divider"></div>
+  <p class="cover-meta">เทคโนโลยี · การตลาด &nbsp;·&nbsp; sirichokbook</p>
+  <div class="scroll-hint"><span>เริ่มอ่าน</span><div class="scroll-arrow"></div></div>
+</section>
+
+<nav class="toc">
+  <p class="toc-label">สารบัญ</p>
+  <a class="toc-item" href="#s1"><span class="toc-num">i</span><span class="toc-title">สิ่งที่เกิดขึ้นกับ Google วันนี้</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s2"><span class="toc-num">ii</span><span class="toc-title">ข่าวดีที่ซ่อนข่าวร้ายไว้</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s3"><span class="toc-num">iii</span><span class="toc-title">การค้นหาสี่ประเภทและ AI เข้ามาเกี่ยวข้องแค่ไหน</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s4"><span class="toc-num">iv</span><span class="toc-title">เบื้องหลัง AI Overview ทำงานยังไง</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s5"><span class="toc-num">v</span><span class="toc-title">ทำไม Conversion ของ AI Search ถึงสูงกว่า 6 เท่า</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s6"><span class="toc-num">vi</span><span class="toc-title">สิ่งที่แบรนด์ต้องทำแตกต่างออกไป</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s7"><span class="toc-num">vii</span><span class="toc-title">บทสรุป: เปลี่ยน KPI ก่อนที่จะสายเกินไป</span><span class="toc-dots"></span></a>
+</nav>
+
+<article class="article">
+
+  <div class="chapter visible">
+    <div class="chapter-body">
+      <p>ถ้าคุณมีเว็บไซต์ธุรกิจ หรือเคยลงทุนเงินกับการทำ<span class="term" data-term="SEO (Search Engine Optimization)" data-def="การปรับแต่งเว็บไซต์ให้ติดอันดับต้นๆ บน Google เพื่อให้คนเจอเว็บเราง่ายขึ้น เป็นกลยุทธ์ที่ธุรกิจส่วนใหญ่ใช้มาหลายปี">SEO</span> หรือยิงโฆษณา Google บทนี้อาจจะทำให้คุณรู้สึกไม่สบายใจ</p>
+      <p>แต่ข้อมูลที่จะพูดถึงในบทนี้ไม่ได้มีเพื่อทำให้ตื่นตระหนก มีเพื่อให้เห็นภาพรวมก่อนที่คนอื่นจะเห็น และนั่นคือข้อได้เปรียบที่แท้จริง</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s1">
+    <span class="chapter-num">i</span>
+    <h2 class="chapter-title">สิ่งที่เกิดขึ้นกับ Google วันนี้</h2>
+    <div class="chapter-body">
+      <p>มีตัวเลขหนึ่งที่เปลี่ยนวิธีมองอินเทอร์เน็ตไปตลอดกาล</p>
+      <p>ปัจจุบันกว่า <strong>60% ของการค้นหาบน Google ไม่ได้จบลงด้วยการกดคลิก</strong> แปลว่าคนเข้าไปถาม Google เห็นคำตอบจาก<span class="term" data-term="AI Overview" data-def="กล่องสรุปคำตอบที่ Google สร้างขึ้นโดย AI ปรากฏที่ด้านบนสุดของผลการค้นหา ก่อนที่จะแสดงลิงก์เว็บไซต์ทั่วไป ทำให้ผู้ใช้ได้คำตอบทันทีโดยไม่ต้องกดเข้าเว็บ">AI Overview</span> ที่โผล่ขึ้นมาด้านบน แล้วก็ออกจาก Google โดยไม่ได้เข้าเว็บใครเลย</p>
+
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="stat-num">60%</div>
+          <div class="stat-label">ของการค้นหาบน Google จบโดยไม่กดคลิกเว็บใดเลย</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">30–50%</div>
+          <div class="stat-label">คือปริมาณ Traffic ที่แบรนด์หลายแห่งสูญเสียไป</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">8%</div>
+          <div class="stat-label">ของลิงก์อันดับ 1–3 เท่านั้นที่ AI จะนำไปอ้างอิง</div>
+        </div>
+      </div>
+
+      <p>ตัวเลขสุดท้ายนั้นน่าตกใจที่สุด การที่เว็บไซต์ติดอันดับ 1 บน Google <em>ไม่ได้แปลว่า</em> AI จะนำแบรนด์ของคุณไปพูดถึงโดยอัตโนมัติ มีเพียง 8% ของลิงก์ที่ติดหน้าแรกเท่านั้นที่จะถูก AI เลือกอ้างอิง และนั่นคือปัญหาใหม่ที่กฎเดิมแก้ไม่ได้</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s2">
+    <span class="chapter-num">ii</span>
+    <h2 class="chapter-title">ข่าวดีที่ซ่อนข่าวร้ายไว้</h2>
+    <div class="chapter-body">
+      <p>แต่มีสิ่งที่น่าแปลกใจเกิดขึ้นพร้อมกัน ในขณะที่ Traffic ของเว็บไซต์ตกลง พฤติกรรมการค้นหาของคนกลับเพิ่มขึ้น</p>
+      <p>ก่อนจะมี AI Overview คนค้นหาบน Google ประมาณ <strong>8,500 ล้านครั้งต่อวัน</strong> แต่หลังจาก AI Overview เข้ามา ตัวเลขนั้นกระโดดขึ้นเป็น <strong>13,500 ล้านครั้งต่อวัน</strong> เพิ่มขึ้นเกือบเท่าตัว</p>
+      <div class="pull-quote">คนค้นหามากขึ้น แต่คลิกน้อยลง ซึ่งแปลว่าโอกาสยังอยู่ แค่กติกาเปลี่ยนไป</div>
+      <p>เหตุผลคือการมี AI Overview ทำให้คนรู้สึกว่าการค้นหามีประโยชน์มากขึ้น ได้คำตอบที่ดีขึ้น เลยค้นหาบ่อยขึ้น แต่เพราะ AI สรุปคำตอบให้ตรงหน้าแล้ว พวกเขาก็ไม่จำเป็นต้องกดเข้าเว็บอีกต่อไป</p>
+      <p>นั่นหมายความว่าปริมาณผู้บริโภคที่กำลังหาข้อมูลนั้นมีมากกว่าเดิม แต่ประตูที่พวกเขาจะเดินเข้ามาหาแบรนด์เราเปลี่ยนไปแล้ว</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s3">
+    <span class="chapter-num">iii</span>
+    <h2 class="chapter-title">การค้นหาสี่ประเภทและ AI เข้ามาเกี่ยวข้องแค่ไหน</h2>
+    <div class="chapter-body">
+      <p>Google แบ่งการค้นหาออกเป็นสี่ประเภท และ AI Overview จะโผล่ขึ้นมาในแต่ละประเภทไม่เท่ากัน เข้าใจตรงนี้แล้วจะรู้ว่าควรลงทุนพลังงานไปที่ไหน</p>
+
+      <div class="search-grid">
+        <div class="search-item">
+          <div class="search-pct">45%</div>
+          <div class="search-content">
+            <div class="search-name">การค้นหาเพื่อรับข้อมูล (Informational)</div>
+            <div class="search-desc">ถามเพื่อให้รู้ ไม่ได้ตั้งใจจะซื้ออะไร AI Overview โผล่ขึ้นมาบ่อยที่สุด ประเภทนี้คือจุดที่ AI มีอิทธิพลสูงที่สุดและแบรนด์ต้องให้ความสนใจมากที่สุด</div>
+            <div class="search-example">เช่น "วิตามิน C มีประโยชน์อะไรบ้าง" หรือ "โซฟาผ้าหรือหนังดีกว่ากัน"</div>
+          </div>
+        </div>
+        <div class="search-item">
+          <div class="search-pct">18%</div>
+          <div class="search-content">
+            <div class="search-name">การค้นหาเพื่อเปรียบเทียบ (Commercial)</div>
+            <div class="search-desc">กำลังพิจารณาจะซื้อแต่ยังไม่ตัดสินใจ อยากได้ตัวเลือก อยากเปรียบเทียบ AI Overview โผล่ขึ้นมาในกรณีนี้ประมาณหนึ่งในห้า</div>
+            <div class="search-example">เช่น "คอนโดแถว BTS ราคาไม่เกิน 18,000 ไหนน่าเช่าบ้าง"</div>
+          </div>
+        </div>
+        <div class="search-item">
+          <div class="search-pct">6%</div>
+          <div class="search-content">
+            <div class="search-name">การค้นหาเพื่อซื้อทันที (Transactional)</div>
+            <div class="search-desc">ตัดสินใจแล้ว แค่อยากได้ลิงก์สั่งซื้อ Google รู้ว่าคุณต้องการลิงก์มากกว่าคำอธิบาย AI Overview จึงโผล่น้อยมาก</div>
+            <div class="search-example">เช่น "MacBook Air M3 ซื้อได้ที่ไหน ราคาล่าสุด"</div>
+          </div>
+        </div>
+        <div class="search-item">
+          <div class="search-pct">1.5%</div>
+          <div class="search-content">
+            <div class="search-name">การค้นหาเพื่อไปถึงที่หมาย (Navigational)</div>
+            <div class="search-desc">อยากเข้าเว็บใดเว็บหนึ่งโดยตรง ไม่ต้องการคำอธิบาย แค่ต้องการลิงก์ AI จึงแทบไม่โผล่เลย</div>
+            <div class="search-example">เช่น "Gmail login" หรือ "Facebook เข้าระบบ"</div>
+          </div>
+        </div>
+      </div>
+
+      <p>บทสรุปคือถ้าแบรนด์ของคุณอยู่ในหมวดสินค้าหรือบริการที่คนมักจะ "ถามก่อนซื้อ" เช่น สุขภาพ การเงิน ท่องเที่ยว อสังหาริมทรัพย์ หรือเทคโนโลยี การค้นหาประเภทแรกและที่สองคือจุดที่ต้องลงทุนมากที่สุด</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s4">
+    <span class="chapter-num">iv</span>
+    <h2 class="chapter-title">เบื้องหลัง AI Overview ทำงานยังไง</h2>
+    <div class="chapter-body">
+      <p>เพื่อที่จะรู้ว่าต้องทำอะไรให้แบรนด์ถูก AI นำไปพูดถึง ต้องเข้าใจก่อนว่า AI ตัดสินใจเลือกข้อมูลอย่างไร</p>
+      <p>Google ใช้ระบบที่จดสิทธิบัตรไว้ชื่อว่า <span class="term" data-term="Query Fan Out" data-def="วิธีการที่ Google AI ใช้ในการตอบคำถาม โดยแตกคำถามหนึ่งออกเป็นหลายคำถามย่อย ค้นหาแต่ละคำถาม รวบรวมข้อมูล แล้วสังเคราะห์เป็นคำตอบเดียว">Query Fan Out</span> ซึ่งทำงานต่างจากการค้นหาแบบเดิมมาก</p>
+
+      <div class="process">
+        <span class="process-label">วิธีเก่า vs วิธีใหม่ — ตัวอย่าง: "บัตรเดบิตสำหรับเที่ยวจีน"</span>
+        <div class="process-step">
+          <div class="process-num">เก่า</div>
+          <div class="process-text">Google จับคีย์เวิร์ดจากคำถาม → หาเว็บที่มีคีย์เวิร์ดนั้นมากที่สุด → เรียงลำดับตาม Domain Authority → แสดงลิงก์ให้คลิก</div>
+        </div>
+        <div class="process-step">
+          <div class="process-num">ใหม่</div>
+          <div class="process-text">AI รับคำถามยาวๆ → แตกออกเป็นคำถามย่อยหลายข้อ เช่น "บัตรเดบิตเที่ยวต่างประเทศคืออะไร" "อัตราแลกเปลี่ยนบาทเป็นหยวนตอนนี้เท่าไหร่" "บัตรใบไหนค่าธรรมเนียมต่ำสุด" → ค้นหาแต่ละคำถาม → รวบรวมข้อมูลจากหลายแหล่ง → สังเคราะห์เป็นคำตอบสรุป → อ้างอิงแหล่งที่มา</div>
+        </div>
+      </div>
+
+      <p>สิ่งที่น่าสนใจมากคือแหล่งข้อมูลที่ AI เชื่อถือมากที่สุดในยุคนี้<em>ไม่ใช่เว็บไซต์ของแบรนด์</em> แต่เป็นแหล่งที่มาจากผู้ใช้จริง เช่น Pantip, Reddit, Facebook Groups และรีวิวต่างๆ เพราะ AI รู้ว่าเว็บไซต์แบรนด์ถูกสร้างมาเพื่อขาย แต่ความคิดเห็นของผู้บริโภคจริงๆ นั้นน่าเชื่อถือกว่า</p>
+
+      <div class="pull-quote">แปลว่าคำรีวิวของลูกค้าคุณบน Pantip มีน้ำหนักต่อ AI มากกว่าหน้าเว็บที่คุณลงทุนทำมาตลอด</div>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s5">
+    <span class="chapter-num">v</span>
+    <h2 class="chapter-title">ทำไม Conversion ของ AI Search ถึงสูงกว่า 6 เท่า</h2>
+    <div class="chapter-body">
+      <p>นี่คือตัวเลขที่ทำให้ทุกอย่างเปลี่ยนไป</p>
+      <p>ในอดีต ถ้าคนกดลิงก์เว็บไซต์จาก Google ธรรมดา อัตราการที่เขาจะซื้อหรือสมัครอยู่ที่ประมาณ <strong>4%</strong> แต่ถ้าคนมาจากการที่ AI Overview นำแบรนด์คุณไปพูดถึง อัตรานั้นกระโดดขึ้นเป็น <strong>24%</strong></p>
+      <p>เหตุผลนั้นเข้าใจง่ายมาก เพราะกว่าคนจะกดลิงก์ผ่าน AI Overview นั้น เขาได้คุยกับ AI แล้ว ได้เปรียบเทียบแล้ว ได้พิจารณาแล้ว และตัดสินใจมาแล้วในระดับหนึ่ง การที่เขากดลิงก์ของเราคือสัญญาณว่าเขา<em>พร้อมจะซื้อ</em> ไม่ใช่แค่ "อยากดู"</p>
+      <p>เปรียบง่ายๆ คือ ถ้าลูกค้าเดินเข้าร้านโดยที่ยังไม่รู้อะไรเลย พนักงานต้องใช้เวลาอธิบายสินค้าทั้งหมดก่อน แต่ถ้าลูกค้าเดินเข้ามาโดยที่ AI บอกเขาแล้วว่าร้านนี้ตอบโจทย์เขายังไง เขาก็พร้อมตัดสินใจได้เลย</p>
+      <div class="pull-quote">AI ทำหน้าที่เป็นพนักงานขายที่ดีที่สุดของคุณ โดยที่คุณไม่ต้องจ่ายเงินเดือนให้มัน แค่ทำให้มันรู้จักคุณก็พอ</div>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s6">
+    <span class="chapter-num">vi</span>
+    <h2 class="chapter-title">สิ่งที่แบรนด์ต้องทำแตกต่างออกไป</h2>
+    <div class="chapter-body">
+      <p>กลยุทธ์ใหม่นี้มีชื่อเรียกว่า <span class="term" data-term="AEO (AI Engine Optimization)" data-def="การปรับแต่งเนื้อหาและกลยุทธ์ออนไลน์ให้ AI นำแบรนด์ไปพูดถึงและอ้างอิงในคำตอบ คล้ายกับ SEO แต่เป้าหมายไม่ใช่อันดับ Google แต่คือการถูก AI mention">AEO หรือ AI Engine Optimization</span> ซึ่งยังคงมีพื้นฐานบางอย่างที่เหมือน SEO แต่ก็มีสิ่งที่ต้องทำแตกต่างออกไปอย่างมาก</p>
+
+      <div class="shift">
+        <div class="shift-col">
+          <span class="shift-header old">สิ่งที่เคยสำคัญ (SEO เดิม)</span>
+          <div class="shift-item old">ติดอันดับ 1 ใน Google</div>
+          <div class="shift-item old">สร้าง Backlink ให้เยอะที่สุด</div>
+          <div class="shift-item old">ยัดคีย์เวิร์ดลงในเนื้อหา</div>
+          <div class="shift-item old">วัดผลด้วย Page Traffic</div>
+          <div class="shift-item old">เนื้อหาบนเว็บไซต์ตัวเอง</div>
+        </div>
+        <div class="shift-col">
+          <span class="shift-header new">สิ่งที่สำคัญตอนนี้ (AEO)</span>
+          <div class="shift-item new">ถูก AI นำไปพูดถึง (Brand Mention)</div>
+          <div class="shift-item new">มีรีวิวและบทความบน Pantip, Reddit</div>
+          <div class="shift-item new">ตอบคำถามที่คนจะถาม AI</div>
+          <div class="shift-item new">วัดผลด้วยความถี่ที่ AI mention แบรนด์</div>
+          <div class="shift-item new">เนื้อหาจากผู้บริโภคจริง (UGC)</div>
+        </div>
+      </div>
+
+      <p>สิ่งที่ต้องเริ่มทำทันทีมีสามอย่างหลักๆ</p>
+      <p><strong>หนึ่ง — หาให้เจอว่า AI ใช้แหล่งข้อมูลไหนอ้างอิงสินค้าในอุตสาหกรรมคุณ</strong> ลองถาม ChatGPT หรือ Google ว่า "แนะนำ [สินค้าของคุณ] ที่ดีที่สุดในไทย" แล้วดูว่ามันอ้างอิงจากที่ไหน เว็บนั้นคือที่ที่คุณต้องไปมีตัวตน</p>
+      <p><strong>สอง — สร้างเนื้อหาที่ตอบคำถามจริงๆ ไม่ใช่คีย์เวิร์ด</strong> แทนที่จะเขียนบทความที่ยัดคีย์เวิร์ด ให้เขียนในรูปแบบคำถาม-คำตอบ เพราะ Query Fan Out ของ AI ทำงานในแบบนั้น</p>
+      <p><strong>สาม — กระตุ้นให้ลูกค้าพูดถึงแบรนด์ในพื้นที่ที่ AI ไว้วางใจ</strong> รีวิวบน Pantip รีวิวใน Facebook Group หรือแม้แต่ความเห็นใน Reddit ล้วนมีน้ำหนักต่อ AI มากกว่าหน้าเว็บของแบรนด์เอง</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s7">
+    <span class="chapter-num">vii</span>
+    <h2 class="chapter-title">บทสรุป: เปลี่ยน KPI ก่อนที่จะสายเกินไป</h2>
+    <div class="chapter-body">
+      <p>สิ่งที่สำคัญที่สุดจากทั้งหมดนี้ไม่ใช่เทคนิค แต่คือการเปลี่ยน<span class="term" data-term="KPI (Key Performance Indicator)" data-def="ตัวชี้วัดหลักที่ใช้ประเมินความสำเร็จของงาน เช่น ยอดขาย จำนวนผู้เข้าเว็บ หรืออัตราการซื้อ">ตัวชี้วัดความสำเร็จ</span> ของธุรกิจออนไลน์</p>
+      <p>ถ้ายังวัดผลด้วย Page Traffic อยู่ เราจะเห็นว่าตัวเลขตกลงเรื่อยๆ ทุกปี และมองไม่เห็นโอกาสที่แท้จริง แต่ถ้าเริ่มวัดว่า AI mention แบรนด์เราบ่อยแค่ไหน ในบริบทแบบไหน เราจะเริ่มเห็นว่าต้องทำอะไรต่อไป</p>
+      <div class="pull-quote">แบรนด์ที่ AI รู้จักคือแบรนด์ที่ลูกค้ายุคใหม่จะเจอ แบรนด์ที่ AI ไม่รู้จักคือแบรนด์ที่ค่อยๆ หายไปจากการตัดสินใจของผู้บริโภค</div>
+      <p>โลกไม่ได้รอให้ใครพร้อม มันเปลี่ยนไปแล้ว และคนที่เข้าใจและปรับตัวก่อนจะได้เปรียบที่คนอื่นตามไม่ทัน ไม่ใช่เพราะฉลาดกว่า แต่เพราะเริ่มก่อน</p>
+    </div>
+  </div>
+
+  <div class="chapter" id="vocab">
+    <div class="vocab-section">
+      <span class="vocab-label">คลังคำศัพท์ · บทที่ 6</span>
+      <p class="vocab-hint">* คำที่ขีดเส้นใต้สีทองในเนื้อหา กดได้เพื่อดูความหมายทันที</p>
+
+      <div class="vocab-item">
+        <div class="vocab-term">AI Overview</div>
+        <div class="vocab-meaning">กล่องสรุปคำตอบที่ Google สร้างขึ้นโดย AI ปรากฏที่ด้านบนสุดของผลการค้นหา ก่อนลิงก์เว็บไซต์ทั่วไป ทำให้ผู้ใช้ได้คำตอบทันทีโดยไม่ต้องกดเข้าเว็บ</div>
+        <div class="vocab-example">ใช้ได้ว่า: "AI Overview โผล่มาตอบก่อนเลย ทำให้คนไม่จำเป็นต้องกดเข้าเว็บเราอีกต่อไป"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">SEO (Search Engine Optimization)</div>
+        <div class="vocab-meaning">การปรับแต่งเว็บไซต์ให้ติดอันดับต้นๆ บน Google โดยใช้คีย์เวิร์ด Backlink และคุณภาพเนื้อหา เป็นกลยุทธ์ที่ธุรกิจส่วนใหญ่ใช้มาหลายปี แต่ปัจจุบันมีประสิทธิภาพลดลงเพราะ AI Overview</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ลงทุน SEO ไปเยอะแต่ Traffic ยังตกอยู่ดี ต้องมาคิด AEO เพิ่มแล้ว"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">AEO (AI Engine Optimization)</div>
+        <div class="vocab-meaning">กลยุทธ์การตลาดแบบใหม่ที่มุ่งให้ AI นำแบรนด์ไปพูดถึงและอ้างอิงในคำตอบ แทนที่จะแค่ติดอันดับ Google เป้าหมายคือให้ AI "รู้จัก" แบรนด์และเลือกแนะนำเมื่อมีคนถาม</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ยุคนี้ต้องทำ AEO ควบคู่ไปกับ SEO ไม่ใช่ทดแทนกัน"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Query Fan Out</div>
+        <div class="vocab-meaning">วิธีการที่ AI ของ Google ใช้ในการตอบคำถาม โดยแตกคำถามหนึ่งออกเป็นหลายคำถามย่อย ค้นหาแต่ละคำถาม รวบรวมข้อมูลจากหลายแหล่ง แล้วสังเคราะห์เป็นคำตอบเดียว</div>
+        <div class="vocab-example">ใช้ได้ว่า: "Query Fan Out ทำให้ AI ตอบคำถามซับซ้อนได้ดีขึ้น แต่แบรนด์ต้องอยู่ในแหล่งที่ AI ไปดึงข้อมูลด้วย"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">UGC (User Generated Content)</div>
+        <div class="vocab-meaning">เนื้อหาที่สร้างโดยผู้ใช้จริง ไม่ใช่แบรนด์ เช่น รีวิวบน Pantip ความเห็นใน Facebook Group หรือโพสต์ใน Reddit AI ให้น้ำหนักกับ UGC มากกว่าเนื้อหาบนเว็บไซต์แบรนด์ เพราะเชื่อถือได้มากกว่า</div>
+        <div class="vocab-example">ใช้ได้ว่า: "UGC บน Pantip มีน้ำหนักต่อ AI มากกว่าบทความ SEO ที่เราเขียนเอง"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Brand Mention</div>
+        <div class="vocab-meaning">การที่ AI หรือแหล่งข้อมูลอื่นพูดถึงชื่อแบรนด์ของเรา ซึ่งในยุค AEO ถือเป็นตัวชี้วัดที่สำคัญกว่าอันดับบน Google เพราะบ่งบอกว่า AI "รู้จัก" แบรนด์เราหรือไม่</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ต้องเปลี่ยนจากวัด Traffic มาวัด Brand Mention แทนในยุค AI Search"</div>
+      </div>
+    </div>
+  </div>
+
+</article>
+
+<footer>
+  <p>บทที่ 6 &nbsp;·&nbsp; เมื่อ AI เปลี่ยนวิธีที่คนหาข้อมูล &nbsp;·&nbsp; sirichokbook</p>
+</footer>
+
+<script>
+  const chapters = document.querySelectorAll('.chapter:not(.visible)');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); }
+    });
+  }, { threshold: 0.1 });
+  chapters.forEach(ch => observer.observe(ch));
+
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  const tooltip = document.getElementById('tooltip');
+  const tooltipTerm = document.getElementById('tooltip-term');
+  const tooltipBody = document.getElementById('tooltip-body');
+  let hideTimeout;
+
+  document.querySelectorAll('.term').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      clearTimeout(hideTimeout);
+      tooltipTerm.textContent = el.getAttribute('data-term');
+      tooltipBody.textContent = el.getAttribute('data-def');
+      const rect = el.getBoundingClientRect();
+      const tipW = 260;
+      let left = rect.left;
+      let top = rect.bottom + 8;
+      if (left + tipW > window.innerWidth - 16) left = window.innerWidth - tipW - 16;
+      if (left < 16) left = 16;
+      if (top + 120 > window.innerHeight) top = rect.top - 130;
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+      tooltip.classList.add('show');
+      hideTimeout = setTimeout(() => tooltip.classList.remove('show'), 4000);
+    });
+  });
+
+  document.addEventListener('click', () => tooltip.classList.remove('show'));
+</script>
+</body>
+</html>
