@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI สำหรับธุรกิจขนาดเล็ก · sirichokbook</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,600;1,300&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root { --cream: #F5F0E8; --ink: #1A1208; --amber: #C8852A; --muted: #7A6E5F; --divider: #D9CFC0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background-color: var(--cream); color: var(--ink); font-family: 'Sarabun', sans-serif; font-weight: 300; line-height: 1.9; font-size: 17px; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 100; opacity: 0.4; }
+
+  .term { color: var(--amber); font-weight: 400; border-bottom: 1px dashed var(--amber); cursor: pointer; display: inline; }
+  .tooltip { display: none; position: fixed; background: var(--ink); color: var(--cream); font-size: 13px; line-height: 1.6; padding: 12px 16px; max-width: 260px; z-index: 9999; pointer-events: none; font-family: 'Sarabun', sans-serif; font-weight: 300; border-left: 3px solid var(--amber); }
+  .tooltip.show { display: block; }
+  .tooltip-term { font-weight: 600; font-size: 12px; letter-spacing: 0.1em; color: var(--amber); margin-bottom: 4px; text-transform: uppercase; }
+
+  .cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 60px 24px; position: relative; border-bottom: 1px solid var(--divider); overflow: hidden; }
+  .cover::after { content: ''; position: absolute; bottom: -80px; left: 50%; transform: translateX(-50%); width: 500px; height: 500px; background: radial-gradient(circle, rgba(200,133,42,0.08) 0%, transparent 70%); pointer-events: none; }
+  .cover-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 32px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.2s; }
+  .cover-title { font-family: 'Playfair Display', serif; font-size: clamp(34px, 7vw, 64px); font-weight: 900; line-height: 1.1; letter-spacing: -0.02em; color: var(--ink); max-width: 700px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.4s; }
+  .cover-title em { font-style: italic; color: var(--amber); }
+  .cover-subtitle { margin-top: 24px; font-size: 15px; color: var(--muted); max-width: 440px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.6s; }
+  .cover-divider { width: 48px; height: 2px; background: var(--amber); margin: 40px auto; opacity: 0; animation: fadeUp 0.8s ease forwards 0.8s; }
+  .cover-meta { font-size: 12px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; opacity: 0; animation: fadeUp 0.8s ease forwards 1s; }
+  .scroll-hint { position: absolute; bottom: 32px; display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: 0; animation: fadeUp 0.8s ease forwards 1.4s; }
+  .scroll-hint span { font-size: 11px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; }
+  .scroll-arrow { width: 1px; height: 32px; background: linear-gradient(to bottom, var(--amber), transparent); animation: scrollPulse 2s ease-in-out infinite; }
+  .back-link { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); text-decoration: none; position: absolute; top: 32px; left: 32px; transition: color 0.2s; opacity: 0; animation: fadeUp 0.8s ease forwards 0.1s; }
+  .back-link:hover { color: var(--amber); }
+
+  .toc { max-width: 680px; margin: 0 auto; padding: 80px 24px; border-bottom: 1px solid var(--divider); }
+  .toc-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 40px; }
+  .toc-item { display: flex; align-items: baseline; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--divider); text-decoration: none; color: var(--ink); transition: color 0.2s; }
+  .toc-item:hover { color: var(--amber); }
+  .toc-num { font-family: 'Playfair Display', serif; font-size: 13px; color: var(--amber); min-width: 24px; font-style: italic; }
+  .toc-title { font-size: 15px; font-weight: 400; flex: 1; }
+  .toc-dots { flex: 1; border-bottom: 1px dotted var(--divider); margin: 0 8px; min-width: 20px; }
+
+  .article { max-width: 680px; margin: 0 auto; padding: 80px 24px 120px; }
+  .chapter { margin-bottom: 100px; opacity: 0; transform: translateY(20px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .chapter.visible { opacity: 1; transform: translateY(0); }
+  .chapter-num { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 16px; display: block; }
+  .chapter-title { font-family: 'Playfair Display', serif; font-size: clamp(24px, 5vw, 36px); font-weight: 700; line-height: 1.2; margin-bottom: 40px; color: var(--ink); }
+  .chapter-body p { margin-bottom: 24px; color: #2E2416; }
+  .chapter-body strong { font-weight: 600; color: var(--ink); }
+  .chapter-body em { font-style: italic; color: var(--amber); }
+  .pull-quote { border-left: 3px solid var(--amber); padding: 4px 0 4px 24px; margin: 40px 0; font-family: 'Playfair Display', serif; font-size: 20px; font-style: italic; line-height: 1.5; color: var(--ink); }
+  .section-break { text-align: center; margin: 48px 0; color: var(--amber); letter-spacing: 0.3em; font-size: 14px; }
+
+  /* Stats */
+  .stat-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 32px 0; }
+  .stat-card { border: 1px solid var(--divider); padding: 20px 16px; text-align: center; }
+  .stat-num { font-family: 'Playfair Display', serif; font-size: 30px; font-weight: 900; color: var(--amber); line-height: 1; margin-bottom: 8px; }
+  .stat-label { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* Timeline */
+  .timeline { margin: 32px 0; }
+  .tl-item { display: flex; gap: 20px; padding: 16px 0; border-bottom: 1px solid var(--divider); }
+  .tl-item:last-child { border-bottom: none; }
+  .tl-time { font-family: 'Playfair Display', serif; font-size: 14px; color: var(--amber); min-width: 60px; padding-top: 2px; font-weight: 700; }
+  .tl-content { flex: 1; }
+  .tl-title { font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 4px; }
+  .tl-desc { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+  /* Skill grid */
+  .skill-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 32px 0; }
+  .skill-card { border: 1px solid var(--divider); padding: 18px 20px; }
+  .skill-name { font-weight: 600; font-size: 14px; color: var(--amber); margin-bottom: 6px; }
+  .skill-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* Risk list */
+  .risk-list { margin: 24px 0; }
+  .risk-item { display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--divider); }
+  .risk-item:last-child { border-bottom: none; }
+  .risk-num { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: rgba(200,133,42,0.25); min-width: 28px; line-height: 1.2; }
+  .risk-content { flex: 1; }
+  .risk-title { font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 4px; }
+  .risk-desc { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+  /* Vocab */
+  .vocab-section { background: rgba(200,133,42,0.06); border: 1px solid var(--divider); padding: 40px; margin-top: 80px; }
+  .vocab-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 8px; display: block; }
+  .vocab-hint { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+  .vocab-item { padding: 16px 0; border-bottom: 1px solid var(--divider); }
+  .vocab-item:last-child { border-bottom: none; }
+  .vocab-term { font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 4px; }
+  .vocab-meaning { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .vocab-example { font-size: 13px; color: var(--amber); font-style: italic; margin-top: 4px; }
+
+  footer { text-align: center; padding: 60px 24px; border-top: 1px solid var(--divider); font-size: 12px; color: var(--muted); letter-spacing: 0.1em; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes scrollPulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+  @media (max-width: 600px) {
+    body { font-size: 16px; }
+    .toc, .article { padding-left: 20px; padding-right: 20px; }
+    .back-link { top: 20px; left: 20px; }
+    .stat-row { grid-template-columns: 1fr 1fr; }
+    .skill-grid { grid-template-columns: 1fr; }
+    .tooltip { max-width: 200px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="tooltip" id="tooltip">
+  <div class="tooltip-term" id="tooltip-term"></div>
+  <div id="tooltip-body"></div>
+</div>
+
+<section class="cover">
+  <a class="back-link" href="index.html">← กลับหน้าหลัก</a>
+  <p class="cover-label">บทที่ 8</p>
+  <h1 class="cover-title">AI สำหรับ<em>ธุรกิจขนาดเล็ก</em></h1>
+  <p class="cover-subtitle">ซอฟต์แวร์เคยถูกสร้างมาเพื่อองค์กรใหญ่เท่านั้น แต่ตอนนี้ AI กำลังเปลี่ยนสมการนั้น และธุรกิจ SME ไทยคือหนึ่งในกลุ่มที่ได้ประโยชน์มากที่สุด</p>
+  <div class="cover-divider"></div>
+  <p class="cover-meta">เทคโนโลยี · ธุรกิจ &nbsp;·&nbsp; sirichokbook</p>
+  <div class="scroll-hint"><span>เริ่มอ่าน</span><div class="scroll-arrow"></div></div>
+</section>
+
+<nav class="toc">
+  <p class="toc-label">สารบัญ</p>
+  <a class="toc-item" href="#s1"><span class="toc-num">i</span><span class="toc-title">ซอฟต์แวร์ที่โลกสร้างมา ไม่ได้สร้างมาเพื่อคุณ</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s2"><span class="toc-num">ii</span><span class="toc-title">SME ไทยกับ AI — ตัวเลขที่น่าสนใจ</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s3"><span class="toc-num">iii</span><span class="toc-title">Claude for Small Business คืออะไร</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s4"><span class="toc-num">iv</span><span class="toc-title">ทักษะที่มาพร้อมกัน 12 อย่าง</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s5"><span class="toc-num">v</span><span class="toc-title">วันทำงานของเจ้าของธุรกิจในยุค AI</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s6"><span class="toc-num">vi</span><span class="toc-title">ความเสี่ยงที่ต้องรู้ก่อนใช้</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s7"><span class="toc-num">vii</span><span class="toc-title">บทสรุป: เวลาที่ได้คืนมา ใช้ทำอะไรดี</span><span class="toc-dots"></span></a>
+</nav>
+
+<article class="article">
+
+  <div class="chapter visible">
+    <div class="chapter-body">
+      <p>มีประโยคหนึ่งที่ผู้บริหารของ Anthropic พูดไว้และน่าคิดมาก เธอบอกว่าซอฟต์แวร์ที่ผ่านมาถูกสร้างขึ้นเพื่อองค์กรใหญ่ Startup ที่มีนักลงทุน และผู้บริโภคทั่วไป แต่ไม่ได้ถูกออกแบบมาเพื่อบริษัทที่รับงานปรับอากาศ มีพนักงาน 50 คน หรือบริษัทจัดสวนที่มีคน 25 คน</p>
+      <p>นั่นกำลังเปลี่ยนไปแล้ว</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s1">
+    <span class="chapter-num">i</span>
+    <h2 class="chapter-title">ซอฟต์แวร์ที่โลกสร้างมา ไม่ได้สร้างมาเพื่อคุณ</h2>
+    <div class="chapter-body">
+      <p>ลองนึกถึงระบบ<span class="term" data-term="ERP (Enterprise Resource Planning)" data-def="ระบบซอฟต์แวร์ที่ใช้จัดการทรัพยากรขององค์กรแบบครบวงจร ทั้งบัญชี คลังสินค้า การผลิต และ HR มักมีราคาสูงและต้องการทีม IT ดูแล">ERP</span> ที่ธุรกิจใหญ่ใช้กัน ราคาเป็นล้าน ต้องมีทีม IT ดูแล ต้องผ่านกระบวนการ implement หลายเดือน ถ้าคุณมีธุรกิจครอบครัวสี่คน นั่นไม่ใช่ของสำหรับคุณ</p>
+      <p>แต่ปัญหาจริงๆ ของธุรกิจขนาดเล็กไม่ใช่ว่าไม่มีซอฟต์แวร์ ปัญหาคือเจ้าของต้องทำทุกอย่างเอง ตั้งแต่ออกใบแจ้งหนี้ ตรวจสัญญา ดูแลพนักงาน ติดตามลูกค้า ไปจนถึงปิดงบประจำเดือน ทั้งหมดนั้นตกอยู่กับคนคนเดียว</p>
+      <div class="pull-quote">ซอฟต์แวร์ที่ผ่านมาถูกสร้างมาสำหรับองค์กรใหญ่ ไม่ใช่สำหรับธุรกิจที่มีพนักงาน 25 คน</div>
+      <p>และนั่นคือช่องว่างที่ Anthropic กำลังเดินเข้ามาปิดด้วย Claude for Small Business</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s2">
+    <span class="chapter-num">ii</span>
+    <h2 class="chapter-title">SME ไทยกับ AI — ตัวเลขที่น่าสนใจ</h2>
+    <div class="chapter-body">
+      <p>ก่อนจะพูดถึงตัวผลิตภัณฑ์ มีตัวเลขที่น่าหยุดคิดอยู่หลายตัว</p>
+
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="stat-num">3 ล้าน</div>
+          <div class="stat-label">ธุรกิจ SME ในไทย คิดเป็น 90% ของธุรกิจทั้งหมด</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">58%</div>
+          <div class="stat-label">ของ SME ทั่วโลกใช้ Generative AI แล้วในปี 2568 เพิ่มจาก 40% ในปีก่อน</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">1.2x</div>
+          <div class="stat-label">ช่องว่างการใช้ AI ระหว่างบริษัทใหญ่กับ SME ลดลงเหลือเพียงนี้ จาก 1.8x ในปี 2567</div>
+        </div>
+      </div>
+
+      <p>ที่น่าสนใจกว่านั้นคือความเร็ว ในยุคอินเทอร์เน็ต SME ใช้เวลาเกือบสิบปีกว่าจะตามบริษัทใหญ่ทัน แต่ครั้งนี้ดูเหมือนจะใช้เวลาแค่สองปี นั่นหมายความว่าหน้าต่างโอกาสเปิดอยู่ แต่จะไม่เปิดนานเท่าเดิม</p>
+      <p>สำหรับ Anthropic เองนั้น ตัวเลขก็น่าสนใจไม่แพ้กัน รายได้ต่อปีแตะ 3,000 ล้านดอลลาร์ในปี 2569 เพิ่มขึ้นจาก 900 ล้านดอลลาร์ในปีก่อน และจำนวนลูกค้าที่จ่ายเงินเกิน 1 ล้านดอลลาร์ต่อปีเพิ่มเป็น 2 เท่าในเวลาแค่สองเดือน</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s3">
+    <span class="chapter-num">iii</span>
+    <h2 class="chapter-title">Claude for Small Business คืออะไร</h2>
+    <div class="chapter-body">
+      <p>Claude for Small Business ไม่ใช่ผลิตภัณฑ์แยกต่างหาก แต่เป็น<span class="term" data-term="Plugin" data-def="ส่วนเสริมที่เพิ่มความสามารถให้กับโปรแกรมหลัก ในกรณีของ Claude คือชุดทักษะและตัวเชื่อมต่อที่ทำให้ Claude ทำงานเฉพาะทางได้ดีขึ้น">Plugin</span> สำหรับ Claude Code ที่ผู้ใช้ Claude อยู่แล้วสามารถเปิดใช้ได้ทันที</p>
+      <p>โครงสร้างของมันแบ่งออกเป็นสองส่วน ส่วนแรกคือ <strong>Skill</strong> หรือทักษะ ซึ่งเปรียบเหมือนคู่มือพนักงานที่บอก Claude ว่า workflow นี้ต้องทำอะไรบ้าง step by step ดึงข้อมูลจากไหน สร้าง Output ในรูปแบบไหน ส่วนที่สองคือ <strong>Connector</strong> ซึ่งเป็นตัวเชื่อมระหว่าง Claude กับซอฟต์แวร์ที่ธุรกิจใช้อยู่แล้ว ไม่ว่าจะเป็น Gmail, Google Drive, QuickBooks หรือ Slack</p>
+      <div class="pull-quote">เหมือนมีพนักงานที่เก่งมาก แต่ไม่รู้ว่าบริษัทเราทำงานยังไง Skill คือคู่มือที่สอนให้เขารู้</div>
+      <p>ผลที่ได้คือ Claude ไม่ได้แค่ตอบคำถาม แต่สามารถเปิดระบบ ดึงข้อมูล วิเคราะห์ สร้างเอกสาร และส่ง Output ให้ได้โดยตรง โดยที่ผู้ใช้ไม่ต้องรู้ด้วยซ้ำว่า Skill ไหนกำลังทำงานอยู่</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s4">
+    <span class="chapter-num">iv</span>
+    <h2 class="chapter-title">ทักษะที่มาพร้อมกัน 12 อย่าง</h2>
+    <div class="chapter-body">
+      <p>Claude for Small Business ครอบคลุมงานหลักของธุรกิจทั้ง 6 ด้าน ได้แก่ การเงิน การดำเนินงาน การขาย การตลาด HR และ Customer Service</p>
+
+      <div class="skill-grid">
+        <div class="skill-card">
+          <div class="skill-name">Plan Pay — วางแผนเงินเดือน</div>
+          <div class="skill-desc">คำนวณค่าจ้าง หักภาษี ตรวจจุดผิดปกติ และเตรียมข้อมูลให้พร้อมประมวลผลในระบบบัญชี</div>
+        </div>
+        <div class="skill-card">
+          <div class="skill-name">Reconcile the Books — กระทบยอด</div>
+          <div class="skill-desc">ตรวจสอบงบการเงินและกระทบยอดบัญชีที่เคยต้องทำด้วยมือหลายชั่วโมง</div>
+        </div>
+        <div class="skill-card">
+          <div class="skill-name">Margin Analyzer — วิเคราะห์กำไร</div>
+          <div class="skill-desc">ดึงข้อมูลจาก Shopify, PayPal, QuickBooks แล้วคำนวณกำไรสุทธิของแต่ละสินค้าแต่ละช่องทาง เหมาะมากสำหรับธุรกิจที่มีสินค้าหลาย SKU</div>
+        </div>
+        <div class="skill-card">
+          <div class="skill-name">Invoice Chase — ติดตามใบแจ้งหนี้</div>
+          <div class="skill-desc">ระบุใบแจ้งหนี้ที่ค้างชำระ ร่างอีเมลติดตามพร้อมปรับโทนตามประวัติลูกค้าแต่ละราย</div>
+        </div>
+        <div class="skill-card">
+          <div class="skill-name">Contract Review — ตรวจสัญญา</div>
+          <div class="skill-desc">โยนสัญญาเข้าไปแล้วถามว่า "มีกับดักไหม" Claude จะวิเคราะห์และสรุปประเด็นที่ต้องตัดสินใจออกมาให้</div>
+        </div>
+        <div class="skill-card">
+          <div class="skill-name">Tax Season Organizer — เตรียมภาษี</div>
+          <div class="skill-desc">ดึงใบเสร็จจาก Gmail และ Google Drive จัดหมวดหมู่ตามแบบฟอร์มภาษี เปลี่ยนงานสองสัปดาห์ให้เสร็จในไม่กี่นาที</div>
+        </div>
+        <div class="skill-card">
+          <div class="skill-name">Cashflow Analysis — วิเคราะห์เงินสด</div>
+          <div class="skill-desc">บอกล่วงหน้าว่าเดือนไหนจะขาดสภาพคล่อง เพื่อให้เตรียมรับมือได้ทัน</div>
+        </div>
+        <div class="skill-card">
+          <div class="skill-name">Onboard New Employees — ต้อนรับพนักงาน</div>
+          <div class="skill-desc">เตรียมเอกสาร ส่งอีเมลต้อนรับ และตั้งค่าต่างๆ ที่พนักงานใหม่ต้องการโดยอัตโนมัติ</div>
+        </div>
+        <div class="skill-card">
+          <div class="skill-name">Run Marketing Campaign</div>
+          <div class="skill-desc">จัดการแคมเปญการตลาดตั้งแต่ต้นจนถึงการติดตามผล</div>
+        </div>
+        <div class="skill-card">
+          <div class="skill-name">Lead Triage — จัดลำดับลูกค้า</div>
+          <div class="skill-desc">วิเคราะห์ว่ารายไหนควรปิดเร็ว รายไหนยังไม่พร้อม เพื่อจัดสรรเวลาได้ถูกต้อง</div>
+        </div>
+        <div class="skill-card">
+          <div class="skill-name">Surface Business Insight</div>
+          <div class="skill-desc">ดึง Insight ของธุรกิจขึ้นมาให้เห็นโดยไม่ต้องเปิด Dashboard สิบหน้า</div>
+        </div>
+        <div class="skill-card">
+          <div class="skill-name">Content Strategist</div>
+          <div class="skill-desc">วางกลยุทธ์ Content และช่วยสร้างเนื้อหาให้สอดคล้องกับเป้าหมายธุรกิจ</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s5">
+    <span class="chapter-num">v</span>
+    <h2 class="chapter-title">วันทำงานของเจ้าของธุรกิจในยุค AI</h2>
+    <div class="chapter-body">
+      <p>ลองนึกถึงบริษัทรับเหมาขนาดเล็ก 25 คน ที่ใช้ Claude for Small Business เต็มรูปแบบ วันทำงานของเจ้าของจะเป็นแบบนี้</p>
+
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-time">08:30</div>
+          <div class="tl-content">
+            <div class="tl-title">Morning Briefing อัตโนมัติ</div>
+            <div class="tl-desc">Claude ดึงข้อมูลจาก QuickBooks, PayPal และ Gmail มาสรุปบนหน้าจอ มีใบแจ้งหนี้ค้าง 3 ใบ รวม 180,000 บาท มีเช็ค 2 ใบจะเข้าวันนี้ และมีสัญญาจากลูกค้ารายใหญ่รอตรวจ</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-time">09:00</div>
+          <div class="tl-content">
+            <div class="tl-title">ตรวจสัญญา 32 หน้าใน 7 Bullet Points</div>
+            <div class="tl-desc">Claude เปิด Contract Review Skill ดึงสัญญาจาก Gmail เปรียบเทียบกับ Template ของบริษัท และสรุปเฉพาะจุดที่เปลี่ยนแปลงและต้องตัดสินใจ เจ้าของไม่ต้องอ่านทั้ง 32 หน้า</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-time">09:30</div>
+          <div class="tl-content">
+            <div class="tl-title">ติดตามลูกค้าค้างชำระ 3 ราย</div>
+            <div class="tl-desc">Claude ร่างอีเมล 3 ฉบับ โดยปรับโทนตามประวัติแต่ละราย ลูกค้าเก่า 5 ปีโทนนุ่มเป็นพิเศษ ลูกค้าใหม่ที่ค้างหลายใบโทนชัดขึ้น แล้วส่งให้เจ้าของอนุมัติก่อนส่ง</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-time">10:30</div>
+          <div class="tl-content">
+            <div class="tl-title">เข้าประชุมพร้อม Briefing ครบ</div>
+            <div class="tl-desc">ก่อนประชุม Claude เตรียมประวัติการซื้อ 24 เดือน กำไรของแต่ละโปรเจกต์ และความถี่ในการส่งเอกสารของลูกค้ารายนั้น เพื่อให้เจ้าของมีบริบทครบก่อนเข้าห้อง</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-time">14:00</div>
+          <div class="tl-content">
+            <div class="tl-title">วาง Payroll พร้อมแจ้งเตือนความผิดปกติ</div>
+            <div class="tl-desc">Claude คำนวณเงินเดือน หักภาษี และแจ้งว่าเดือนนี้มีพนักงาน 2 คนทำงานล่วงเวลาเฉลี่ยสูงกว่าปกติ 60% ให้เจ้าของตัดสินใจว่าจะดำเนินการอย่างไร</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-time">16:00</div>
+          <div class="tl-content">
+            <div class="tl-title">พบว่ากำไรลดลง 4% และรู้สาเหตุ</div>
+            <div class="tl-desc">Claude วิเคราะห์ Margin Report แล้วพบว่าโปรเจกต์ติดตั้งแอร์บ้านพักมีกำไรลดลง และเสนอว่าอาจเป็นเพราะราคาเหล็กกล่องเพิ่มขึ้น 11% ในไตรมาสนี้</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-time">17:00</div>
+          <div class="tl-content">
+            <div class="tl-title">กลับบ้าน ไม่ใช่ 22:00</div>
+            <div class="tl-desc">ประเด็นไม่ใช่ว่างานน้อยลง แต่คืองานที่เคยกินเวลาไปกับการ Copy-Paste ข้อมูล ออกใบแจ้งหนี้ และตรวจเอกสาร หายไปแล้ว เวลาที่ได้คืนมาคือเวลาสำหรับงานที่สำคัญกว่า</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s6">
+    <span class="chapter-num">vi</span>
+    <h2 class="chapter-title">ความเสี่ยงที่ต้องรู้ก่อนใช้</h2>
+    <div class="chapter-body">
+      <p>ทุกเทคโนโลยีมีทั้งข้อดีและข้อควรระวัง Claude for Small Business ก็ไม่ต่างกัน</p>
+
+      <div class="risk-list">
+        <div class="risk-item">
+          <div class="risk-num">1</div>
+          <div class="risk-content">
+            <div class="risk-title">ความปลอดภัยของข้อมูล</div>
+            <div class="risk-desc">AI ทุกเจ้าบอกว่าข้อมูลของลูกค้าไม่ถูกนำไปเทรน แต่ยังไม่มีใครยืนยันได้ 100% ก่อนใช้ควรอ่านนโยบายความเป็นส่วนตัวให้ชัดเจน โดยเฉพาะถ้าข้อมูลที่จะใส่เข้าไปมีความอ่อนไหว</div>
+          </div>
+        </div>
+        <div class="risk-item">
+          <div class="risk-num">2</div>
+          <div class="risk-content">
+            <div class="risk-title">AI ก็ทำผิดได้</div>
+            <div class="risk-desc">Claude Code เหมือนพนักงานที่ฉลาดแต่ไม่สมบูรณ์แบบ ต้องอ่านและตรวจสอบ Output เสมอ อย่าเชื่อ 100% โดยเฉพาะงานที่มีผลกระทบทางกฎหมายหรือการเงิน</div>
+          </div>
+        </div>
+        <div class="risk-item">
+          <div class="risk-num">3</div>
+          <div class="risk-content">
+            <div class="risk-title">งานที่อยู่ภายใต้การกำกับดูแลของรัฐ</div>
+            <div class="risk-desc">Anthropic แนะนำให้หลีกเลี่ยงการใช้ Claude Code กับงานที่อยู่ภายใต้กฎหมายเฉพาะ เช่น ข้อมูลทางการแพทย์ ข้อมูลการเงินที่ต้องผ่าน Audit ระดับสูง หรืองานที่ต้องปฏิบัติตาม PDPA อย่างเคร่งครัด</div>
+          </div>
+        </div>
+        <div class="risk-item">
+          <div class="risk-num">4</div>
+          <div class="risk-content">
+            <div class="risk-title">ทักษะที่อาจหายไป</div>
+            <div class="risk-desc">ถ้าเราให้ AI ตรวจสัญญาทุกครั้งโดยไม่เคยอ่านเองเลย วันหนึ่งเราจะไม่มี Mental Model ในการจับผิดมันอีกต่อไป กลายเป็นหัวหน้าที่ไม่รู้ว่าลูกน้องทำอะไรผิด ใช้ AI เป็นเครื่องมือช่วย ไม่ใช่แทนที่การเรียนรู้</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s7">
+    <span class="chapter-num">vii</span>
+    <h2 class="chapter-title">บทสรุป: เวลาที่ได้คืนมา ใช้ทำอะไรดี</h2>
+    <div class="chapter-body">
+      <p>ประเด็นสำคัญที่สุดของ Claude for Small Business ไม่ใช่ว่ามันทำอะไรได้บ้าง แต่คือสิ่งที่มันทำให้เจ้าของธุรกิจได้กลับมาทำ</p>
+      <p>เวลาที่เคยหมดไปกับการ Copy-Paste ข้อมูล ออกใบแจ้งหนี้ด้วยมือ และตรวจเอกสารหลายสิบหน้า กลับมาเป็นเวลาสำหรับคิดกลยุทธ์ บริหารคน หาลูกค้าใหม่ และได้กลับบ้านกินข้าวกับครอบครัว</p>
+      <div class="pull-quote">ซอฟต์แวร์ที่ดีไม่ได้ทำให้คนทำงานน้อยลง แต่ทำให้คนได้ทำงานที่มีความหมายมากขึ้น</div>
+      <p>สำหรับธุรกิจ SME ไทยที่มีอยู่ 3 ล้านราย นี่คือเครื่องมือที่ถูกสร้างมาสำหรับพวกเขาเป็นครั้งแรก คำถามไม่ใช่ว่าจะใช้ไหม แต่คือจะเริ่มจากส่วนไหนก่อน</p>
+    </div>
+  </div>
+
+  <div class="chapter" id="vocab">
+    <div class="vocab-section">
+      <span class="vocab-label">คลังคำศัพท์ · บทที่ 8</span>
+      <p class="vocab-hint">* คำที่ขีดเส้นใต้สีทองในเนื้อหา กดได้เพื่อดูความหมายทันที</p>
+
+      <div class="vocab-item">
+        <div class="vocab-term">SME / SMB (Small and Medium Enterprise / Business)</div>
+        <div class="vocab-meaning">ธุรกิจขนาดกลางและขนาดเล็ก ในไทยหมายถึงธุรกิจที่มีพนักงานไม่เกิน 200 คนและรายได้ต่อปีไม่เกินระดับที่กำหนด มีจำนวนกว่า 3 ล้านรายในไทย คิดเป็น 90% ของธุรกิจทั้งหมด</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ร้านกาแฟที่มีพนักงาน 10 คนก็ถือเป็น SME ที่ได้ประโยชน์จาก AI ได้เต็มๆ"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">ERP (Enterprise Resource Planning)</div>
+        <div class="vocab-meaning">ระบบซอฟต์แวร์ที่ใช้จัดการทรัพยากรขององค์กรแบบครบวงจร ทั้งบัญชี คลังสินค้า การผลิต และ HR มักมีราคาสูงและต้องการทีม IT ดูแล จึงเหมาะกับองค์กรขนาดใหญ่มากกว่า SME</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ก่อนจะมี AI ธุรกิจเล็กๆ อยากได้ฟีเจอร์แบบ ERP ต้องจ่ายแพงมาก ตอนนี้ Claude ทำได้หลายอย่างในราคาที่ถูกกว่ามาก"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">SKU (Stock Keeping Unit)</div>
+        <div class="vocab-meaning">รหัสที่ใช้ระบุสินค้าแต่ละรายการในคลังสินค้า ธุรกิจที่ขายสินค้าหลายรุ่นหลายสีมักมี SKU หลายร้อยหรือหลายพัน ทำให้การวิเคราะห์กำไรต่อรายการเป็นงานที่ซับซ้อนมาก</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ร้านที่มีสินค้า 500 SKU ต้องใช้ AI ช่วยวิเคราะห์ว่าตัวไหนกำไรจริง ทำเองไม่ไหว"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Contribution Margin</div>
+        <div class="vocab-meaning">กำไรส่วนเกินหลังหักต้นทุนผันแปร คือรายได้ที่เหลือหลังจากหักต้นทุนสินค้าโดยตรงแล้ว ใช้วัดว่าสินค้าแต่ละตัวมีส่วนช่วยครอบคลุมต้นทุนคงที่และสร้างกำไรให้บริษัทได้มากแค่ไหน</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ขายดีไม่ได้แปลว่ากำไร ต้องดู Contribution Margin ของแต่ละ SKU ด้วย"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">PDPA (Personal Data Protection Act)</div>
+        <div class="vocab-meaning">พระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคลของไทย กำหนดให้ธุรกิจต้องได้รับความยินยอมก่อนเก็บและใช้ข้อมูลส่วนตัวของลูกค้า การนำข้อมูลเข้า AI โดยไม่ระวังอาจผิดกฎหมายนี้ได้</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ก่อนนำข้อมูลลูกค้าเข้า Claude ต้องตรวจสอบก่อนว่าเข้าข่าย PDPA หรือเปล่า"</div>
+      </div>
+    </div>
+  </div>
+
+</article>
+
+<footer>
+  <p>บทที่ 8 &nbsp;·&nbsp; AI สำหรับธุรกิจขนาดเล็ก &nbsp;·&nbsp; sirichokbook</p>
+</footer>
+
+<script>
+  const chapters = document.querySelectorAll('.chapter:not(.visible)');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); }
+    });
+  }, { threshold: 0.1 });
+  chapters.forEach(ch => observer.observe(ch));
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+  const tooltip = document.getElementById('tooltip');
+  const tooltipTerm = document.getElementById('tooltip-term');
+  const tooltipBody = document.getElementById('tooltip-body');
+  let hideTimeout;
+  document.querySelectorAll('.term').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      clearTimeout(hideTimeout);
+      tooltipTerm.textContent = el.getAttribute('data-term');
+      tooltipBody.textContent = el.getAttribute('data-def');
+      const rect = el.getBoundingClientRect();
+      const tipW = 260;
+      let left = rect.left;
+      let top = rect.bottom + 8;
+      if (left + tipW > window.innerWidth - 16) left = window.innerWidth - tipW - 16;
+      if (left < 16) left = 16;
+      if (top + 120 > window.innerHeight) top = rect.top - 130;
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+      tooltip.classList.add('show');
+      hideTimeout = setTimeout(() => tooltip.classList.remove('show'), 4000);
+    });
+  });
+  document.addEventListener('click', () => tooltip.classList.remove('show'));
+</script>
+</body>
+</html>

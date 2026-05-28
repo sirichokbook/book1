@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เมื่อ AI กลายเป็นแรงงาน · sirichokbook</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,600;1,300&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root { --cream: #F5F0E8; --ink: #1A1208; --amber: #C8852A; --muted: #7A6E5F; --divider: #D9CFC0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background-color: var(--cream); color: var(--ink); font-family: 'Sarabun', sans-serif; font-weight: 300; line-height: 1.9; font-size: 17px; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 100; opacity: 0.4; }
+
+  .term { color: var(--amber); font-weight: 400; border-bottom: 1px dashed var(--amber); cursor: pointer; display: inline; }
+  .tooltip { display: none; position: fixed; background: var(--ink); color: var(--cream); font-size: 13px; line-height: 1.6; padding: 12px 16px; max-width: 260px; z-index: 9999; pointer-events: none; font-family: 'Sarabun', sans-serif; font-weight: 300; border-left: 3px solid var(--amber); }
+  .tooltip.show { display: block; }
+  .tooltip-term { font-weight: 600; font-size: 12px; letter-spacing: 0.1em; color: var(--amber); margin-bottom: 4px; text-transform: uppercase; }
+
+  .cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 60px 24px; position: relative; border-bottom: 1px solid var(--divider); overflow: hidden; }
+  .cover::after { content: ''; position: absolute; bottom: -80px; left: 50%; transform: translateX(-50%); width: 500px; height: 500px; background: radial-gradient(circle, rgba(200,133,42,0.08) 0%, transparent 70%); pointer-events: none; }
+  .cover-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 32px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.2s; }
+  .cover-title { font-family: 'Playfair Display', serif; font-size: clamp(34px, 7vw, 64px); font-weight: 900; line-height: 1.1; letter-spacing: -0.02em; color: var(--ink); max-width: 700px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.4s; }
+  .cover-title em { font-style: italic; color: var(--amber); }
+  .cover-subtitle { margin-top: 24px; font-size: 15px; color: var(--muted); max-width: 440px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.6s; }
+  .cover-divider { width: 48px; height: 2px; background: var(--amber); margin: 40px auto; opacity: 0; animation: fadeUp 0.8s ease forwards 0.8s; }
+  .cover-meta { font-size: 12px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; opacity: 0; animation: fadeUp 0.8s ease forwards 1s; }
+  .scroll-hint { position: absolute; bottom: 32px; display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: 0; animation: fadeUp 0.8s ease forwards 1.4s; }
+  .scroll-hint span { font-size: 11px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; }
+  .scroll-arrow { width: 1px; height: 32px; background: linear-gradient(to bottom, var(--amber), transparent); animation: scrollPulse 2s ease-in-out infinite; }
+  .back-link { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); text-decoration: none; position: absolute; top: 32px; left: 32px; transition: color 0.2s; opacity: 0; animation: fadeUp 0.8s ease forwards 0.1s; }
+  .back-link:hover { color: var(--amber); }
+
+  .toc { max-width: 680px; margin: 0 auto; padding: 80px 24px; border-bottom: 1px solid var(--divider); }
+  .toc-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 40px; }
+  .toc-item { display: flex; align-items: baseline; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--divider); text-decoration: none; color: var(--ink); transition: color 0.2s; }
+  .toc-item:hover { color: var(--amber); }
+  .toc-num { font-family: 'Playfair Display', serif; font-size: 13px; color: var(--amber); min-width: 24px; font-style: italic; }
+  .toc-title { font-size: 15px; font-weight: 400; flex: 1; }
+  .toc-dots { flex: 1; border-bottom: 1px dotted var(--divider); margin: 0 8px; min-width: 20px; }
+
+  .article { max-width: 680px; margin: 0 auto; padding: 80px 24px 120px; }
+  .chapter { margin-bottom: 100px; opacity: 0; transform: translateY(20px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .chapter.visible { opacity: 1; transform: translateY(0); }
+  .chapter-num { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 16px; display: block; }
+  .chapter-title { font-family: 'Playfair Display', serif; font-size: clamp(24px, 5vw, 36px); font-weight: 700; line-height: 1.2; margin-bottom: 40px; color: var(--ink); }
+  .chapter-body p { margin-bottom: 24px; color: #2E2416; }
+  .chapter-body strong { font-weight: 600; color: var(--ink); }
+  .chapter-body em { font-style: italic; color: var(--amber); }
+  .pull-quote { border-left: 3px solid var(--amber); padding: 4px 0 4px 24px; margin: 40px 0; font-family: 'Playfair Display', serif; font-size: 20px; font-style: italic; line-height: 1.5; color: var(--ink); }
+  .section-break { text-align: center; margin: 48px 0; color: var(--amber); letter-spacing: 0.3em; font-size: 14px; }
+
+  /* Day-in-life timeline */
+  .timeline { margin: 32px 0; }
+  .tl-item { display: flex; gap: 20px; padding: 16px 0; border-bottom: 1px solid var(--divider); }
+  .tl-item:last-child { border-bottom: none; }
+  .tl-time { font-family: 'Playfair Display', serif; font-size: 14px; color: var(--amber); min-width: 60px; font-style: italic; padding-top: 2px; }
+  .tl-content { flex: 1; }
+  .tl-title { font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 4px; }
+  .tl-desc { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+  /* Job cards */
+  .job-grid { margin: 32px 0; }
+  .job-card { border: 1px solid var(--divider); padding: 24px; margin-bottom: 12px; }
+  .job-card.highlight { border-color: var(--amber); background: rgba(200,133,42,0.03); }
+  .job-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; }
+  .job-title { font-weight: 600; font-size: 15px; color: var(--ink); }
+  .job-badge { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--amber); background: rgba(200,133,42,0.1); padding: 2px 8px; }
+  .job-desc { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+  /* Age-group table */
+  .age-table { margin: 32px 0; }
+  .age-row { display: grid; grid-template-columns: 120px 1fr 1fr; gap: 1px; background: var(--divider); margin-bottom: 1px; }
+  .age-row.header { background: none; margin-bottom: 8px; }
+  .age-cell { background: var(--cream); padding: 16px; font-size: 14px; }
+  .age-cell.header { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--amber); background: none; padding: 0 16px 8px; }
+  .age-label { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; color: var(--amber); }
+  .age-old { color: var(--muted); }
+  .age-new { color: #2E2416; font-weight: 400; }
+
+  /* Skills list */
+  .skill-list { margin: 24px 0; }
+  .skill-item { display: flex; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--divider); align-items: flex-start; }
+  .skill-item:last-child { border-bottom: none; }
+  .skill-num { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: rgba(200,133,42,0.3); min-width: 28px; line-height: 1.1; }
+  .skill-content { flex: 1; }
+  .skill-title { font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 4px; }
+  .skill-desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+  /* Vocab */
+  .vocab-section { background: rgba(200,133,42,0.06); border: 1px solid var(--divider); padding: 40px; margin-top: 80px; }
+  .vocab-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 8px; display: block; }
+  .vocab-hint { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+  .vocab-item { padding: 16px 0; border-bottom: 1px solid var(--divider); }
+  .vocab-item:last-child { border-bottom: none; }
+  .vocab-term { font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 4px; }
+  .vocab-meaning { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .vocab-example { font-size: 13px; color: var(--amber); font-style: italic; margin-top: 4px; }
+
+  footer { text-align: center; padding: 60px 24px; border-top: 1px solid var(--divider); font-size: 12px; color: var(--muted); letter-spacing: 0.1em; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes scrollPulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+  @media (max-width: 600px) {
+    body { font-size: 16px; }
+    .toc, .article { padding-left: 20px; padding-right: 20px; }
+    .back-link { top: 20px; left: 20px; }
+    .age-row { grid-template-columns: 80px 1fr; }
+    .age-cell:last-child { display: none; }
+    .tooltip { max-width: 200px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="tooltip" id="tooltip">
+  <div class="tooltip-term" id="tooltip-term"></div>
+  <div id="tooltip-body"></div>
+</div>
+
+<section class="cover">
+  <a class="back-link" href="index.html">← กลับหน้าหลัก</a>
+  <p class="cover-label">บทที่ 7</p>
+  <h1 class="cover-title">เมื่อ AI <em>กลายเป็นแรงงาน</em></h1>
+  <p class="cover-subtitle">จากเครื่องมือที่ตอบคำถาม สู่พนักงานที่ลงมือทำงาน และสิ่งที่หมายความว่าสำหรับทุกคนที่ทำงานอยู่ในวันนี้</p>
+  <div class="cover-divider"></div>
+  <p class="cover-meta">อนาคตของงาน · เทคโนโลยี &nbsp;·&nbsp; sirichokbook</p>
+  <div class="scroll-hint"><span>เริ่มอ่าน</span><div class="scroll-arrow"></div></div>
+</section>
+
+<nav class="toc">
+  <p class="toc-label">สารบัญ</p>
+  <a class="toc-item" href="#s1"><span class="toc-num">i</span><span class="toc-title">ความแตกต่างระหว่าง AI ที่คุย กับ AI ที่ทำงาน</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s2"><span class="toc-num">ii</span><span class="toc-title">วันทำงานของมนุษย์ในยุค Agentic Economy</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s3"><span class="toc-num">iii</span><span class="toc-title">งานอะไรที่ AI เข้ามาแทนได้แล้ววันนี้</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s4"><span class="toc-num">iv</span><span class="toc-title">อาชีพใหม่ที่กำลังเกิดขึ้น</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s5"><span class="toc-num">v</span><span class="toc-title">แต่ละช่วงวัยต้องปรับตัวอย่างไร</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s6"><span class="toc-num">vi</span><span class="toc-title">ทักษะที่ AI แทนไม่ได้</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s7"><span class="toc-num">vii</span><span class="toc-title">ภาพอนาคตที่ต้องเตรียมใจรับ</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s8"><span class="toc-num">viii</span><span class="toc-title">บทสรุป: วิกฤตหรือโอกาส ขึ้นอยู่กับว่าใครเริ่มก่อน</span><span class="toc-dots"></span></a>
+</nav>
+
+<article class="article">
+
+  <div class="chapter visible">
+    <div class="chapter-body">
+      <p>ปลายปี 2565 ChatGPT เปิดตัว และทุกคนตื่นเต้นที่ได้คุยกับ AI เป็นครั้งแรก มันฉลาด มันตอบเป็นภาษามนุษย์ มันน่าทึ่ง แต่มันยังแค่ "ตอบ"</p>
+      <p>ต้นปี 2568 สิ่งที่เกิดขึ้นต่างออกไปโดยสิ้นเชิง AI ไม่ได้แค่ตอบคำถามอีกต่อไป มัน<em>ลงมือทำงาน</em> และนั่นคือความแตกต่างที่เปลี่ยนทุกอย่าง</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s1">
+    <span class="chapter-num">i</span>
+    <h2 class="chapter-title">ความแตกต่างระหว่าง AI ที่คุย กับ AI ที่ทำงาน</h2>
+    <div class="chapter-body">
+      <p>ลองนึกถึงความแตกต่างระหว่างการถามเพื่อนว่า "ช่วยบอกหน่อยว่าควรส่งอีเมลยังไง" กับการที่เพื่อนคนนั้นเปิดคอมของคุณ เขียนอีเมล และกด Send ให้เลย</p>
+      <p>แบบแรกคือ AI รุ่นเก่า แบบที่สองคือ<span class="term" data-term="AI Agent" data-def="ระบบ AI ที่ไม่แค่ตอบคำถาม แต่สามารถลงมือทำงานได้หลายขั้นตอนโดยอัตโนมัติ เช่น เปิดเว็บไซต์ กรอกฟอร์ม ส่งอีเมล สร้างไฟล์ และทำงานข้ามโปรแกรมได้">AI Agent</span> ที่กำลังเข้ามาเต็มตัวในปี 2568</p>
+      <p>AI Agent ทำงานได้จริงกับโปรแกรมที่เราใช้อยู่ทุกวัน ไม่ว่าจะเป็น Gmail, Google Calendar, Google Drive, Canva, Zoom หรือ WordPress มันไม่ได้แค่แนะนำว่าควรทำอะไร มันเข้าไปทำให้เลย เหมือนมีเมาส์เล็กๆ ที่มองไม่เห็น วิ่งอยู่บนหน้าจอของเราและจัดการทุกอย่างตามที่เราสั่ง</p>
+      <div class="pull-quote">ChatGPT คือคนที่ปรึกษาได้ AI Agent คือคนที่ทำงานแทนได้</div>
+      <p>และนั่นคือจุดที่ทำให้บริษัทซอฟต์แวร์หลายแห่งราคาหุ้นตกหนักทันทีที่มีการประกาศ เพราะนักลงทุนรู้ว่า งานที่เคยต้องจ้างคนทำ กำลังจะถูกทำโดย AI ในราคาเพียงหลักร้อยบาทต่อเดือน</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s2">
+    <span class="chapter-num">ii</span>
+    <h2 class="chapter-title">วันทำงานของมนุษย์ในยุค Agentic Economy</h2>
+    <div class="chapter-body">
+      <p>ลองจินตนาการวันทำงานของ "มิ้นท" Marketing Executive อายุ 28 ปี ในบริษัทสินค้าอุปโภคบริโภค ปี 2570 เธอไม่มีทีมใหญ่ แต่มีลูกน้องมนุษย์ 2 คน และ AI Agent อีก 7 ตัว</p>
+
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-time">07:30</div>
+          <div class="tl-content">
+            <div class="tl-title">เริ่มวันด้วยรายงานจาก AI</div>
+            <div class="tl-desc">ไม่ใช่การเปิด Instagram มิ้นท์ถาม AI Assistant ว่า "วันนี้มีสัญญาณอะไรที่กระทบแบรนด์เราบ้าง" AI สรุปให้ทันทีว่ามีเทรนด์ส่วนผสมธรรมชาติกำลังมา คู่แข่งปรับ Packaging แล้ว และมีกระแสวิจารณ์แบรนด์คล้ายกันใน X ให้ตรวจสอบ</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-time">10:30</div>
+          <div class="tl-content">
+            <div class="tl-title">ประชุมทีม — แต่ไม่มีใครรายงานข้อมูล</div>
+            <div class="tl-desc">AI ทำ Report มาเสร็จแล้วทั้งหมด ทีมเข้าประชุมเพื่อถามเพียงคำถามเดียว "ถ้าเพิ่มงบใน TikTok หรือโฟกัส Micro Influencer แบรนด์เราอยากได้อะไรมากกว่ากัน" มนุษย์เป็นคนตัดสินใจ AI เป็นคนเตรียมข้อมูล</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-time">13:00</div>
+          <div class="tl-content">
+            <div class="tl-title">งานที่ AI ทำแทนไม่ได้</div>
+            <div class="tl-desc">มิ้นท์ออกไปพบ Influencer เพื่อดูว่าเข้ากันได้จริงไหม อยากทำงานด้วยจริงหรือแค่รับงาน ต่อรองเงื่อนไขที่ทั้งสองฝ่ายโอเค งานนี้ต้องการความเป็นมนุษย์ทั้งหมด</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-time">18:00</div>
+          <div class="tl-content">
+            <div class="tl-title">สรุปวันกับ AI</div>
+            <div class="tl-desc">AI Agent สรุป Learning ของวัน สิ่งที่ต้องติดตามพรุ่งนี้ และเตรียมวาระสำหรับการประชุมเช้า AI กลายเป็นความทรงจำภายนอกของสมองมนุษย์</div>
+          </div>
+        </div>
+      </div>
+
+      <p>สิ่งที่เปลี่ยนไปไม่ใช่จำนวนชั่วโมงทำงาน แต่คือ<em>ชนิดของงาน</em>ที่มนุษย์ทำ งานที่ต้องการข้อมูล การวิเคราะห์ และการประสานงานเบื้องต้นถูกมอบหมายให้ AI งานที่เหลือสำหรับมนุษย์คืองานที่ต้องการการตัดสินใจ ความสัมพันธ์ และความเข้าใจบริบท</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s3">
+    <span class="chapter-num">iii</span>
+    <h2 class="chapter-title">งานอะไรที่ AI เข้ามาแทนได้แล้ววันนี้</h2>
+    <div class="chapter-body">
+      <p>ไม่ใช่ทฤษฎีอีกต่อไป ผู้เชี่ยวชาญหลายคนที่ทดสอบของจริงสรุปตรงกันว่างานเหล่านี้ AI ทำได้แล้วในระดับที่ใช้งานได้จริง</p>
+
+      <p><strong>งานด้านการเงิน</strong> — สร้างแบบจำลองทางการเงิน (Financial Model) ครบสูตร ดึงข้อมูลจากเว็บโดยตรง วิเคราะห์งบการเงินหลายบริษัท สร้างตารางเปรียบเทียบ และประเมินมูลค่ากิจการ งานที่นักการเงินต้องเรียนรู้หลายปีเพื่อทำ AI ทำได้ภายในไม่กี่นาที</p>
+
+      <p><strong>งานด้านกฎหมาย</strong> — ตรวจสัญญา ทำ Comment แก้ไข ร่างสัญญาใหม่ และสรุปเอกสารกฎหมายหนาหลายร้อยหน้า นักกฎหมายบางคนเริ่มพูดว่าตัวเองไม่จำเป็นต้องมีทีม Junior อีกต่อไป</p>
+
+      <p><strong>งาน HR</strong> — สร้างแผน Onboarding 90 วันสำหรับพนักงานใหม่ ปรับตามวัฒนธรรมองค์กร และออก Checklist ที่ต้องทำโดยอัตโนมัติ</p>
+
+      <p><strong>งาน Content</strong> — เขียน Script รายการ นัดหมายในปฏิทิน สรุป Shot List สำหรับทีมตัดต่อ และเตรียมคำถามสัมภาษณ์ ที่น่าสนใจคือคุณภาพของงานที่ได้นั้น "เทียบเท่ากับตอนที่เราเป็น Junior ปีแรกๆ" ตามคำบอกเล่าของผู้ใช้จริง</p>
+
+      <div class="pull-quote">งานที่หายไปไม่ใช่งานยาก แต่คืองานที่ทำซ้ำๆ ตามขั้นตอน ซึ่งเป็นงานที่คนส่วนใหญ่ทำอยู่ทุกวัน</div>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s4">
+    <span class="chapter-num">iv</span>
+    <h2 class="chapter-title">อาชีพใหม่ที่กำลังเกิดขึ้น</h2>
+    <div class="chapter-body">
+      <p>เมื่องานเก่าหายไป งานใหม่ก็เกิดขึ้น และงานใหม่เหล่านี้ต้องการทักษะที่ต่างออกไปโดยสิ้นเชิง</p>
+
+      <div class="job-grid">
+        <div class="job-card highlight">
+          <div class="job-header">
+            <span class="job-title">นักออกแบบกระบวนการทำงานยุค AI (AI Workflow Designer)</span>
+            <span class="job-badge">ขาดแคลนมาก</span>
+          </div>
+          <p class="job-desc">คนที่เข้าใจทั้งกระบวนการธุรกิจและความสามารถของ AI พอที่จะออกแบบว่างานไหนควรให้ AI ทำ งานไหนมนุษย์ต้องทำเอง และสร้าง Workflow ใหม่ทั้งหมดสำหรับทีม ไม่ต้องเป็นโปรแกรมเมอร์ แต่ต้องเข้าใจธุรกิจลึกและ AI กว้าง</p>
+        </div>
+        <div class="job-card highlight">
+          <div class="job-header">
+            <span class="job-title">ผู้จัดการแรงงาน AI (AI Operations Lead)</span>
+            <span class="job-badge">ขาดแคลนมาก</span>
+          </div>
+          <p class="job-desc">องค์กรจะมี AI Agent หลายสิบตัวในอนาคต และต้องการคนที่คอย Assign งาน ตรวจ Output ติดตาม Risk และปรับปรุงประสิทธิภาพของแต่ละ Agent เหมือนผู้จัดการที่มีลูกทีมเป็น AI ทั้งหมด</p>
+        </div>
+        <div class="job-card">
+          <div class="job-header">
+            <span class="job-title">นักวางกลยุทธ์ยุค AI (Human-AI Strategist)</span>
+            <span class="job-badge">โอกาสสูง</span>
+          </div>
+          <p class="job-desc">ที่ปรึกษาที่ช่วย CEO ตัดสินใจว่าควรนำ AI มาใช้ส่วนไหนถึงได้เปรียบคู่แข่ง ต้องเข้าใจทั้ง Business Model และความสามารถของ AI และแปลสิ่งที่ฝ่าย Tech พูดให้ผู้บริหารเข้าใจได้</p>
+        </div>
+        <div class="job-card">
+          <div class="job-header">
+            <span class="job-title">ผู้ตรวจสอบความถูกต้องยุค AI (Trust & Verification Editor)</span>
+            <span class="job-badge">โอกาสสูง</span>
+          </div>
+          <p class="job-desc">เมื่อ AI สร้าง Content และรายงานมหาศาล องค์กรต้องการคนที่ตรวจว่า AI ทำถูกหรือเปล่า ข้อมูลจากแหล่งที่เชื่อถือได้จริงไหม และผลลัพธ์ที่ได้นั้นใช้ตัดสินใจได้จริงหรือเปล่า</div>
+        </div>
+        <div class="job-card">
+          <div class="job-header">
+            <span class="job-title">นักสร้าง Community เชิงความรู้ (Community Intelligence Builder)</span>
+            <span class="job-badge">ยาวนาน</span>
+          </div>
+          <p class="job-desc">เมื่อ Know-how AI ทำแทนได้มากขึ้น สิ่งที่มีค่าขึ้นเรื่อยๆ คือ Network และ Connection คนที่สร้างและดูแลชุมชนความรู้ในวงการต่างๆ จะมีมูลค่าสูงมากในอนาคตที่ข้อมูลล้นเกิน</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s5">
+    <span class="chapter-num">v</span>
+    <h2 class="chapter-title">แต่ละช่วงวัยต้องปรับตัวอย่างไร</h2>
+    <div class="chapter-body">
+      <p>คำแนะนำเรื่อง AI มักพูดแบบรวมๆ แต่ความจริงคือแต่ละช่วงวัยเจอความท้าทายที่แตกต่างกันโดยสิ้นเชิง</p>
+
+      <div class="age-table">
+        <div class="age-row header">
+          <div class="age-cell header">ช่วงวัย</div>
+          <div class="age-cell header">บทบาทเดิม</div>
+          <div class="age-cell header">บทบาทที่ต้องเป็น</div>
+        </div>
+        <div class="age-row">
+          <div class="age-cell"><div class="age-label">22–30</div><div style="font-size:12px;color:var(--muted)">จบใหม่</div></div>
+          <div class="age-cell age-old">Doer — ทำตามที่ถูกบอก งาน Entry Level แบบเดิม</div>
+          <div class="age-cell age-new">AI Operator — คนที่รู้จักสั่งและควบคุม AI ให้ทำงานแทน แล้วนำ Output ไปต่อยอด</div>
+        </div>
+        <div class="age-row">
+          <div class="age-cell"><div class="age-label">30–45</div><div style="font-size:12px;color:var(--muted)">กลางๆ</div></div>
+          <div class="age-cell age-old">Specialist — เชี่ยวชาญงานเฉพาะทาง มีประสบการณ์สะสม</div>
+          <div class="age-cell age-new">Decision Maker — คนที่ตัดสินใจได้ ไม่ใช่แค่คนเก่ง ต้องกลายเป็นคนที่องค์กรขาดไม่ได้</div>
+        </div>
+        <div class="age-row">
+          <div class="age-cell"><div class="age-label">45+</div><div style="font-size:12px;color:var(--muted)">ผู้บริหาร</div></div>
+          <div class="age-cell age-old">Manager — บริหารคนและ Process ขาด Operational Knowledge</div>
+          <div class="age-cell age-new">Sense Maker — มองเห็นสัญญาณก่อนคนอื่น เชื่อม Geopolitics Tech Economy ได้ และตัดสินใจได้แม้ข้อมูลไม่ครบ</div>
+        </div>
+      </div>
+
+      <p>ช่วงวัย 30–45 คือช่วงที่เสี่ยงสูงที่สุด เพราะเงินเดือนสูงแต่ยังไม่ได้เป็น Decision Maker เต็มตัว องค์กรอาจรู้สึกว่าไม่คุ้มค่าเมื่อเทียบกับการใช้ AI ทำงานแทน</p>
+      <p>แต่มีข่าวดีสำหรับคนรุ่นใหม่ที่ฉลาดพอ เพราะมีหลายคนที่รู้จักใช้ AI อย่างถูกวิธีจนสามารถ<em>แซง Mid-level</em> ได้เลย เพราะ Performance โดดกว่าคนรุ่นเดียวกันมากจนเผลอๆ แซงคนที่อยู่ระดับกลางได้ด้วย</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s6">
+    <span class="chapter-num">vi</span>
+    <h2 class="chapter-title">ทักษะที่ AI แทนไม่ได้</h2>
+    <div class="chapter-body">
+      <p>มีงานวิจัยชิ้นหนึ่งที่น่าสนใจมาก ว่าด้วยการตัดสินใจของผู้จัดการกองทุน พบว่า 71% ของการซื้อขายสามารถ AI ทำนายได้ แต่ 29% ที่เหลือนั้น AI ทำนายไม่ได้ และส่วนใหญ่กลับเป็นการตัดสินใจที่<em>ได้กำไรมากกว่า</em></p>
+      <p>นั่นบอกอะไรบางอย่างที่สำคัญมาก งานที่ AI ทำได้ดีคืองานที่มีรูปแบบ มีสูตร มีขั้นตอน แต่งานที่สร้างผลลัพธ์พิเศษคืองานที่ออกนอกรูปแบบ และนั่นคือสิ่งที่มนุษย์ยังทำได้ดีกว่า</p>
+
+      <div class="skill-list">
+        <div class="skill-item">
+          <div class="skill-num">1</div>
+          <div class="skill-content">
+            <div class="skill-title">การรู้จักตั้งคำถามที่ถูก</div>
+            <div class="skill-desc">AI ตอบได้เก่งมาก แต่ถ้าเราถามผิดคำถาม คำตอบที่ได้ก็ไม่มีประโยชน์ การรู้ว่าต้องถามอะไร ในบริบทอะไร เป็นทักษะที่มนุษย์ต้องฝึกและ AI ไม่สามารถทำแทนได้</div>
+          </div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-num">2</div>
+          <div class="skill-content">
+            <div class="skill-title">การสื่อสารและสร้างความเชื่อใจ</div>
+            <div class="skill-desc">การที่คนเชื่อใจกัน ยอมรับกัน และทำงานร่วมกันได้นั้นยังคงต้องการความเป็นมนุษย์ Influencer ที่มิ้นท์ไปพบนั้นต้องการดูว่าเธอเป็นคนแบบไหน ไม่ใช่แค่ดูว่า AI วิเคราะห์อะไรมาให้</div>
+          </div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-num">3</div>
+          <div class="skill-content">
+            <div class="skill-title">การตัดสินใจในความไม่แน่นอน</div>
+            <div class="skill-desc">AI ทำงานได้ดีกับข้อมูลที่มี แต่ในโลกธุรกิจจริง ข้อมูลมักไม่ครบ องค์กรต้องการคนที่ตัดสินใจได้แม้ข้อมูลไม่ครบ รับผิดชอบผลลัพธ์ได้ และมีวิจารณญาณที่มาจากประสบการณ์จริง</div>
+          </div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-num">4</div>
+          <div class="skill-content">
+            <div class="skill-title">ความสามารถในการเรียนรู้สิ่งใหม่อย่างรวดเร็ว</div>
+            <div class="skill-desc">โลกเปลี่ยนเร็วมากจนทักษะเฉพาะทางใดทักษะหนึ่งอาจล้าสมัยในไม่กี่ปี คนที่เรียนรู้ได้เร็ว ปรับตัวได้เร็ว และไม่ยึดติดกับวิธีเดิมๆ คือคนที่จะอยู่รอดได้ในระยะยาว</div>
+          </div>
+        </div>
+      </div>
+
+      <p>มีข้อเตือนที่สำคัญมากจากงานวิจัยด้วยว่า <strong>ถ้าเราพึ่ง AI มากเกินไปในงานที่ต้องการความคิดสร้างสรรค์</strong> เราจะค่อยๆ เสียความสามารถนั้นไป เพราะ AI เรียนรู้จากรูปแบบที่มีอยู่ มันไม่สร้างสิ่งใหม่จริงๆ และถ้าเราให้ AI คิดแทนเสมอ เราก็จะคิดได้น้อยลงเรื่อยๆ</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s7">
+    <span class="chapter-num">vii</span>
+    <h2 class="chapter-title">ภาพอนาคตที่ต้องเตรียมใจรับ</h2>
+    <div class="chapter-body">
+      <p>มีรายงานฉบับหนึ่งชื่อ "2028 Global Intelligence Crisis" ที่วาดภาพสถานการณ์ที่อาจเกิดขึ้น และน่ากังวลพอสมควร</p>
+      <p><strong>ภาพที่หนึ่ง — GDP ผี</strong> บริษัทใช้ AI Agent แทนพนักงาน ผลิตภาพสูงขึ้น กำไรเพิ่มขึ้น GDP ของประเทศเพิ่มขึ้นบนกระดาษ แต่เงินกระจุกอยู่กับเจ้าของบริษัทและเทคโนโลยี ไม่ไหลผ่านการจ้างงานเข้าสู่ระบบเศรษฐกิจ กำลังซื้อของประชาชนลดลง การบริโภคหดตัว กำไรที่เคยพุ่งก็เริ่มพัง</p>
+      <p><strong>ภาพที่สอง — Junior Cliff</strong> คนจบใหม่หางานยากขึ้นมาก เพราะงาน Entry Level ถูก AI แทนก่อนทุกอย่าง แต่ในขณะเดียวกัน คนรุ่นใหม่ที่รู้จักใช้ AI กลับสามารถแซง Mid-level ได้เลย ทำให้ตลาดแรงงานแบ่งขั้วชัดเจนขึ้น ระหว่างคนที่ใช้ AI เป็นและคนที่ยังไม่ได้ปรับตัว</p>
+      <div class="pull-quote">ความน่ากลัวไม่ได้อยู่ที่ AI ฉลาดขึ้น แต่อยู่ที่เราไม่ยอมปรับตัวให้ทัน</div>
+      <p>สำหรับประเทศไทย มีทั้งความเสี่ยงและโอกาส ความเสี่ยงคือองค์กรไทยจำนวนมากยังทำงานแบบ Manual และอาจถูก Disrupt รวดเร็ว โอกาสคือ Productivity Gap ที่ยังสูงอยู่หมายความว่ามีพื้นที่ให้ AI เข้ามาสร้างคุณค่าได้มหาศาล โดยเฉพาะในช่วงที่ประเทศกำลังเข้าสู่สังคมสูงวัยและแรงงานจะน้อยลงเรื่อยๆ</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s8">
+    <span class="chapter-num">viii</span>
+    <h2 class="chapter-title">บทสรุป: วิกฤตหรือโอกาส ขึ้นอยู่กับว่าใครเริ่มก่อน</h2>
+    <div class="chapter-body">
+      <p>ทุกคนในวงการรู้ดีว่าโครงสร้างของแรงงานจะไม่เหมือนเดิมอีกต่อไป คำถามไม่ใช่ว่ามันจะเกิดขึ้นไหม แต่คือเราจะเป็นคนที่ถูกแทนที่ หรือเป็นคนที่แทนที่คนอื่นด้วยความช่วยเหลือของ AI</p>
+      <p>สำหรับคนที่ฟังแล้วรู้สึกกังวล นั่นเป็นเรื่องสมเหตุสมผล แต่สำหรับคนที่มองว่านี่คือโอกาส พวกเขาจะได้เปรียบมหาศาล เพราะเส้นแบ่งระหว่างคนธรรมดาและผู้ประกอบการที่ประสบความสำเร็จกำลังบางลงเรื่อยๆ เพราะมีเครื่องมือที่ช่วยให้คนคนเดียวทำงานได้เทียบเท่าทีมทั้งทีม</p>
+      <div class="pull-quote">ในอดีต ต้องมีทีมใหญ่ถึงจะแข่งได้ ในอนาคต คนคนเดียวที่รู้จักใช้ AI อาจแข่งได้กับบริษัทที่มีพนักงานร้อยคน</div>
+      <p>นี่เป็นเพียงจุดเริ่มต้นของ<span class="term" data-term="Agentic Economy" data-def="เศรษฐกิจที่ขับเคลื่อนด้วย AI Agent ซึ่งทำงานเป็นแรงงานจริงๆ ไม่ใช่แค่เครื่องมือ องค์กรในยุคนี้จะมีทั้งพนักงานมนุษย์และ AI Agent ทำงานร่วมกัน">Agentic Economy</span> เท่านั้น และคำถามที่สำคัญที่สุดสำหรับทุกคนที่อ่านบทนี้อยู่คือ คุณอยากเป็นส่วนหนึ่งของการเปลี่ยนแปลงนี้ หรืออยากให้มันเกิดขึ้นโดยที่คุณยังไม่พร้อม</p>
+    </div>
+  </div>
+
+  <div class="chapter" id="vocab">
+    <div class="vocab-section">
+      <span class="vocab-label">คลังคำศัพท์ · บทที่ 7</span>
+      <p class="vocab-hint">* คำที่ขีดเส้นใต้สีทองในเนื้อหา กดได้เพื่อดูความหมายทันที</p>
+
+      <div class="vocab-item">
+        <div class="vocab-term">AI Agent</div>
+        <div class="vocab-meaning">ระบบ AI ที่ไม่แค่ตอบคำถาม แต่ลงมือทำงานได้หลายขั้นตอนโดยอัตโนมัติ เช่น เปิดเว็บ กรอกฟอร์ม ส่งอีเมล สร้างไฟล์ และทำงานข้ามโปรแกรมได้โดยไม่ต้องให้คนสั่งทีละขั้น</div>
+        <div class="vocab-example">ใช้ได้ว่า: "บริษัทเราใช้ AI Agent จัดการ Onboarding พนักงานใหม่แทน HR ได้แล้ว"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Agentic Economy</div>
+        <div class="vocab-meaning">เศรษฐกิจที่ขับเคลื่อนด้วย AI Agent ซึ่งทำงานเป็นแรงงานจริงๆ ไม่ใช่แค่เครื่องมือ องค์กรในยุคนี้จะมีทั้งพนักงานมนุษย์และ AI Agent ทำงานร่วมกันในทีมเดียวกัน</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ใน Agentic Economy คนคนเดียวสามารถบริหาร AI Agent 7 ตัวได้เหมือนมีทีมงานเต็มทีม"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Digital Labor (แรงงานดิจิทัล)</div>
+        <div class="vocab-meaning">งานที่ทำได้ด้วยระบบดิจิทัลหรือ AI แทนที่จะต้องใช้คน เช่น การสร้างเอกสาร การจองปฏิทิน การวิเคราะห์ข้อมูล และการสรุปรายงาน ซึ่งทั้งหมดนี้ AI ทำแทนได้แล้ว</div>
+        <div class="vocab-example">ใช้ได้ว่า: "งานพวก Digital Labor อย่างการทำสไลด์และสรุปรายงาน AI เข้ามาแทนได้แล้วในปี 2568"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Junior Cliff</div>
+        <div class="vocab-meaning">ปรากฏการณ์ที่คนจบใหม่หางานยากขึ้นมากเพราะงาน Entry Level ถูก AI แทนที่ก่อน ทำให้ช่องทางเริ่มต้นอาชีพลดลงอย่างรวดเร็ว</div>
+        <div class="vocab-example">ใช้ได้ว่า: "Junior Cliff กำลังเกิดขึ้นในหลายอุตสาหกรรม คนจบใหม่ต้องแข่งกับ AI ตั้งแต่วันแรก"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Sense Maker</div>
+        <div class="vocab-meaning">บทบาทของผู้บริหารในยุค AI ที่ต้องมองเห็นสัญญาณก่อนคนอื่น เชื่อมข้อมูลจากหลายแหล่งเพื่อตัดสินใจในสถานการณ์ที่ข้อมูลไม่ครบ และมี Network Capital ที่ AI ทดแทนไม่ได้</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ยุคนี้ผู้บริหารต้องเป็น Sense Maker ไม่ใช่แค่ Manager ที่บริหารคนและ Process"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Ghost GDP (GDP ผี)</div>
+        <div class="vocab-meaning">สถานการณ์ที่ GDP ของประเทศเพิ่มขึ้นจากการที่ AI ช่วยเพิ่มผลิตภาพ แต่เงินไม่ไหลเข้าสู่ระบบเศรษฐกิจผ่านการจ้างงาน ทำให้กำลังซื้อของประชาชนลดลงแม้ GDP สูงขึ้น</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ถ้าไม่มีนโยบายรองรับ Ghost GDP อาจทำให้ความเหลื่อมล้ำในสังคมสูงขึ้นมาก"</div>
+      </div>
+    </div>
+  </div>
+
+</article>
+
+<footer>
+  <p>บทที่ 7 &nbsp;·&nbsp; เมื่อ AI กลายเป็นแรงงาน &nbsp;·&nbsp; sirichokbook</p>
+</footer>
+
+<script>
+  const chapters = document.querySelectorAll('.chapter:not(.visible)');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); }
+    });
+  }, { threshold: 0.1 });
+  chapters.forEach(ch => observer.observe(ch));
+
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  const tooltip = document.getElementById('tooltip');
+  const tooltipTerm = document.getElementById('tooltip-term');
+  const tooltipBody = document.getElementById('tooltip-body');
+  let hideTimeout;
+
+  document.querySelectorAll('.term').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      clearTimeout(hideTimeout);
+      tooltipTerm.textContent = el.getAttribute('data-term');
+      tooltipBody.textContent = el.getAttribute('data-def');
+      const rect = el.getBoundingClientRect();
+      const tipW = 260;
+      let left = rect.left;
+      let top = rect.bottom + 8;
+      if (left + tipW > window.innerWidth - 16) left = window.innerWidth - tipW - 16;
+      if (left < 16) left = 16;
+      if (top + 120 > window.innerHeight) top = rect.top - 130;
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+      tooltip.classList.add('show');
+      hideTimeout = setTimeout(() => tooltip.classList.remove('show'), 4000);
+    });
+  });
+
+  document.addEventListener('click', () => tooltip.classList.remove('show'));
+</script>
+</body>
+</html>
