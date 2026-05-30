@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>กินกบซะ · หนังสือของฉัน</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,600;1,300&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root { --cream: #F5F0E8; --ink: #1A1208; --amber: #C8852A; --muted: #7A6E5F; --divider: #D9CFC0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background-color: var(--cream); color: var(--ink); font-family: 'Sarabun', sans-serif; font-weight: 300; line-height: 1.9; font-size: 17px; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 100; opacity: 0.4; }
+
+  .term { color: var(--amber); font-weight: 400; border-bottom: 1px dashed var(--amber); cursor: pointer; display: inline; }
+  .tooltip { display: none; position: fixed; background: var(--ink); color: var(--cream); font-size: 13px; line-height: 1.6; padding: 12px 16px; max-width: 260px; z-index: 9999; pointer-events: none; font-family: 'Sarabun', sans-serif; font-weight: 300; border-left: 3px solid var(--amber); }
+  .tooltip.show { display: block; }
+  .tooltip-term { font-weight: 600; font-size: 12px; letter-spacing: 0.1em; color: var(--amber); margin-bottom: 4px; text-transform: uppercase; }
+
+  .cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 60px 24px; position: relative; border-bottom: 1px solid var(--divider); overflow: hidden; }
+  .cover::after { content: ''; position: absolute; bottom: -80px; left: 50%; transform: translateX(-50%); width: 500px; height: 500px; background: radial-gradient(circle, rgba(200,133,42,0.08) 0%, transparent 70%); pointer-events: none; }
+  .cover-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 32px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.2s; }
+  .cover-title { font-family: 'Playfair Display', serif; font-size: clamp(34px, 7vw, 64px); font-weight: 900; line-height: 1.1; letter-spacing: -0.02em; color: var(--ink); max-width: 700px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.4s; }
+  .cover-title em { font-style: italic; color: var(--amber); }
+  .cover-subtitle { margin-top: 24px; font-size: 15px; color: var(--muted); max-width: 460px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.6s; }
+  .cover-divider { width: 48px; height: 2px; background: var(--amber); margin: 40px auto; opacity: 0; animation: fadeUp 0.8s ease forwards 0.8s; }
+  .cover-meta { font-size: 12px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; opacity: 0; animation: fadeUp 0.8s ease forwards 1s; }
+  .scroll-hint { position: absolute; bottom: 32px; display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: 0; animation: fadeUp 0.8s ease forwards 1.4s; }
+  .scroll-hint span { font-size: 11px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; }
+  .scroll-arrow { width: 1px; height: 32px; background: linear-gradient(to bottom, var(--amber), transparent); animation: scrollPulse 2s ease-in-out infinite; }
+  .back-link { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); text-decoration: none; position: absolute; top: 32px; left: 32px; transition: color 0.2s; opacity: 0; animation: fadeUp 0.8s ease forwards 0.1s; }
+  .back-link:hover { color: var(--amber); }
+
+  .toc { max-width: 680px; margin: 0 auto; padding: 80px 24px; border-bottom: 1px solid var(--divider); }
+  .toc-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 40px; }
+  .toc-item { display: flex; align-items: baseline; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--divider); text-decoration: none; color: var(--ink); transition: color 0.2s; }
+  .toc-item:hover { color: var(--amber); }
+  .toc-num { font-family: 'Playfair Display', serif; font-size: 13px; color: var(--amber); min-width: 24px; font-style: italic; }
+  .toc-title { font-size: 15px; font-weight: 400; flex: 1; }
+  .toc-dots { flex: 1; border-bottom: 1px dotted var(--divider); margin: 0 8px; min-width: 20px; }
+
+  .article { max-width: 680px; margin: 0 auto; padding: 80px 24px 120px; }
+  .chapter { margin-bottom: 100px; opacity: 0; transform: translateY(20px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .chapter.visible { opacity: 1; transform: translateY(0); }
+  .chapter-num { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 16px; display: block; }
+  .chapter-title { font-family: 'Playfair Display', serif; font-size: clamp(24px, 5vw, 36px); font-weight: 700; line-height: 1.2; margin-bottom: 40px; color: var(--ink); }
+  .chapter-body p { margin-bottom: 24px; color: #2E2416; }
+  .chapter-body strong { font-weight: 600; color: var(--ink); }
+  .chapter-body em { font-style: italic; color: var(--amber); }
+  .pull-quote { border-left: 3px solid var(--amber); padding: 4px 0 4px 24px; margin: 40px 0; font-family: 'Playfair Display', serif; font-size: 20px; font-style: italic; line-height: 1.5; color: var(--ink); }
+  .section-break { text-align: center; margin: 48px 0; color: var(--amber); letter-spacing: 0.3em; font-size: 14px; }
+
+  /* ABCDE table */
+  .abcde { margin: 32px 0; border: 1px solid var(--divider); }
+  .abcde-row { display: flex; gap: 0; border-bottom: 1px solid var(--divider); }
+  .abcde-row:last-child { border-bottom: none; }
+  .abcde-letter { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 900; color: var(--amber); min-width: 64px; padding: 20px; border-right: 1px solid var(--divider); display: flex; align-items: center; justify-content: center; line-height: 1; }
+  .abcde-content { flex: 1; padding: 18px 20px; }
+  .abcde-title { font-weight: 600; font-size: 14px; color: var(--ink); margin-bottom: 4px; }
+  .abcde-desc { font-size: 13px; color: var(--muted); line-height: 1.7; }
+
+  /* Principle list */
+  .principle-list { margin: 32px 0; }
+  .principle-item { display: flex; gap: 20px; padding: 20px 0; border-bottom: 1px solid var(--divider); }
+  .principle-item:last-child { border-bottom: none; }
+  .principle-num { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 900; color: rgba(200,133,42,0.2); min-width: 32px; line-height: 1.1; padding-top: 2px; }
+  .principle-content { flex: 1; }
+  .principle-title { font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 6px; }
+  .principle-desc { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+  /* Insight */
+  .insight { background: rgba(200,133,42,0.06); border-left: 3px solid var(--amber); padding: 20px 24px; margin: 32px 0; }
+  .insight-label { font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--amber); margin-bottom: 10px; display: block; }
+  .insight-body { font-size: 14px; color: #2E2416; line-height: 1.8; }
+
+  /* Vocab */
+  .vocab-section { background: rgba(200,133,42,0.06); border: 1px solid var(--divider); padding: 40px; margin-top: 80px; }
+  .vocab-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 8px; display: block; }
+  .vocab-hint { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+  .vocab-item { padding: 16px 0; border-bottom: 1px solid var(--divider); }
+  .vocab-item:last-child { border-bottom: none; }
+  .vocab-term { font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 4px; }
+  .vocab-meaning { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .vocab-example { font-size: 13px; color: var(--amber); font-style: italic; margin-top: 4px; }
+
+  footer { text-align: center; padding: 60px 24px; border-top: 1px solid var(--divider); font-size: 12px; color: var(--muted); letter-spacing: 0.1em; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes scrollPulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+  @media (max-width: 600px) {
+    body { font-size: 16px; }
+    .toc, .article { padding-left: 20px; padding-right: 20px; }
+    .back-link { top: 20px; left: 20px; }
+    .abcde-letter { min-width: 48px; font-size: 22px; }
+    .tooltip { max-width: 200px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="tooltip" id="tooltip">
+  <div class="tooltip-term" id="tooltip-term"></div>
+  <div id="tooltip-body"></div>
+</div>
+
+<section class="cover">
+  <a class="back-link" href="index.html">← กลับหน้าหลัก</a>
+  <p class="cover-label">บทที่ 12</p>
+  <h1 class="cover-title"><em>กินกบ</em>ซะ</h1>
+  <p class="cover-subtitle">ถ้าคุณต้องกินกบเป็นอาหารเช้า อย่ารอจนถึงบ่าย — Brian Tracy เขียนหนังสือทั้งเล่มเพื่ออธิบายว่าทำไมงานที่ยากที่สุดควรทำก่อนเป็นอันดับแรกของทุกวัน</p>
+  <div class="cover-divider"></div>
+  <p class="cover-meta">Productivity · การจัดการเวลา &nbsp;·&nbsp; หนังสือของฉัน</p>
+  <div class="scroll-hint"><span>เริ่มอ่าน</span><div class="scroll-arrow"></div></div>
+</section>
+
+<nav class="toc">
+  <p class="toc-label">สารบัญ</p>
+  <a class="toc-item" href="#s1"><span class="toc-num">i</span><span class="toc-title">กบคืออะไร</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s2"><span class="toc-num">ii</span><span class="toc-title">ทำไมเราถึงผัดวันประกันพรุ่ง</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s3"><span class="toc-num">iii</span><span class="toc-title">วิธี ABCDE — จัดลำดับให้ถูกก่อน</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s4"><span class="toc-num">iv</span><span class="toc-title">หลักการสำคัญ 5 ข้อจากหนังสือ</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s5"><span class="toc-num">v</span><span class="toc-title">เริ่มต้นที่ยากที่สุด — สร้าง Momentum</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s6"><span class="toc-num">vi</span><span class="toc-title">บทสรุป: ทำวันนี้ให้ดี แทนที่จะรอพรุ่งนี้</span><span class="toc-dots"></span></a>
+</nav>
+
+<article class="article">
+
+  <div class="chapter visible">
+    <div class="chapter-body">
+      <p>Mark Twain เคยพูดว่า ถ้าคุณต้องกินกบเป็นอาหารเช้า อย่ารอจนถึงบ่าย Brian Tracy นำประโยคนั้นมาสร้างเป็นหนังสือที่ขายได้มากกว่า 2 ล้านเล่มทั่วโลก และแปลไปแล้วมากกว่า 40 ภาษา</p>
+      <p>แก่นของมันเรียบง่ายมาก คนที่ประสบความสำเร็จไม่ได้มีเวลามากกว่าคนอื่น แต่พวกเขาใช้เวลาที่มีกับสิ่งที่สำคัญที่สุดก่อน และทำมันให้เสร็จก่อนที่ความกังวล ความขี้เกียจ หรือสิ่งเร่งด่วนที่ไม่สำคัญจะเข้ามาแทรก</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s1">
+    <span class="chapter-num">i</span>
+    <h2 class="chapter-title">กบคืออะไร</h2>
+    <div class="chapter-body">
+      <p><em>กบ</em> ในที่นี้คืองานที่สำคัญที่สุด มีผลกระทบมากที่สุด แต่มักถูกเลื่อนออกไปเรื่อยๆ เพราะมันยาก น่าเบื่อ หรือน่ากลัว เป็นงานที่ถ้าทำแล้วเสร็จในวันนี้ จะทำให้วันนี้ถือว่าประสบความสำเร็จ ไม่ว่าจะเกิดอะไรขึ้นหลังจากนั้น</p>
+      <p>Tracy บอกว่าคนส่วนใหญ่เริ่มวันด้วยการทำงานเล็กๆ ง่ายๆ ก่อน ตอบอีเมล เช็ค Social เปิด Notification ต่างๆ สิ่งเหล่านั้นให้ความรู้สึกว่า "กำลังทำงานอยู่" แต่ความจริงคือกำลังหลีกเลี่ยงกบอยู่</p>
+      <div class="pull-quote">ถ้าคุณต้องกินกบสองตัว ให้เริ่มจากตัวที่น่าเกลียดกว่า</div>
+      <p>และถ้าวันไหนมีกบมากกว่าหนึ่งตัว ให้เริ่มจากตัวที่ใหญ่และน่าเกลียดที่สุดก่อน เพราะถ้าเริ่มจากตัวเล็กแล้วค่อยไปตัวใหญ่ พลังงานและสมาธิจะหมดไปเสียก่อน</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s2">
+    <span class="chapter-num">ii</span>
+    <h2 class="chapter-title">ทำไมเราถึงผัดวันประกันพรุ่ง</h2>
+    <div class="chapter-body">
+      <p>Tracy อธิบายว่าการผัดวันไม่ได้เกิดจากความขี้เกียจ แต่เกิดจากสองเรื่องหลัก คือ <strong>ความไม่ชัดเจน</strong> ว่าต้องทำอะไรกันแน่ และ <strong>ความรู้สึกท่วมท้น</strong> ว่างานมันใหญ่เกินไปจนไม่รู้จะเริ่มตรงไหน</p>
+
+      <div class="insight">
+        <span class="insight-label">กลไกของสมองที่ทำให้เราหนีกบ</span>
+        <div class="insight-body">สมองออกแบบมาให้หลีกเลี่ยงความเจ็บปวดและแสวงหาความสุขในทันที งานที่ยากและน่าเบื่อให้ความรู้สึกเหมือน "เจ็บปวด" สมองจึงหันไปหางานง่ายๆ ที่ให้ผลตอบแทนทันทีแทน เช่น การตอบข้อความ การเลื่อน Feed หรือการทำงานเล็กๆ ที่รู้สึกว่าได้ติ๊กถูกในลิสต์ ทางแก้คือทำให้สมองเชื่อมงานยากนั้นกับผลลัพธ์ที่ดีที่จะตามมา ไม่ใช่กับความเจ็บปวดของกระบวนการ</div>
+      </div>
+
+      <p>วิธีแก้ความไม่ชัดเจนคือการเขียนลงกระดาษ Tracy เน้นมากว่า <strong>งานที่เขียนออกมาชัดเจนจะทำเสร็จได้เร็วกว่างานที่อยู่ในหัวเสมอ</strong> เพราะการเขียนบังคับให้เราคิดให้ชัด และทำให้สมองไม่ต้องใช้พลังงานส่วนหนึ่งไปจำว่าต้องทำอะไร</p>
+      <p>ส่วนความรู้สึกท่วมท้น แก้ด้วยการแบ่งงานใหญ่ออกเป็นขั้นตอนย่อยๆ แล้วทำทีละขั้น เรียกว่า <span class="term" data-term="Salami Slice Method" data-def="วิธีจัดการงานใหญ่โดยแบ่งออกเป็นชิ้นเล็กๆ เหมือนการหั่นซาลามี่ ทีละชิ้น แต่ละชิ้นทำได้ในเวลาสั้นๆ เมื่อทำครบทุกชิ้นก็เสร็จงานทั้งหมด">Salami Slice Method</span> หั่นงานออกเป็นชิ้นบางๆ แล้วทำทีละชิ้น</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s3">
+    <span class="chapter-num">iii</span>
+    <h2 class="chapter-title">วิธี ABCDE — จัดลำดับให้ถูกก่อน</h2>
+    <div class="chapter-body">
+      <p>ก่อนจะกินกบได้ ต้องรู้ก่อนว่าตัวไหนคือกบ Tracy แนะนำวิธีจัดลำดับความสำคัญที่เรียกว่า <strong>ABCDE Method</strong> โดยเขียนรายการงานทั้งหมดออกมา แล้วติดตัวอักษรให้แต่ละงาน</p>
+
+      <div class="abcde">
+        <div class="abcde-row">
+          <div class="abcde-letter">A</div>
+          <div class="abcde-content">
+            <div class="abcde-title">Must Do — ต้องทำ มีผลกระทบสูง</div>
+            <div class="abcde-desc">งานที่ถ้าไม่ทำจะมีผลเสียร้ายแรง เช่น งานที่ถึงกำหนดส่ง งานที่ลูกค้ารอ หรืองานที่กระทบรายได้โดยตรง นี่คือกบ ถ้ามีหลายงาน A ให้แบ่งเป็น A-1, A-2, A-3</div>
+          </div>
+        </div>
+        <div class="abcde-row">
+          <div class="abcde-letter">B</div>
+          <div class="abcde-content">
+            <div class="abcde-title">Should Do — ควรทำ แต่ผลกระทบปานกลาง</div>
+            <div class="abcde-desc">งานที่มีผลกระทบพอสมควร แต่ถ้าไม่ทำวันนี้ก็ยังพอรับได้ ห้ามทำงาน B ถ้ายังมีงาน A ค้างอยู่</div>
+          </div>
+        </div>
+        <div class="abcde-row">
+          <div class="abcde-letter">C</div>
+          <div class="abcde-content">
+            <div class="abcde-title">Nice to Do — ทำได้แต่ไม่มีผลกระทบ</div>
+            <div class="abcde-desc">งานที่ทำแล้วก็ดี ไม่ทำก็ไม่เป็นไร เช่น อ่านบทความที่น่าสนใจ จัดระเบียบโต๊ะ หรือตอบอีเมลที่ไม่เร่งด่วน</div>
+          </div>
+        </div>
+        <div class="abcde-row">
+          <div class="abcde-letter">D</div>
+          <div class="abcde-content">
+            <div class="abcde-title">Delegate — มอบหมายให้คนอื่นทำ</div>
+            <div class="abcde-desc">งานที่คนอื่นทำได้เท่าเราหรือดีกว่า ให้มอบหมายออกไป เพื่อเพิ่มเวลาสำหรับงาน A</div>
+          </div>
+        </div>
+        <div class="abcde-row">
+          <div class="abcde-letter">E</div>
+          <div class="abcde-content">
+            <div class="abcde-title">Eliminate — ตัดทิ้งได้เลย</div>
+            <div class="abcde-desc">งานที่ไม่ว่าจะทำหรือไม่ทำก็ไม่มีอะไรเปลี่ยนแปลง ให้ตัดออกจากลิสต์เลย อย่าเสียเวลา</div>
+          </div>
+        </div>
+      </div>
+
+      <p>กุญแจของ ABCDE คือ <strong>ห้ามทำงานลำดับต่ำกว่าในขณะที่ยังมีงานลำดับสูงกว่าค้างอยู่</strong> นั่นคือสิ่งที่คนส่วนใหญ่ทำผิดพลาดทุกวัน ใช้เวลาส่วนใหญ่กับงาน B, C, D ในขณะที่งาน A ยังรอให้ทำอยู่</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s4">
+    <span class="chapter-num">iv</span>
+    <h2 class="chapter-title">หลักการสำคัญ 5 ข้อจากหนังสือ</h2>
+    <div class="chapter-body">
+      <p>Tracy เขียนหลักการไว้ 21 ข้อในหนังสือ แต่มี 5 ข้อที่ทรงพลังที่สุดและนำไปใช้ได้ทันที</p>
+
+      <div class="principle-list">
+        <div class="principle-item">
+          <div class="principle-num">1</div>
+          <div class="principle-content">
+            <div class="principle-title">เขียนทุกอย่างลงกระดาษ</div>
+            <div class="principle-desc">ก่อนเริ่มวัน เขียนรายการสิ่งที่ต้องทำทั้งหมดออกมา งานที่อยู่บนกระดาษทำเสร็จได้เร็วกว่างานในหัวถึง 25% เพราะสมองไม่ต้องแบกภาระจำมันไว้ ทุกพลังงานไปที่การทำงานได้เลย</div>
+          </div>
+        </div>
+        <div class="principle-item">
+          <div class="principle-num">2</div>
+          <div class="principle-content">
+            <div class="principle-title">วางแผนวันต่อไปในคืนนี้</div>
+            <div class="principle-desc">Tracy แนะนำให้วางแผนวันพรุ่งนี้ก่อนนอนทุกคืน เพราะระหว่างนอน สมองจะประมวลผลรายการนั้นและเตรียมพร้อมสำหรับวันใหม่ ทำให้ตื่นมาแล้วรู้ทันทีว่าต้องทำอะไรก่อน ไม่เสียเวลาตัดสินใจตอนเช้า</div>
+          </div>
+        </div>
+        <div class="principle-item">
+          <div class="principle-num">3</div>
+          <div class="principle-content">
+            <div class="principle-title">ใช้ <span class="term" data-term="Law of Three" data-def="หลักการของ Tracy ที่บอกว่าในทุกบทบาทของชีวิต มีงานเพียง 3 อย่างที่สร้างผลลัพธ์ส่วนใหญ่ทั้งหมด ให้ระบุ 3 งานนั้นให้ได้ แล้วโฟกัสเวลาส่วนใหญ่ไปกับมัน">Law of Three</span></div>
+            <div class="principle-desc">ในทุกบทบาท มีงานแค่ 3 อย่างที่สร้างผลลัพธ์ส่วนใหญ่ ให้ถามตัวเองว่าถ้าทำได้แค่ 3 อย่างในวันนี้ แต่ต้องทำให้เสร็จ จะเลือกอะไร 3 อย่างนั้นคือกบของวันนี้</div>
+          </div>
+        </div>
+        <div class="principle-item">
+          <div class="principle-num">4</div>
+          <div class="principle-content">
+            <div class="principle-title">สร้างสภาพแวดล้อมสำหรับโฟกัส</div>
+            <div class="principle-desc">ปิดการแจ้งเตือน ปิดหน้าต่างที่ไม่เกี่ยวข้อง แจ้งคนรอบข้างว่ากำลังทำงานอยู่ Tracy บอกว่า <em>Single-Handling</em> คือการเริ่มงานชิ้นหนึ่งแล้วทำต่อเนื่องจนเสร็จโดยไม่เปลี่ยนไปทำอย่างอื่น เป็นหนึ่งในนิสัยที่ทรงพลังที่สุดของคนที่ได้งานมาก</div>
+          </div>
+        </div>
+        <div class="principle-item">
+          <div class="principle-num">5</div>
+          <div class="principle-content">
+            <div class="principle-title">ฝึกนิสัยกินกบทุกวัน</div>
+            <div class="principle-desc">21 วันแรกคือช่วงที่ยากที่สุด สมองจะพยายามกลับไปหาพฤติกรรมเดิม แต่ถ้าฝึกจนเป็นนิสัยแล้ว การเริ่มวันด้วยงานที่สำคัญที่สุดจะกลายเป็นอัตโนมัติ และนั่นคือความได้เปรียบที่สะสมไปทุกวัน</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s5">
+    <span class="chapter-num">v</span>
+    <h2 class="chapter-title">เริ่มต้นที่ยากที่สุด — สร้าง Momentum</h2>
+    <div class="chapter-body">
+      <p>Tracy อธิบายถึงสิ่งที่เรียกว่า <span class="term" data-term="Momentum Effect" data-def="เมื่อเราเริ่มทำงานและเห็นความคืบหน้า สมองจะปล่อย Dopamine ซึ่งทำให้รู้สึกดีและอยากทำต่อ ยิ่งทำยิ่งมีแรง ตรงข้ามกับการผัดวันที่ยิ่งรอยิ่งหนัก">Momentum Effect</span> เมื่อเราเริ่มทำงานที่ยากและเห็นความคืบหน้า สมองจะปล่อย Dopamine ทำให้รู้สึกดีและอยากทำต่อ ยิ่งทำยิ่งมีแรง</p>
+      <p>ในทางกลับกัน ยิ่งผัดวันไปเรื่อยๆ งานชิ้นนั้นจะหนักขึ้นในหัวเรื่อยๆ เพราะสมองคิดถึงมันตลอดเวลาแม้จะไม่ได้ทำ เป็นภาระทางจิตใจที่สะสมและดูดพลังงานไปโดยที่เราไม่รู้ตัว</p>
+      <div class="pull-quote">การเริ่มต้นคืออุปสรรคที่ใหญ่ที่สุด พอเริ่มแล้ว งานส่วนใหญ่ไม่ได้ยากอย่างที่คิด</div>
+      <p>วิธีที่ Tracy แนะนำเพื่อเอาชนะจุดเริ่มต้นคือบอกตัวเองว่า <em>"ทำแค่ 5 นาที"</em> แค่นั้นพอ เพราะเมื่อเริ่มแล้ว Momentum จะพาต่อเอง ร่างกายและสมองไม่ชอบหยุดกลางคัน สิ่งที่ยากที่สุดคือการยกก้นขึ้นจากเก้าอี้แล้วนั่งลงทำงานนั้น</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s6">
+    <span class="chapter-num">vi</span>
+    <h2 class="chapter-title">บทสรุป: ทำวันนี้ให้ดี แทนที่จะรอพรุ่งนี้</h2>
+    <div class="chapter-body">
+      <p>Eat That Frog ไม่ได้สอนให้เราทำงานมากขึ้น แต่สอนให้เราทำ <em>สิ่งที่ถูกต้อง</em> ก่อน เพราะเวลาในแต่ละวันเท่ากันสำหรับทุกคน ความต่างอยู่ที่ว่าใช้มันกับอะไรก่อน</p>
+      <p>คนที่ประสบความสำเร็จไม่ได้ไม่มีกบ แต่พวกเขาเลือกกินมันเสียก่อนที่มันจะมีโอกาสกระโดดหนี เมื่อกบตัวแรกถูกกินแล้ว วันที่เหลือจะเบาขึ้น มีพลังงานมากขึ้น และรู้สึกว่าควบคุมชีวิตได้มากขึ้น</p>
+      <div class="pull-quote">คุณไม่มีเวลาทำทุกอย่าง แต่คุณมีเวลาเสมอสำหรับสิ่งที่สำคัญที่สุด</div>
+      <p>คำถามที่ Tracy ฝากไว้คือ กบของคุณวันนี้คืออะไร และคุณกำลังรอให้มันกระโดดหนีอยู่หรือเปล่า</p>
+    </div>
+  </div>
+
+  <div class="chapter" id="vocab">
+    <div class="vocab-section">
+      <span class="vocab-label">คลังคำศัพท์ · บทที่ 12</span>
+      <p class="vocab-hint">* คำที่ขีดเส้นใต้สีทองในเนื้อหา กดได้เพื่อดูความหมายทันที</p>
+
+      <div class="vocab-item">
+        <div class="vocab-term">Eat That Frog (กินกบ)</div>
+        <div class="vocab-meaning">อุปมาจากหนังสือของ Brian Tracy หมายถึงการทำงานที่สำคัญที่สุด ยากที่สุด และมักถูกเลื่อนออกไปเรื่อยๆ ให้เสร็จก่อนเป็นอันดับแรกของวัน</div>
+        <div class="vocab-example">ใช้ได้ว่า: "กบของฉันวันนี้คือการเขียนรายงานที่ค้างมาสองอาทิตย์ ต้องกินมันซะก่อนทำอย่างอื่น"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">ABCDE Method</div>
+        <div class="vocab-meaning">วิธีจัดลำดับความสำคัญของงาน โดยติดตัวอักษร A ถึง E ให้แต่ละงานตามความสำคัญ A คือต้องทำ B คือควรทำ C คือทำได้แต่ไม่จำเป็น D คือมอบหมายให้คนอื่น E คือตัดทิ้ง</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ลอง ABCDE Method ดู จะพบว่างานที่เราใช้เวลาส่วนใหญ่ไปนั้นเป็นแค่ C หรือ D เท่านั้น"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Single-Handling</div>
+        <div class="vocab-meaning">หลักการทำงานชิ้นหนึ่งจนเสร็จโดยไม่เปลี่ยนไปทำอย่างอื่น ต่างจาก Multitasking ที่สลับไปมา Tracy บอกว่านิสัยนี้เพิ่มประสิทธิภาพได้มากกว่าเทคนิคอื่นใด</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ปิดทุกอย่างแล้วทำแค่งานนี้จนเสร็จ Single-Handling แค่ชั่วโมงเดียวได้งานมากกว่าทำแบบแบ่งสมาธิทั้งวัน"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Salami Slice Method</div>
+        <div class="vocab-meaning">วิธีจัดการงานใหญ่โดยแบ่งออกเป็นขั้นตอนย่อยๆ เหมือนการหั่นซาลามี่ทีละชิ้น แต่ละชิ้นทำได้ในเวลาสั้นๆ ช่วยลดความรู้สึกท่วมท้นและทำให้เริ่มต้นได้ง่ายขึ้น</div>
+        <div class="vocab-example">ใช้ได้ว่า: "โปรเจคนี้ใหญ่มาก ลอง Salami Slice ดู แบ่งเป็น 10 ขั้น แล้วทำทีละขั้น พรุ่งนี้ทำแค่ขั้นที่ 1 ให้เสร็จก็พอ"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Pareto Principle (กฎ 80/20)</div>
+        <div class="vocab-meaning">หลักการที่ Tracy นำมาใช้ประกอบ ว่า 20% ของงานที่เราทำสร้างผลลัพธ์ 80% ทั้งหมด งาน A ในวิธี ABCDE คือ 20% นั้น ถ้าโฟกัสกับมันก่อน ผลลัพธ์จะมากกว่าการวิ่งทำครบทุกอย่างมาก</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ถ้าใช้ Pareto Principle กับรายการงานวันนี้ งานไหนคือ 20% ที่จะสร้างผล 80%"</div>
+      </div>
+    </div>
+  </div>
+
+</article>
+
+<footer>
+  <p>บทที่ 12 &nbsp;·&nbsp; กินกบซะ &nbsp;·&nbsp; หนังสือของฉัน</p>
+</footer>
+
+<script>
+  const chapters = document.querySelectorAll('.chapter:not(.visible)');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); }
+    });
+  }, { threshold: 0.1 });
+  chapters.forEach(ch => observer.observe(ch));
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+  const tooltip = document.getElementById('tooltip');
+  const tooltipTerm = document.getElementById('tooltip-term');
+  const tooltipBody = document.getElementById('tooltip-body');
+  let hideTimeout;
+  document.querySelectorAll('.term').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      clearTimeout(hideTimeout);
+      tooltipTerm.textContent = el.getAttribute('data-term');
+      tooltipBody.textContent = el.getAttribute('data-def');
+      const rect = el.getBoundingClientRect();
+      const tipW = 260;
+      let left = rect.left;
+      let top = rect.bottom + 8;
+      if (left + tipW > window.innerWidth - 16) left = window.innerWidth - tipW - 16;
+      if (left < 16) left = 16;
+      if (top + 120 > window.innerHeight) top = rect.top - 130;
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+      tooltip.classList.add('show');
+      hideTimeout = setTimeout(() => tooltip.classList.remove('show'), 4000);
+    });
+  });
+  document.addEventListener('click', () => tooltip.classList.remove('show'));
+</script>
+</body>
+</html>
