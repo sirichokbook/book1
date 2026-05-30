@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EQ ปัญญาทางอารมณ์ · sirichokbook</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,600;1,300&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root { --cream: #F5F0E8; --ink: #1A1208; --amber: #C8852A; --muted: #7A6E5F; --divider: #D9CFC0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background-color: var(--cream); color: var(--ink); font-family: 'Sarabun', sans-serif; font-weight: 300; line-height: 1.9; font-size: 17px; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 100; opacity: 0.4; }
+
+  .term { color: var(--amber); font-weight: 400; border-bottom: 1px dashed var(--amber); cursor: pointer; display: inline; }
+  .tooltip { display: none; position: fixed; background: var(--ink); color: var(--cream); font-size: 13px; line-height: 1.6; padding: 12px 16px; max-width: 260px; z-index: 9999; pointer-events: none; font-family: 'Sarabun', sans-serif; font-weight: 300; border-left: 3px solid var(--amber); }
+  .tooltip.show { display: block; }
+  .tooltip-term { font-weight: 600; font-size: 12px; letter-spacing: 0.1em; color: var(--amber); margin-bottom: 4px; text-transform: uppercase; }
+
+  .cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 60px 24px; position: relative; border-bottom: 1px solid var(--divider); overflow: hidden; }
+  .cover::after { content: ''; position: absolute; bottom: -80px; left: 50%; transform: translateX(-50%); width: 500px; height: 500px; background: radial-gradient(circle, rgba(200,133,42,0.08) 0%, transparent 70%); pointer-events: none; }
+  .cover-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 32px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.2s; }
+  .cover-title { font-family: 'Playfair Display', serif; font-size: clamp(34px, 7vw, 64px); font-weight: 900; line-height: 1.1; letter-spacing: -0.02em; color: var(--ink); max-width: 700px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.4s; }
+  .cover-title em { font-style: italic; color: var(--amber); }
+  .cover-subtitle { margin-top: 24px; font-size: 15px; color: var(--muted); max-width: 460px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.6s; }
+  .cover-divider { width: 48px; height: 2px; background: var(--amber); margin: 40px auto; opacity: 0; animation: fadeUp 0.8s ease forwards 0.8s; }
+  .cover-meta { font-size: 12px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; opacity: 0; animation: fadeUp 0.8s ease forwards 1s; }
+  .scroll-hint { position: absolute; bottom: 32px; display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: 0; animation: fadeUp 0.8s ease forwards 1.4s; }
+  .scroll-hint span { font-size: 11px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; }
+  .scroll-arrow { width: 1px; height: 32px; background: linear-gradient(to bottom, var(--amber), transparent); animation: scrollPulse 2s ease-in-out infinite; }
+  .back-link { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); text-decoration: none; position: absolute; top: 32px; left: 32px; transition: color 0.2s; opacity: 0; animation: fadeUp 0.8s ease forwards 0.1s; }
+  .back-link:hover { color: var(--amber); }
+
+  .toc { max-width: 680px; margin: 0 auto; padding: 80px 24px; border-bottom: 1px solid var(--divider); }
+  .toc-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 40px; }
+  .toc-item { display: flex; align-items: baseline; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--divider); text-decoration: none; color: var(--ink); transition: color 0.2s; }
+  .toc-item:hover { color: var(--amber); }
+  .toc-num { font-family: 'Playfair Display', serif; font-size: 13px; color: var(--amber); min-width: 24px; font-style: italic; }
+  .toc-title { font-size: 15px; font-weight: 400; flex: 1; }
+  .toc-dots { flex: 1; border-bottom: 1px dotted var(--divider); margin: 0 8px; min-width: 20px; }
+
+  .article { max-width: 680px; margin: 0 auto; padding: 80px 24px 120px; }
+  .chapter { margin-bottom: 100px; opacity: 0; transform: translateY(20px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .chapter.visible { opacity: 1; transform: translateY(0); }
+  .chapter-num { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 16px; display: block; }
+  .chapter-title { font-family: 'Playfair Display', serif; font-size: clamp(24px, 5vw, 36px); font-weight: 700; line-height: 1.2; margin-bottom: 40px; color: var(--ink); }
+  .chapter-body p { margin-bottom: 24px; color: #2E2416; }
+  .chapter-body strong { font-weight: 600; color: var(--ink); }
+  .chapter-body em { font-style: italic; color: var(--amber); }
+  .pull-quote { border-left: 3px solid var(--amber); padding: 4px 0 4px 24px; margin: 40px 0; font-family: 'Playfair Display', serif; font-size: 20px; font-style: italic; line-height: 1.5; color: var(--ink); }
+  .section-break { text-align: center; margin: 48px 0; color: var(--amber); letter-spacing: 0.3em; font-size: 14px; }
+
+  /* 4-skill grid */
+  .skill-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 32px 0; }
+  .skill-card { border: 1px solid var(--divider); padding: 22px; }
+  .skill-num { font-family: 'Playfair Display', serif; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--amber); margin-bottom: 8px; display: block; }
+  .skill-name { font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 8px; }
+  .skill-desc { font-size: 13px; color: var(--muted); line-height: 1.7; }
+
+  /* Breathing box */
+  .breath-box { border: 1px solid var(--divider); padding: 28px 32px; margin: 32px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  .breath-step { padding: 16px 20px; border-right: 1px solid var(--divider); border-bottom: 1px solid var(--divider); }
+  .breath-step:nth-child(2) { border-right: none; }
+  .breath-step:nth-child(3) { border-bottom: none; }
+  .breath-step:nth-child(4) { border-right: none; border-bottom: none; }
+  .breath-label { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--amber); margin-bottom: 6px; display: block; }
+  .breath-action { font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 4px; }
+  .breath-count { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 900; color: rgba(200,133,42,0.25); line-height: 1; }
+
+  /* Tip list */
+  .tip-list { margin: 32px 0; }
+  .tip-item { display: flex; gap: 20px; padding: 20px 0; border-bottom: 1px solid var(--divider); }
+  .tip-item:last-child { border-bottom: none; }
+  .tip-num { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 900; color: rgba(200,133,42,0.2); min-width: 32px; line-height: 1.1; padding-top: 2px; }
+  .tip-content { flex: 1; }
+  .tip-title { font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 6px; }
+  .tip-desc { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+  /* Insight block */
+  .insight { background: rgba(200,133,42,0.06); border-left: 3px solid var(--amber); padding: 20px 24px; margin: 32px 0; }
+  .insight-label { font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--amber); margin-bottom: 10px; display: block; }
+  .insight-body { font-size: 14px; color: #2E2416; line-height: 1.8; }
+
+  /* Vocab */
+  .vocab-section { background: rgba(200,133,42,0.06); border: 1px solid var(--divider); padding: 40px; margin-top: 80px; }
+  .vocab-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 8px; display: block; }
+  .vocab-hint { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+  .vocab-item { padding: 16px 0; border-bottom: 1px solid var(--divider); }
+  .vocab-item:last-child { border-bottom: none; }
+  .vocab-term { font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 4px; }
+  .vocab-meaning { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .vocab-example { font-size: 13px; color: var(--amber); font-style: italic; margin-top: 4px; }
+
+  footer { text-align: center; padding: 60px 24px; border-top: 1px solid var(--divider); font-size: 12px; color: var(--muted); letter-spacing: 0.1em; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes scrollPulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+  @media (max-width: 600px) {
+    body { font-size: 16px; }
+    .toc, .article { padding-left: 20px; padding-right: 20px; }
+    .back-link { top: 20px; left: 20px; }
+    .skill-grid { grid-template-columns: 1fr; }
+    .breath-box { grid-template-columns: 1fr; }
+    .breath-step { border-right: none; border-bottom: 1px solid var(--divider); }
+    .breath-step:last-child { border-bottom: none; }
+    .tooltip { max-width: 200px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="tooltip" id="tooltip">
+  <div class="tooltip-term" id="tooltip-term"></div>
+  <div id="tooltip-body"></div>
+</div>
+
+<section class="cover">
+  <a class="back-link" href="index.html">← กลับหน้าหลัก</a>
+  <p class="cover-label">บทที่ 11</p>
+  <h1 class="cover-title"><em>EQ</em> ปัญญาทางอารมณ์ที่สำคัญกว่าที่คิด</h1>
+  <p class="cover-subtitle">สมองเราถูกออกแบบมาให้ประมวลผลอารมณ์ก่อนเหตุผลเสมอ EQ คือชุดทักษะที่ช่วยให้เราเข้าใจกลไกนั้น แล้วเลือกตอบสนองได้อย่างตั้งใจมากขึ้น</p>
+  <div class="cover-divider"></div>
+  <p class="cover-meta">จิตวิทยา · การพัฒนาตัวเอง &nbsp;·&nbsp; sirichokbook</p>
+  <div class="scroll-hint"><span>เริ่มอ่าน</span><div class="scroll-arrow"></div></div>
+</section>
+
+<nav class="toc">
+  <p class="toc-label">สารบัญ</p>
+  <a class="toc-item" href="#s1"><span class="toc-num">i</span><span class="toc-title">อารมณ์มาก่อนเหตุผลเสมอ</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s2"><span class="toc-num">ii</span><span class="toc-title">4 ทักษะหลักของ EQ</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s3"><span class="toc-num">iii</span><span class="toc-title">Labeling — ตั้งชื่อความรู้สึก</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s4"><span class="toc-num">iv</span><span class="toc-title">จัดการตัวเองในวันที่อารมณ์มา</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s5"><span class="toc-num">v</span><span class="toc-title">กลยุทธ์ฝึก EQ ในชีวิตประจำวัน</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s6"><span class="toc-num">vi</span><span class="toc-title">บทสรุป: ไม่ใช่การกดข่ม แต่คือการเข้าใจ</span><span class="toc-dots"></span></a>
+</nav>
+
+<article class="article">
+
+  <div class="chapter visible">
+    <div class="chapter-body">
+      <p>ลองนึกถึง Road Rage หรือการโมโหในการขับรถ ถ้าคิดด้วยตรรกะ ไม่มีเหตุผลเลยที่ควรลงจากรถไปต่อยกัน มันไม่มีอะไรคุ้ม มีแต่เสีย แต่มันก็ยังเกิดขึ้นอยู่ทุกวัน</p>
+      <p>เพราะสมองไม่ทันคิด มันตอบสนองไปแล้ว</p>
+      <p>Emotional Intelligence หรือ EQ คือชุดทักษะที่ช่วยให้เราเข้าใจกลไกนั้น แล้วเลือกตอบสนองได้ดีขึ้น ไม่ใช่การกดข่มอารมณ์ แต่คือการให้สมองส่วนเหตุผลมีโอกาสได้เข้ามาทำงานก่อนที่เราจะพูดหรือทำอะไรที่จะเสียใจทีหลัง</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s1">
+    <span class="chapter-num">i</span>
+    <h2 class="chapter-title">อารมณ์มาก่อนเหตุผลเสมอ</h2>
+    <div class="chapter-body">
+      <p>ทุกสิ่งที่เรารับรู้ผ่านประสาทสัมผัสทั้ง 5 จะวิ่งตรงไปยัง <span class="term" data-term="Limbic System" data-def="สมองส่วนที่ทำหน้าที่จัดการอารมณ์ ความทรงจำ และแรงขับพื้นฐาน เป็นส่วนที่วิวัฒนาการมาก่อน Prefrontal Cortex ดังนั้นจึงประมวลผลข้อมูลก่อนสมองส่วนเหตุผลเสมอ">Limbic System</span> ซึ่งเป็นสมองส่วนอารมณ์ก่อน แล้ว <span class="term" data-term="Prefrontal Cortex" data-def="สมองส่วนหน้าที่ทำหน้าที่ควบคุมการคิดเชิงตรรกะ การตัดสินใจ และการวางแผน เป็นส่วนที่รับข้อมูลช้ากว่า Limbic System ทำให้อารมณ์มักเข้ามาก่อนเหตุผลในสถานการณ์ที่รุนแรง">Prefrontal Cortex</span> หรือสมองส่วนเหตุผลถึงจะรู้ตัวทีหลัง</p>
+      <p>นั่นคือเหตุผลที่เราทำสิ่งที่รู้ว่า "ถ้าคิดดีๆ แล้วไม่ควรทำ" ได้ง่ายกว่าที่คิด สมองไม่ทันคิด มันตอบสนองไปแล้ว</p>
+      <div class="pull-quote">ความสามารถในการคิดอย่างชัดเจนขึ้นอยู่กับว่าคุณเข้าใจอารมณ์ตัวเองแค่ไหน</div>
+      <p>หากไม่มีสติ ความรู้สึกจะบงการทุกอย่าง สิ่งที่เราสัมผัสโดยยังไม่ผ่านการกรองด้วยเหตุผลจะเป็นตัวตัดสินคำพูดและการกระทำของเราทั้งหมด EQ คือทักษะที่ช่วยให้เราสร้างพื้นที่ระหว่างสิ่งกระตุ้นกับการตอบสนองนั้น</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s2">
+    <span class="chapter-num">ii</span>
+    <h2 class="chapter-title">4 ทักษะหลักของ EQ</h2>
+    <div class="chapter-body">
+      <p>EQ แบ่งออกเป็น 4 ทักษะที่ต่อยอดกันตามลำดับ เริ่มจากการเข้าใจตัวเอง ไปจนถึงการจัดการความสัมพันธ์กับคนรอบข้าง</p>
+
+      <div class="skill-grid">
+        <div class="skill-card">
+          <span class="skill-num">ทักษะที่ 1</span>
+          <div class="skill-name">Self-Awareness<br>รู้จักตัวเอง</div>
+          <div class="skill-desc">สังเกตอารมณ์ตัวเองเมื่อมันเกิดขึ้น รู้ว่าอะไรคือ "ปุ่มร้อน" ของตัวเอง ทักษะนี้เป็นรากฐานของทั้งหมด ถ้าไม่รู้ว่าตัวเองกำลังรู้สึกอะไร ก็จัดการอะไรไม่ได้เลย</div>
+        </div>
+        <div class="skill-card">
+          <span class="skill-num">ทักษะที่ 2</span>
+          <div class="skill-name">Self-Management<br>จัดการตัวเอง</div>
+          <div class="skill-desc">เมื่อรู้ว่าอารมณ์กำลังขึ้น ทำอย่างไรต่อ คือความสามารถในการควบคุมอารมณ์ให้สนับสนุนเราแทนที่จะทำลายเรา</div>
+        </div>
+        <div class="skill-card">
+          <span class="skill-num">ทักษะที่ 3</span>
+          <div class="skill-name">Social Awareness<br>รับรู้รอบข้าง</div>
+          <div class="skill-desc">อ่านบรรยากาศของห้อง เข้าใจว่าคนรอบข้างกำลังรู้สึกอะไร รู้ว่าตอนนี้ควรพูดอะไรหรือยังไม่ควรพูด</div>
+        </div>
+        <div class="skill-card">
+          <span class="skill-num">ทักษะที่ 4</span>
+          <div class="skill-name">Relationship Management<br>จัดการความสัมพันธ์</div>
+          <div class="skill-desc">รวมสามทักษะแรกมาใช้ในการสื่อสาร แก้ไขความขัดแย้ง สร้างความไว้ใจ และส่งอิทธิพลต่อผู้อื่นในแบบที่เป็นบวก</div>
+        </div>
+      </div>
+
+      <p>ทักษะทั้งสี่ไม่ได้อยู่แยกจากกัน แต่ต่อยอดกัน คนที่ไม่รู้จักตัวเองจะจัดการตัวเองไม่ได้ และคนที่จัดการตัวเองไม่ได้ก็ยากที่จะจัดการความสัมพันธ์ได้ดี</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s3">
+    <span class="chapter-num">iii</span>
+    <h2 class="chapter-title">Labeling — ตั้งชื่อความรู้สึก</h2>
+    <div class="chapter-body">
+      <p>หนึ่งในเทคนิคที่เรียบง่ายที่สุดแต่ได้ผลที่สุดคือการ <strong>ตั้งชื่อให้อารมณ์</strong> งานวิจัยพบว่าเมื่อเราพูด (หรือคิด) ว่า "ตอนนี้ฉันโกรธ" หรือ "ตอนนี้ฉันกังวล" Prefrontal Cortex จะเข้ามาทำงานทันที และ Amygdala ส่วนที่ควบคุม Fight-or-Flight จะสงบลง</p>
+
+      <div class="insight">
+        <span class="insight-label">ทำไมมันถึงได้ผล</span>
+        <div class="insight-body">อารมณ์ที่ไม่ได้รับการจัดการจะอยู่ได้ประมาณ 90 วินาที ถ้าเราไม่ไปต่อยอดมัน ไม่คิดต่อ ไม่เล่าซ้ำ ไม่เสริม มันจะจางหายไปเอง แต่ส่วนใหญ่ที่อารมณ์ค้างอยู่นานคือเราเองที่ไปต่อยอดมัน การตั้งชื่ออารมณ์ช่วยตัดวงจรนั้น และทำให้สมองเห็นว่า "เรื่องนี้ไม่มีอะไรมากหรอก"</div>
+      </div>
+
+      <p>สิ่งนี้ใช้ได้กับอารมณ์ของคนอื่นด้วย เมื่อเราระบุอารมณ์ของอีกฝ่ายได้ถูกต้อง เช่น "ดูเหมือนเธอจะน้อยใจ ใช่ไหม" มันช่วยให้เขาเปิดรับบทสนทนาได้มากขึ้น แต่ต้องเลือกจังหวะให้ดีและไม่ตัดสิน</p>
+      <p>คนที่ฝึก Labeling บ่อยๆ มีแนวโน้มสุขภาพดีและอายุยืนกว่าเฉลี่ย เพราะไม่มีอารมณ์ค้างสะสมอยู่นาน สมองส่วนเหตุผลประเมินสถานการณ์แล้ววาง</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s4">
+    <span class="chapter-num">iv</span>
+    <h2 class="chapter-title">จัดการตัวเองในวันที่อารมณ์มา</h2>
+    <div class="chapter-body">
+      <p>เมื่ออารมณ์โกรธหรือกดดันเข้ามา เทคนิคที่ใช้ได้ทันทีเพราะอยู่กับเราตลอดคือการหายใจ โดยเฉพาะ <strong>Box Breathing</strong> ที่ทำได้ทุกที่ทุกเวลา</p>
+
+      <div class="breath-box">
+        <div class="breath-step">
+          <span class="breath-label">ขั้นที่ 1</span>
+          <div class="breath-action">หายใจเข้า</div>
+          <div class="breath-count">4</div>
+        </div>
+        <div class="breath-step">
+          <span class="breath-label">ขั้นที่ 2</span>
+          <div class="breath-action">ค้างไว้</div>
+          <div class="breath-count">4</div>
+        </div>
+        <div class="breath-step">
+          <span class="breath-label">ขั้นที่ 3</span>
+          <div class="breath-action">หายใจออก</div>
+          <div class="breath-count">4</div>
+        </div>
+        <div class="breath-step">
+          <span class="breath-label">ขั้นที่ 4</span>
+          <div class="breath-action">ค้างอีก</div>
+          <div class="breath-count">4</div>
+        </div>
+      </div>
+
+      <p>ทำ 3-4 รอบ อารมณ์โกรธจะลดลงชัดเจน ถ้าทำได้ทันก่อนที่จะพูดหรือทำอะไรออกไป บางทีแค่ 1 ลมหายใจก็พอสำหรับเรื่องเล็กๆ</p>
+      <p>สำหรับเรื่องที่ซับซ้อนกว่านั้น วิธีที่ดีที่สุดคือนอนคิดข้ามคืน ระหว่าง <span class="term" data-term="REM Sleep" data-def="ช่วงการนอนที่สมองประมวลผลความทรงจำและอารมณ์ ย่อมาจาก Rapid Eye Movement สมองจะสร้างการเชื่อมต่อใหม่ระหว่างประสบการณ์ต่างๆ ทำให้ตื่นมาแล้วมักเห็นปัญหาชัดขึ้น">REM Sleep</span> สมองจะประมวลผลทางอารมณ์และสร้างการเชื่อมต่อที่ไม่คาดคิด ถ้าตื่นมาแล้วยังอยากทำสิ่งนั้น แปลว่าตัดสินใจด้วยเหตุผล ถ้าหายอยาก แปลว่าตอนนั้นตัดสินด้วยอารมณ์</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s5">
+    <span class="chapter-num">v</span>
+    <h2 class="chapter-title">กลยุทธ์ฝึก EQ ในชีวิตประจำวัน</h2>
+    <div class="chapter-body">
+      <p>นอกจากเทคนิคเฉพาะหน้า มีนิสัยที่ถ้าฝึกให้เป็นกิจวัตรจะทำให้ EQ ดีขึ้นในระยะยาว</p>
+
+      <div class="tip-list">
+        <div class="tip-item">
+          <div class="tip-num">1</div>
+          <div class="tip-content">
+            <div class="tip-title">นอนให้พอ</div>
+            <div class="tip-desc">การนอนดีทำให้ EQ ดีขึ้นจริงๆ เพราะสมองจะกำจัดโปรตีนสะสมในเซลล์ประสาทและประมวลผลทางอารมณ์ระหว่างนอน คนที่ไม่ได้นอน เครื่องมือทุกอย่างที่มีจะไม่มีประโยชน์เลย ถ้าอยากมี EQ ดีขึ้นโดยไม่ทำอะไรพิเศษ เริ่มจากจัดการการนอนก่อน</div>
+          </div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-num">2</div>
+          <div class="tip-content">
+            <div class="tip-title">หยุดบ่นและนินทา</div>
+            <div class="tip-desc">การบ่นเรื้อรังทำให้ Hippocampus หดตัว ซึ่งเป็นสมองส่วนที่ใช้แก้ปัญหาและคิดเชิงวิพากษ์ รวมถึงเพิ่มคอร์ติซอลซึ่งเป็นฮอร์โมนความเครียด สังเกตได้ว่าคนที่ประสบความสำเร็จสูงแทบไม่พูดถึงคนอื่นเลยถ้าไม่มีบริบท บทสนทนาของพวกเขาส่วนใหญ่จะอยู่ที่ไอเดียและสิ่งที่จะทำต่อ</div>
+          </div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-num">3</div>
+          <div class="tip-content">
+            <div class="tip-title">ปฏิเสธให้เป็น</div>
+            <div class="tip-desc">การตกลงทำในสิ่งที่ขัดกับค่านิยมหรือทรัพยากรของตัวเองสะสมเป็นความเครียดและความเหนื่อยล้า คนที่ปฏิเสธเป็นรู้สึกว่าตัวเองควบคุมชีวิตได้มากกว่า มีความพึงพอใจมากกว่า และหมดไฟน้อยกว่า การปฏิเสธไม่ใช่การเห็นแก่ตัว แต่คือการเคารพทั้งตัวเองและคนอื่น</div>
+          </div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-num">4</div>
+          <div class="tip-content">
+            <div class="tip-title">โฟกัสทีละอย่าง</div>
+            <div class="tip-desc">Multitasking ไม่มีอยู่จริง สมองสลับไปสลับมา ซึ่งแต่ละครั้งที่เริ่มใหม่มันต้องใช้พลังงาน ทำงานเป็น Batch คือทำอย่างเดียวจนเสร็จก่อนค่อยเปลี่ยน เร็วกว่าและดีต่อสภาพจิตใจมากกว่า</div>
+          </div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-num">5</div>
+          <div class="tip-content">
+            <div class="tip-title">สร้างความมั่นใจจากการกระทำ</div>
+            <div class="tip-desc">ความมั่นใจไม่ได้มาจากการคิดเอา แต่มาจากการรักษาสัญญากับตัวเอง ทำสิ่งที่ตั้งใจไว้ ไม่มีข้อแก้ตัว ไม่ยอมแพ้ง่ายๆ และขยายขอบเขตตัวเองออกไปทีละนิด เมื่อทำแบบนี้บ่อยๆ จะเริ่มรู้สึกว่าตัวเองเป็นคนที่ไว้ใจได้ และความรู้สึกนั้นจะส่งผลต่อทุกอย่างในชีวิต</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s6">
+    <span class="chapter-num">vi</span>
+    <h2 class="chapter-title">บทสรุป: ไม่ใช่การกดข่ม แต่คือการเข้าใจ</h2>
+    <div class="chapter-body">
+      <p>EQ ไม่ได้สอนให้เราไม่มีอารมณ์ ความโกรธ ความกังวล ความเศร้า ล้วนเป็นส่วนหนึ่งของการเป็นมนุษย์ สิ่งที่ EQ ทำคือช่วยให้เรา <em>เห็น</em> อารมณ์นั้นก่อนที่มันจะเห็นเราทำอะไรออกไปโดยไม่ตั้งใจ</p>
+      <p>เมื่อเกิดความขัดแย้ง อย่าเพิ่งตัดสินว่าใครผิดถูก แต่ถามหาสาเหตุก่อน เพราะหลายเรื่องบนโลก ต่างฝ่ายต่างถูกในมุมของตัวเอง เหมือนคนสองคนยืนคนละฝั่งมองตัวเลขตัวเดียวกัน คนหนึ่งเห็น 6 อีกคนเห็น 9 ทั้งคู่ไม่ได้ผิด</p>
+      <div class="pull-quote">นอกเหนือจากกฎฟิสิกส์แล้ว ทุกอย่างบนโลกล้วนเป็นความคิดเห็น</div>
+      <p>และ EQ ก็เป็นกระบวนการที่ไม่มีวันจบสิ้น บางครั้งพอเราผ่านช่วงเวลาที่ยากมากๆ เราจะพบกับบางอย่างในตัวเองที่ก่อนหน้านี้ไม่รู้ว่ามีอยู่ นั่นไม่ใช่ความล้มเหลว นั่นคือการเติบโต</p>
+      <p>ถ้าเราเข้าใจตัวเองมากขึ้น ชีวิตและความสัมพันธ์รอบข้างจะดีขึ้นตามไปด้วย</p>
+    </div>
+  </div>
+
+  <div class="chapter" id="vocab">
+    <div class="vocab-section">
+      <span class="vocab-label">คลังคำศัพท์ · บทที่ 11</span>
+      <p class="vocab-hint">* คำที่ขีดเส้นใต้สีทองในเนื้อหา กดได้เพื่อดูความหมายทันที</p>
+
+      <div class="vocab-item">
+        <div class="vocab-term">EQ / Emotional Intelligence (ปัญญาทางอารมณ์)</div>
+        <div class="vocab-meaning">ชุดทักษะในการรับรู้ เข้าใจ และจัดการอารมณ์ทั้งของตัวเองและผู้อื่น ประกอบด้วย 4 ด้านหลักได้แก่ Self-Awareness, Self-Management, Social Awareness และ Relationship Management</div>
+        <div class="vocab-example">ใช้ได้ว่า: "คนที่มี EQ สูงไม่ได้หมายความว่าไม่มีอารมณ์ แต่หมายความว่าเขารู้ตัวเมื่ออารมณ์มาและเลือกตอบสนองได้ดีกว่า"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Limbic System (สมองส่วนอารมณ์)</div>
+        <div class="vocab-meaning">กลุ่มโครงสร้างในสมองที่ควบคุมอารมณ์ ความทรงจำ และแรงขับพื้นฐาน รับสัญญาณจากประสาทสัมผัสก่อน Prefrontal Cortex ทำให้อารมณ์มักเข้ามาก่อนเหตุผลในสถานการณ์ที่รุนแรง</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ที่เราโมโหแล้วพูดออกไปโดยยังไม่ทันคิดคือเพราะ Limbic System ทำงานก่อน Prefrontal Cortex"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Labeling (การตั้งชื่ออารมณ์)</div>
+        <div class="vocab-meaning">เทคนิคการระบุและตั้งชื่อให้อารมณ์ที่กำลังเกิดขึ้นอย่างชัดเจน เช่น "ตอนนี้ฉันโกรธ" ซึ่งงานวิจัยพบว่าช่วยให้ Prefrontal Cortex เข้ามาทำงาน และลดความรุนแรงของอารมณ์ลง</div>
+        <div class="vocab-example">ใช้ได้ว่า: "แทนที่จะกำหมัดไว้เฉยๆ ลอง Labeling ดูว่าตอนนี้รู้สึกอะไร แค่นั้นก็ช่วยให้อารมณ์เย็นลงได้"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Hot Button (ปุ่มร้อน)</div>
+        <div class="vocab-meaning">สิ่งกระตุ้นเฉพาะที่ทำให้เราตอบสนองทางอารมณ์รุนแรงเป็นพิเศษ เช่น คำพูดบางแบบ สถานการณ์บางอย่าง หรือพฤติกรรมบางอย่างของผู้อื่น การรู้จัก Hot Button ของตัวเองคือก้าวแรกของ Self-Awareness</div>
+        <div class="vocab-example">ใช้ได้ว่า: "รู้จัก Hot Button ตัวเองก่อนว่าอะไรที่แตะแล้วขึ้นทันที แล้วเตรียมรับมือมันไว้ก่อนล่วงหน้า"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Box Breathing (การหายใจแบบกล่อง)</div>
+        <div class="vocab-meaning">เทคนิคการหายใจที่ใช้ควบคุมอารมณ์ โดยหายใจเข้า 4 วินาที ค้างไว้ 4 วินาที หายใจออก 4 วินาที และค้างอีก 4 วินาที ทำซ้ำ 3-4 รอบ ช่วยลดความรุนแรงของอารมณ์โกรธและความวิตกกังวลได้ชัดเจน</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ก่อนเข้าประชุมที่รู้ว่าจะตึงเครียด ลอง Box Breathing สัก 3 รอบ จะช่วยให้ใจเย็นลงได้มาก"</div>
+      </div>
+    </div>
+  </div>
+
+</article>
+
+<footer>
+  <p>บทที่ 11 &nbsp;·&nbsp; EQ ปัญญาทางอารมณ์ที่สำคัญกว่าที่คิด &nbsp;·&nbsp; sirichokbook</p>
+</footer>
+
+<script>
+  const chapters = document.querySelectorAll('.chapter:not(.visible)');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); }
+    });
+  }, { threshold: 0.1 });
+  chapters.forEach(ch => observer.observe(ch));
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+  const tooltip = document.getElementById('tooltip');
+  const tooltipTerm = document.getElementById('tooltip-term');
+  const tooltipBody = document.getElementById('tooltip-body');
+  let hideTimeout;
+  document.querySelectorAll('.term').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      clearTimeout(hideTimeout);
+      tooltipTerm.textContent = el.getAttribute('data-term');
+      tooltipBody.textContent = el.getAttribute('data-def');
+      const rect = el.getBoundingClientRect();
+      const tipW = 260;
+      let left = rect.left;
+      let top = rect.bottom + 8;
+      if (left + tipW > window.innerWidth - 16) left = window.innerWidth - tipW - 16;
+      if (left < 16) left = 16;
+      if (top + 120 > window.innerHeight) top = rect.top - 130;
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+      tooltip.classList.add('show');
+      hideTimeout = setTimeout(() => tooltip.classList.remove('show'), 4000);
+    });
+  });
+  document.addEventListener('click', () => tooltip.classList.remove('show'));
+</script>
+</body>
+</html>

@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ชีวิตที่เราเลือกเอง · sirichokbook</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,600;1,300&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root { --cream: #F5F0E8; --ink: #1A1208; --amber: #C8852A; --muted: #7A6E5F; --divider: #D9CFC0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background-color: var(--cream); color: var(--ink); font-family: 'Sarabun', sans-serif; font-weight: 300; line-height: 1.9; font-size: 17px; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 100; opacity: 0.4; }
+
+  .term { color: var(--amber); font-weight: 400; border-bottom: 1px dashed var(--amber); cursor: pointer; display: inline; }
+  .tooltip { display: none; position: fixed; background: var(--ink); color: var(--cream); font-size: 13px; line-height: 1.6; padding: 12px 16px; max-width: 260px; z-index: 9999; pointer-events: none; font-family: 'Sarabun', sans-serif; font-weight: 300; border-left: 3px solid var(--amber); }
+  .tooltip.show { display: block; }
+  .tooltip-term { font-weight: 600; font-size: 12px; letter-spacing: 0.1em; color: var(--amber); margin-bottom: 4px; text-transform: uppercase; }
+
+  .cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 60px 24px; position: relative; border-bottom: 1px solid var(--divider); overflow: hidden; }
+  .cover::after { content: ''; position: absolute; bottom: -80px; left: 50%; transform: translateX(-50%); width: 500px; height: 500px; background: radial-gradient(circle, rgba(200,133,42,0.08) 0%, transparent 70%); pointer-events: none; }
+  .cover-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 32px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.2s; }
+  .cover-title { font-family: 'Playfair Display', serif; font-size: clamp(34px, 7vw, 64px); font-weight: 900; line-height: 1.1; letter-spacing: -0.02em; color: var(--ink); max-width: 700px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.4s; }
+  .cover-title em { font-style: italic; color: var(--amber); }
+  .cover-subtitle { margin-top: 24px; font-size: 15px; color: var(--muted); max-width: 460px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.6s; }
+  .cover-divider { width: 48px; height: 2px; background: var(--amber); margin: 40px auto; opacity: 0; animation: fadeUp 0.8s ease forwards 0.8s; }
+  .cover-meta { font-size: 12px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; opacity: 0; animation: fadeUp 0.8s ease forwards 1s; }
+  .scroll-hint { position: absolute; bottom: 32px; display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: 0; animation: fadeUp 0.8s ease forwards 1.4s; }
+  .scroll-hint span { font-size: 11px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; }
+  .scroll-arrow { width: 1px; height: 32px; background: linear-gradient(to bottom, var(--amber), transparent); animation: scrollPulse 2s ease-in-out infinite; }
+  .back-link { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); text-decoration: none; position: absolute; top: 32px; left: 32px; transition: color 0.2s; opacity: 0; animation: fadeUp 0.8s ease forwards 0.1s; }
+  .back-link:hover { color: var(--amber); }
+
+  .toc { max-width: 680px; margin: 0 auto; padding: 80px 24px; border-bottom: 1px solid var(--divider); }
+  .toc-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 40px; }
+  .toc-item { display: flex; align-items: baseline; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--divider); text-decoration: none; color: var(--ink); transition: color 0.2s; }
+  .toc-item:hover { color: var(--amber); }
+  .toc-num { font-family: 'Playfair Display', serif; font-size: 13px; color: var(--amber); min-width: 24px; font-style: italic; }
+  .toc-title { font-size: 15px; font-weight: 400; flex: 1; }
+  .toc-dots { flex: 1; border-bottom: 1px dotted var(--divider); margin: 0 8px; min-width: 20px; }
+
+  .article { max-width: 680px; margin: 0 auto; padding: 80px 24px 120px; }
+  .chapter { margin-bottom: 100px; opacity: 0; transform: translateY(20px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .chapter.visible { opacity: 1; transform: translateY(0); }
+  .chapter-num { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 16px; display: block; }
+  .chapter-title { font-family: 'Playfair Display', serif; font-size: clamp(24px, 5vw, 36px); font-weight: 700; line-height: 1.2; margin-bottom: 40px; color: var(--ink); }
+  .chapter-body p { margin-bottom: 24px; color: #2E2416; }
+  .chapter-body strong { font-weight: 600; color: var(--ink); }
+  .chapter-body em { font-style: italic; color: var(--amber); }
+  .pull-quote { border-left: 3px solid var(--amber); padding: 4px 0 4px 24px; margin: 40px 0; font-family: 'Playfair Display', serif; font-size: 20px; font-style: italic; line-height: 1.5; color: var(--ink); }
+  .section-break { text-align: center; margin: 48px 0; color: var(--amber); letter-spacing: 0.3em; font-size: 14px; }
+
+  /* Quote block */
+  .en-quote { background: rgba(200,133,42,0.06); border-left: 3px solid var(--amber); padding: 20px 24px; margin: 32px 0; }
+  .en-quote .en { font-family: 'Playfair Display', serif; font-style: italic; font-size: 17px; color: var(--ink); margin-bottom: 8px; }
+  .en-quote .th { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+  /* Concept grid */
+  .concept-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 32px 0; }
+  .concept-card { border: 1px solid var(--divider); padding: 20px; }
+  .concept-icon { font-size: 22px; margin-bottom: 10px; }
+  .concept-name { font-weight: 600; font-size: 14px; color: var(--ink); margin-bottom: 6px; }
+  .concept-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* Three-level list */
+  .level-list { margin: 32px 0; }
+  .level-item { display: flex; gap: 20px; padding: 20px 0; border-bottom: 1px solid var(--divider); }
+  .level-item:last-child { border-bottom: none; }
+  .level-num { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 900; color: rgba(200,133,42,0.2); min-width: 36px; line-height: 1.1; padding-top: 2px; }
+  .level-content { flex: 1; }
+  .level-title { font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 6px; }
+  .level-desc { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+  /* Cost table */
+  .cost-table { margin: 32px 0; border: 1px solid var(--divider); }
+  .cost-row { display: flex; padding: 14px 20px; border-bottom: 1px solid var(--divider); gap: 16px; align-items: baseline; }
+  .cost-row:last-child { border-bottom: none; }
+  .cost-row.header { background: rgba(200,133,42,0.06); }
+  .cost-item { flex: 2; font-size: 14px; font-weight: 400; }
+  .cost-row.header .cost-item { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--amber); font-weight: 400; }
+  .cost-price { flex: 1; font-family: 'Playfair Display', serif; font-size: 15px; color: var(--amber); font-weight: 700; text-align: right; }
+  .cost-row.header .cost-price { font-family: 'Sarabun', sans-serif; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--amber); font-weight: 400; }
+  .cost-note { flex: 2; font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+  /* Vocab */
+  .vocab-section { background: rgba(200,133,42,0.06); border: 1px solid var(--divider); padding: 40px; margin-top: 80px; }
+  .vocab-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 8px; display: block; }
+  .vocab-hint { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+  .vocab-item { padding: 16px 0; border-bottom: 1px solid var(--divider); }
+  .vocab-item:last-child { border-bottom: none; }
+  .vocab-term { font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 4px; }
+  .vocab-meaning { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .vocab-example { font-size: 13px; color: var(--amber); font-style: italic; margin-top: 4px; }
+
+  footer { text-align: center; padding: 60px 24px; border-top: 1px solid var(--divider); font-size: 12px; color: var(--muted); letter-spacing: 0.1em; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes scrollPulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+  @media (max-width: 600px) {
+    body { font-size: 16px; }
+    .toc, .article { padding-left: 20px; padding-right: 20px; }
+    .back-link { top: 20px; left: 20px; }
+    .concept-grid { grid-template-columns: 1fr; }
+    .cost-note { display: none; }
+    .tooltip { max-width: 200px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="tooltip" id="tooltip">
+  <div class="tooltip-term" id="tooltip-term"></div>
+  <div id="tooltip-body"></div>
+</div>
+
+<section class="cover">
+  <a class="back-link" href="index.html">← กลับหน้าหลัก</a>
+  <p class="cover-label">บทที่ 9</p>
+  <h1 class="cover-title">ชีวิตที่<em>เราเลือกเอง</em></h1>
+  <p class="cover-subtitle">Henry David Thoreau นั่งอยู่ริมบึง Walden ในปี 1845 และถามคำถามที่เราทุกคนยังไม่กล้าถามตัวเอง: ชีวิตที่เราใช้อยู่นี้ เราเลือกมันจริงๆ หรือเปล่า</p>
+  <div class="cover-divider"></div>
+  <p class="cover-meta">ปรัชญา · ชีวิต &nbsp;·&nbsp; sirichokbook</p>
+  <div class="scroll-hint"><span>เริ่มอ่าน</span><div class="scroll-arrow"></div></div>
+</section>
+
+<nav class="toc">
+  <p class="toc-label">สารบัญ</p>
+  <a class="toc-item" href="#s1"><span class="toc-num">i</span><span class="toc-title">ชายคนหนึ่งหนีเข้าป่า เพื่ออะไร</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s2"><span class="toc-num">ii</span><span class="toc-title">ความสิ้นหวังที่เงียบงัน</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s3"><span class="toc-num">iii</span><span class="toc-title">กับดักของการสืบทอด</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s4"><span class="toc-num">iv</span><span class="toc-title">ราคาจริงของสิ่งของ</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s5"><span class="toc-num">v</span><span class="toc-title">ของจำเป็นจริง กับของจำเป็นจอมปลอม</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s6"><span class="toc-num">vi</span><span class="toc-title">การกุศล การปฏิรูป และกับดักทางใจ</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s7"><span class="toc-num">vii</span><span class="toc-title">ข้อจำกัดของทอโร และสิ่งที่เราควรหยิบไป</span><span class="toc-dots"></span></a>
+</nav>
+
+<article class="article">
+
+  <div class="chapter visible">
+    <div class="chapter-body">
+      <p>มีหนังสือบางเล่มที่เขียนในยุคหนึ่ง แต่กลับอ่านแล้วรู้สึกว่ากำลังพูดถึงตัวเราในวันนี้ <em>Walden</em> ของ Henry David Thoreau คือหนึ่งในนั้น</p>
+      <p>เขาเขียนมันในปี 1854 บรรยายชีวิตสองปีที่เขาไปอยู่คนเดียวในกระท่อมริมบึง Walden รัฐแมสซาชูเซตส์ และบทแรกที่ชื่อว่า <strong>Economy</strong> หรือ <em>ความมัธยัตและการดำรงชีพ</em> คือบทที่ยาวที่สุดและหนักที่สุดในเล่ม เพราะมันไม่ได้พูดถึงธรรมชาติหรือการตกปลา แต่พูดถึงระบบที่ทำให้คนส่วนใหญ่หยุดใช้ชีวิตที่ตัวเองเลือก</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s1">
+    <span class="chapter-num">i</span>
+    <h2 class="chapter-title">ชายคนหนึ่งหนีเข้าป่า เพื่ออะไร</h2>
+    <div class="chapter-body">
+      <p>ปี 1845 อเมริกากำลังอยู่ในยุคปฏิวัติอุตสาหกรรม รถไฟแล่นผ่านป่าดงดิบ โรงงานดูดแรงงานจากชนบทเข้าเมือง และ<span class="term" data-term="American Dream" data-def="ความเชื่อว่าทุกคนสามารถประสบความสำเร็จในอเมริกาได้หากทำงานหนักพอ โดยมักวัดความสำเร็จด้วยทรัพย์สินและสถานะทางสังคม">American Dream</span> กำลังก่อตัวในแบบที่คุ้นเคย คือทำงานหนัก สะสมให้มาก วัดความสำเร็จด้วยทรัพย์สมบัติ</p>
+      <p>Thoreau มองดูทั้งหมดนั้น แล้วรู้สึกว่ามีบางอย่างผิดพลาดอย่างลึกซึ้ง เขาไม่ได้หนีเข้าป่าเพราะเกลียดผู้คน และไม่ได้หนีเพราะขี้เกียจ แต่เพราะอยากพิสูจน์ให้ตัวเองเห็นว่า ชีวิตที่มีความหมายนั้นทำได้จริง โดยไม่ต้องอ้อมผ่านระบบที่สังคมสร้างมาให้</p>
+      <div class="pull-quote">เขาไม่ได้เขียนในฐานะนักปรัชญา แต่ในฐานะคนที่รู้สึกว่ากำลังจะจมน้ำ และกำลังบอกให้คนอื่นว่ายน้ำขึ้นมา</div>
+      <p>สิ่งที่เขาเขียนออกมาจึงไม่ใช่คู่มือการใช้ชีวิตเรียบง่าย แต่เป็นการชำแหละระบบที่ทำให้คนหยุดตั้งคำถามกับชีวิตตัวเองออกมาทีละชิ้น</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s2">
+    <span class="chapter-num">ii</span>
+    <h2 class="chapter-title">ความสิ้นหวังที่เงียบงัน</h2>
+    <div class="chapter-body">
+      <p>แนวคิดที่ทรงพลังที่สุดในบท Economy คือสิ่งที่ทอโรเรียกว่า <em>Quiet Desperation</em> หรือ <strong>ความสิ้นหวังอย่างเงียบๆ</strong> เขาบอกว่าคนส่วนใหญ่ ไม่ว่าจะรวยหรือจน มีชื่อเสียงหรือไม่ กำลังใช้ชีวิตอยู่กับสิ่งนี้ โดยไม่รู้ตัว</p>
+
+      <div class="en-quote">
+        <div class="en">"The mass of men lead lives of quiet desperation."</div>
+        <div class="th">คนส่วนใหญ่ใช้ชีวิตด้วยความสิ้นหวังอย่างเงียบๆ</div>
+      </div>
+
+      <p>เขาไม่ได้พูดถึงคนที่กำลังร้องไห้หรือทุกข์ทรมานอย่างเห็นได้ชัด แต่พูดถึงคนที่ดูเหมือนสบายดี มีงานทำ มีเงินใช้ มีครอบครัว แต่ข้างในนั้นมีเสียงเล็กๆ กระซิบตลอดเวลาว่า <em>"นี่ไม่ใช่ชีวิตที่ฉันต้องการ"</em> แต่พวกเขาไม่รู้จะทำอย่างไร เพราะทุกคนรอบข้างก็ใช้ชีวิตแบบเดียวกัน</p>
+
+      <p>และที่อันตรายกว่านั้น เขายังเสริมว่า:</p>
+
+      <div class="en-quote">
+        <div class="en">"What is called resignation is confirmed desperation."</div>
+        <div class="th">สิ่งที่เรียกว่า "การยอมรับชะตา" คือความสิ้นหวังที่สมบูรณ์แล้ว</div>
+      </div>
+
+      <p>กระบวนการนี้เกิดขึ้นใน 3 ระดับ:</p>
+
+      <div class="level-list">
+        <div class="level-item">
+          <div class="level-num">1</div>
+          <div class="level-content">
+            <div class="level-title">ระดับแรก — มีความฝัน</div>
+            <div class="level-desc">คนๆ หนึ่งมีสิ่งที่อยากเป็น อยากทำ หรืออย่างน้อยก็ภาพชีวิตที่รู้สึกว่าตื่นมาแล้วอยากลุกออกจากเตียง</div>
+          </div>
+        </div>
+        <div class="level-item">
+          <div class="level-num">2</div>
+          <div class="level-content">
+            <div class="level-title">ระดับสอง — ชีวิตจริงกดทับ</div>
+            <div class="level-desc">ความจำเป็นทางการเงิน ความคาดหวังของครอบครัว ความกลัวความล้มเหลว หรือแค่ความเฉื่อยชาสะสม ทำให้ความฝันนั้นค่อยๆ หดเล็กลงแล้วก็เงียบไป</div>
+          </div>
+        </div>
+        <div class="level-item">
+          <div class="level-num">3</div>
+          <div class="level-content">
+            <div class="level-title">ระดับสาม — เรียกการหดตัวว่า "การเติบโต"</div>
+            <div class="level-desc">นี่คือส่วนที่อันตรายที่สุด เมื่อคนเริ่มบอกตัวเองว่า "ฉันเป็นผู้ใหญ่แล้ว รู้จักโลกความเป็นจริงแล้ว ความฝันพวกนั้นมันเป็นเรื่องเด็กๆ" และที่อันตรายที่สุดคือบอกว่า "ฉันโอเคกับชีวิตแบบนี้แล้ว" ทั้งๆ ที่ลึกๆ ไม่ได้โอเคเลย</div>
+          </div>
+        </div>
+      </div>
+
+      <p>ทอโรบอกว่าสังคมยิ่งทำให้มันอันตรายขึ้น เพราะสังคมให้รางวัลกับคนที่ยอมรับโดยไม่ต่อต้าน ด้วยคำชมว่า "นี่แหละคนที่รู้จักหน้าที่" ขณะที่คนที่ยังดิ้นรนตามหาความหมายของชีวิตกลับถูกมองว่า "ยังเด็ก เพ้อฝัน ไม่รู้จักพอ"</p>
+      <p>ทางออกของเขาไม่ใช่การหนีเข้าป่าเสมอไป แต่คือ <strong>ความตื่นตัวทางปัญญา</strong> การที่คุณยังถามตัวเองอยู่เสมอว่า "นี่คือชีวิตที่ฉันเลือกหรือเปล่า" ตราบใดที่คำถามนั้นยังดังอยู่ ประตูก็ยังไม่ถูกปิดตาย</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s3">
+    <span class="chapter-num">iii</span>
+    <h2 class="chapter-title">กับดักของการสืบทอด</h2>
+    <div class="chapter-body">
+      <p>ทอโรเล่าภาพที่น่าสนใจมาก เขาบอกว่าเขาเห็น <em>"ชายหนุ่มที่โชคร้าย ซึ่งได้รับมรดกเป็นฟาร์ม เป็นบ้าน เป็นโรงนา และสัตว์เลี้ยง"</em> คำว่า <em>โชคร้าย</em> ในที่นี้เขาเลือกใช้อย่างตั้งใจ</p>
+      <p>สังคมมองว่าการได้รับมรดกก้อนโตคือโชคดี แต่ทอโรมองว่ามันคือการถูกพันธนาการ เพราะเมื่อเราได้รับมรดกมา เราไม่ได้เลือกเอง เรากลายเป็นผู้ดูแลสิ่งที่คนอื่นสร้างไว้ก่อนหน้า ชีวิตเราถูกกำหนดล่วงหน้าโดยการตัดสินใจของคนรุ่นก่อน</p>
+      <div class="pull-quote">มรดกที่หนักที่สุดในยุคนี้ไม่ใช่ที่ดินหรือหนี้สิน แต่คือภาพจำของชีวิตที่สมบูรณ์แบบที่เผลอรับมาแบกไว้บนบ่า</div>
+      <p>เขาขยายความไปถึงการสืบทอดที่ไม่ใช่วัตถุ ซึ่งคือการสืบทอด <strong>ความเชื่อ ค่านิยม และนิยามของความสำเร็จ</strong> เราถูกบอกตั้งแต่เด็กว่าต้องเรียนอะไร ทำงานอะไร แต่งงานกับใคร และควรมีทรัพย์สินเท่าไหร่ถึงจะเรียกว่าอยู่ดีกินดี</p>
+      <p>คำถามที่ทอโรปล่อยค้างไว้ในอากาศคือ ใครกันที่กำหนดมาตรฐานเหล่านั้น และทำไมเราถึงยอมรับมันโดยไม่ตรวจสอบอะไร</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s4">
+    <span class="chapter-num">iv</span>
+    <h2 class="chapter-title">ราคาจริงของสิ่งของ</h2>
+    <div class="chapter-body">
+      <p>หนึ่งในแนวคิดที่คมที่สุดของทอโรคือระบบวัดคุณค่าใหม่ เขาบอกว่า <strong>ราคาของสิ่งของใดๆ ไม่ใช่ตัวเลขที่ติดอยู่บนป้าย แต่คือจำนวนชีวิตที่เราต้องแลกเพื่อมัน</strong></p>
+      <p>เขาคำนวณว่าบ้านหลังหนึ่งในยุคของเขามีราคาเท่ากับ 10–15 ปีของการทำงาน หมายความว่าถ้าเรามีชีวิตทำงานได้ 40 ปี เราแลกชีวิตเกือบครึ่งไปเพื่อที่อยู่อาศัย ประเด็นไม่ใช่ว่าการซื้อบ้านผิดหรือถูก แต่คือ: <em>ในช่วงที่ทุ่มเทชีวิตเพื่อซื้อบ้าน เราได้ใช้ชีวิตจริงๆ ของเราไหม หรือแค่รอให้ผ่อนหมดก่อน</em></p>
+
+      <div class="cost-table">
+        <div class="cost-row header">
+          <div class="cost-item">สิ่งของ</div>
+          <div class="cost-price">ราคาเป็นชีวิต</div>
+          <div class="cost-note">สิ่งที่มักมองข้าม</div>
+        </div>
+        <div class="cost-row">
+          <div class="cost-item">บ้านหลังแรก</div>
+          <div class="cost-price">10–15 ปี</div>
+          <div class="cost-note">ภาระที่จำกัดการตัดสินใจชีวิตอีกหลายด้าน</div>
+        </div>
+        <div class="cost-row">
+          <div class="cost-item">รถหรู</div>
+          <div class="cost-price">1–2 ปี</div>
+          <div class="cost-note">ต้องทำงานมากขึ้นเพื่อจ่ายค่างวดที่สูงขึ้น</div>
+        </div>
+        <div class="cost-row">
+          <div class="cost-item">เสื้อผ้าแบรนด์</div>
+          <div class="cost-price">หลายสัปดาห์</div>
+          <div class="cost-note">ใช้สอยฟังก์ชั่นเดียวกับราคาถูกกว่า</div>
+        </div>
+        <div class="cost-row">
+          <div class="cost-item">เทคโนโลยีที่ "ประหยัดเวลา"</div>
+          <div class="cost-price">หลายเดือน</div>
+          <div class="cost-note">เวลาที่ "ประหยัด" มักถูกใช้ทำงานมากขึ้น</div>
+        </div>
+      </div>
+
+      <p>เขายกตัวอย่างชายคนหนึ่งที่ไปทำงานในอินเดียเพื่อสะสมเงิน หวังจะกลับมาใช้ชีวิตเป็นกวี ทอโรบอกว่าชายคนนั้นควรจะเป็นกวีตั้งแต่ต้น เพราะกว่าจะรวยและกลับมา เขาก็ไม่ใช่คนที่เคยอยากเป็นกวีอีกต่อไปแล้ว เพราะกระบวนการหาเงินนั้น<em>กินค่ากวีในตัวเขาไปเรียบร้อยแล้ว</em></p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s5">
+    <span class="chapter-num">v</span>
+    <h2 class="chapter-title">ของจำเป็นจริง กับของจำเป็นจอมปลอม</h2>
+    <div class="chapter-body">
+      <p>ทอโรแบ่งสิ่งจำเป็นที่แท้จริงออกเป็น 4 อย่าง คือ <strong>อาหาร เสื้อผ้า ที่พักพิง และความอบอุ่น</strong> จากนั้นเขาพิสูจน์ด้วยตัวเองว่าสิ่งเหล่านี้หาได้ไม่ยากและไม่แพงเลย เขาใช้เงินแค่ 27 เซนต์ต่อสัปดาห์สำหรับอาหาร สร้างกระท่อมด้วยเงินน้อยกว่า 30 ดอลลาร์ และทำงานเพียงราว 6 สัปดาห์ต่อปีเพื่อครอบคลุมค่าใช้จ่ายทั้งหมด</p>
+      <p>แต่สิ่งที่เขาต้องการแสดงไม่ใช่ว่าทุกคนควรทำแบบเขา สิ่งที่เขาต้องการแสดงคือ <strong>ช่องว่างมหึมา</strong> ระหว่างสิ่งที่จำเป็นจริงๆ กับสิ่งที่สังคมบอกว่าจำเป็น</p>
+
+      <div class="concept-grid">
+        <div class="concept-card">
+          <div class="concept-icon">👔</div>
+          <div class="concept-name">เสื้อผ้า — หน้าที่จริง</div>
+          <div class="concept-desc">ป้องกันความหนาวและปกปิดร่างกาย นั่นคือทั้งหมด</div>
+        </div>
+        <div class="concept-card">
+          <div class="concept-icon">🏷️</div>
+          <div class="concept-name">เสื้อผ้า — หน้าที่จอมปลอม</div>
+          <div class="concept-desc">แสดงตัวตน บอกสถานะ บอกว่าทันสมัย กลายเป็นเครื่องมือทางสังคมที่ซับซ้อนและแพงกว่าหน้าที่จริงมาก</div>
+        </div>
+        <div class="concept-card">
+          <div class="concept-icon">📱</div>
+          <div class="concept-name">เทคโนโลยี — หน้าที่จริง</div>
+          <div class="concept-desc">ช่วยให้ทำสิ่งที่ต้องการได้ง่ายขึ้นและเร็วขึ้น</div>
+        </div>
+        <div class="concept-card">
+          <div class="concept-icon">🔄</div>
+          <div class="concept-name">เทคโนโลยี — ความขัดแย้ง</div>
+          <div class="concept-desc">เราซื้อเวลาด้วยเครื่องทุ่นแรง แต่เวลาที่ได้คืนมาถูกใช้ทำงานมากขึ้นเพื่อจ่ายค่าเครื่องทุ่นแรง</div>
+        </div>
+      </div>
+
+      <p>เขาวิจารณ์ระบบแฟชั่นด้วยประโยคที่เฉียบคม: ไม่มีเหตุผลทางปัญญาหรือสุนทรียศาสตร์เลยที่จะอธิบายว่าทำไมสิ่งสวยงามของปีนี้ถึงไม่ได้สวยงามในปีหน้า ระบบแฟชั่นทั้งหมดเป็นเพียง <em>การสร้างความไม่พอใจให้กับสิ่งที่เรามีอยู่</em> เพื่อขายสิ่งที่ยังไม่มีให้เรา เขาพูดสิ่งนี้ในปี 1845 แต่กลับอธิบายกลไกพื้นฐานของอุตสาหกรรมแฟชั่นสมัยใหม่ได้อย่างแม่นยำ</p>
+      <p>ประเด็นสำคัญคือ ทอโรไม่ได้ต้องการให้เราใช้น้อยเพื่อความเรียบง่าย แต่ต้องการให้เราใช้น้อยเพื่อ <strong>มีเวลามากขึ้นสำหรับสิ่งที่มีความหมาย</strong> เขาทำงาน 6 สัปดาห์ต่อปีเพื่อชีวิตทางกายภาพ เพื่อจะมีเวลาอีก 46 สัปดาห์สำหรับชีวิตทางปัญญาและจิตวิญญาณ</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s6">
+    <span class="chapter-num">vi</span>
+    <h2 class="chapter-title">การกุศล การปฏิรูป และกับดักทางใจ</h2>
+    <div class="chapter-body">
+      <p>ส่วนที่ทำให้หลายคนรู้สึกไม่สบายใจที่สุดคือเมื่อทอโรวิจารณ์การกุศลและนักปฏิรูปสังคม เขาไม่ได้บอกว่าการช่วยเหลือผู้อื่นเป็นสิ่งผิด แต่เขาชี้ให้เห็นว่า <strong>การกุศลส่วนใหญ่แก้ที่ปลายทาง ไม่ใช่ที่ต้นทาง</strong></p>
+
+      <div class="pull-quote">มีคน 1,000 คนกำลังตัดกิ่งไม้แห่งความเลวออก แต่มีเพียงคนเดียวเท่านั้นที่โจมตีไปที่ราก</div>
+
+      <p>และที่ลึกกว่านั้น เขาตั้งข้อสังเกตว่าคนที่อยากปฏิรูปสังคมมักทำเพราะ<span class="term" data-term="Defense Mechanism" data-def="กลไกทางจิตวิทยาที่จิตใจสร้างขึ้นเพื่อปกป้องตัวเองจากความเจ็บปวดหรือความวิตกกังวล เช่น การโปรเจคความรู้สึกตัวเองไปใส่คนอื่น หรือการหาเหตุผลเพื่อหลีกเลี่ยงการมองตัวเอง">กลไกป้องกันตัวเองทางจิตวิทยา</span> ไม่ใช่เพราะความห่วงใยผู้อื่นอย่างแท้จริง คนที่ไม่พอใจกับชีวิตตัวเองมักมองเห็นแต่ความไม่ยุติธรรมในสังคม การออกไปเป็นนักปฏิรูปจึงเป็นวิธีหนีจากการต้องหันกลับมามองตัวเอง</p>
+      <p>ทอโรเชื่อใน<span class="term" data-term="Individualism (ปัจเจกนิยม)" data-def="แนวคิดที่ให้ความสำคัญกับการพัฒนาและการตัดสินใจของแต่ละบุคคล ต่างจากแนวคิดที่เน้นกลุ่มหรือสังคม ในบริบทของทอโรหมายถึงการแก้ไขตัวเองก่อนที่จะคิดแก้ไขโลก">ปัจเจกนิยม</span> เขามองว่าตราบใดที่คนๆ นั้นยังมีความทุกข์อยู่ข้างใน ต่อให้เขาเปลี่ยนโลกทั้งใบได้ เขาก็ยังจะทุกข์อยู่ดี เพราะต้นตอของปัญหาไม่ได้อยู่ที่สังคม แต่อยู่ที่ตัวเขาเอง</p>
+      <p>การปฏิรูปที่แท้จริงและยั่งยืนที่สุด ต้องเริ่มจากการซ่อมแซมโลกภายในของตัวเองก่อนเสมอ</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s7">
+    <span class="chapter-num">vii</span>
+    <h2 class="chapter-title">ข้อจำกัดของทอโร และสิ่งที่เราควรหยิบไป</h2>
+    <div class="chapter-body">
+      <p>ก่อนจะรับเอาปรัชญาของทอโรไปใช้ทั้งหมด ต้องยอมรับว่ามันมีข้อจำกัดที่สำคัญ</p>
+      <p>เขาทดลองใช้ชีวิตเรียบง่ายได้ เพราะเขาไม่ต้องจ่ายค่าที่ดิน (ยืมจากเพื่อน) ไม่มีภาระครอบครัว ร่างกายแข็งแรง และมีการศึกษาจากฮาร์วาร์ด เศรษฐศาสตร์ของเขาจึงเป็นเศรษฐศาสตร์ของคนโสดที่ไร้ข้อผูกมัด ซึ่งนำไปประยุกต์ใช้ได้ยากกับคนที่มีพ่อแม่ที่ต้องดูแล มีลูกที่ต้องส่งเสีย หรือมีทรัพยากรจำกัดมาแต่ต้น</p>
+      <p>นอกจากนั้น แม้เขาจะปฏิเสธระบบอุตสาหกรรม แต่ขวานที่เขาใช้ตัดต้นไม้ ตะปูที่เขาใช้ตอก เสื้อผ้าที่เขาสวม ล้วนมาจากแรงงานของคนอื่นและระบบที่เขาวิจารณ์อยู่</p>
+
+      <div class="en-quote">
+        <div class="en">"I do not wish to impose my way of life on anyone."</div>
+        <div class="th">ฉันไม่ต้องการให้ใครยึดถือวิถีชีวิตของฉันไปใช้ ฉันปรารถนาให้โลกนี้มีผู้คนที่แตกต่างหลากหลายกันให้มากที่สุด</div>
+      </div>
+
+      <p>ประโยคนี้เป็นกุญแจสำคัญที่คนมักมองข้าม เพราะมันบอกว่าปรัชญาของเขาไม่ใช่สูตรสำเร็จ แต่เป็น <strong>คำเชิญให้คิด ไม่ใช่คำสั่งให้ทำตาม</strong></p>
+      <p>ถ้าอ่านแล้วอยากทิ้งงานในเมืองหนีไปปลูกกระท่อมอยู่คนเดียวเพื่อให้ดูเท่ นั่นแปลว่าล้มเหลวในการเข้าใจเขาอย่างสิ้นเชิง เพราะนั่นก็แค่เปลี่ยนจากการเป็นทาสของระบบทุนนิยม มาเป็นทาสของอุดมคติของทอโรแทน เราก็ยังคงสืบทอดมาตรฐานความสุขของคนอื่นอยู่ดี</p>
+      <div class="pull-quote">การพึ่งพาตัวเองที่แท้จริงคือการกล้าที่จะเป็นตัวของตัวเอง ไม่ใช่การเดินตามรอยเท้าของนักปรัชญาคนใด</div>
+      <p>สิ่งที่ทอโรต้องการจริงๆ มีเพียงอย่างเดียว คือให้เราทุกคนตั้งคำถามกับตัวเองอย่างซื่อสัตย์ว่า <em>"ชีวิตที่เราใช้อยู่นี้ เป็นชีวิตที่เราเลือกเองหรือเปล่า"</em> ในท้ายที่สุด บท Economy ไม่ใช่บทเกี่ยวกับการเงินหรือการประหยัด แต่เป็นบทเกี่ยวกับ <strong>เสรีภาพ</strong> เสรีภาพที่ไม่ใช่การทำทุกอย่างที่ต้องการ แต่คือการรู้ว่าตัวเองต้องการอะไรจริงๆ และมีชีวิตที่สอดคล้องกับสิ่งนั้น</p>
+    </div>
+  </div>
+
+  <div class="chapter" id="vocab">
+    <div class="vocab-section">
+      <span class="vocab-label">คลังคำศัพท์ · บทที่ 9</span>
+      <p class="vocab-hint">* คำที่ขีดเส้นใต้สีทองในเนื้อหา กดได้เพื่อดูความหมายทันที</p>
+
+      <div class="vocab-item">
+        <div class="vocab-term">Quiet Desperation (ความสิ้นหวังอย่างเงียบๆ)</div>
+        <div class="vocab-meaning">แนวคิดของทอโรที่ว่าคนส่วนใหญ่ดำเนินชีวิตในสภาวะที่ไม่พอใจกับชีวิตตัวเองลึกๆ แต่ไม่รู้ตัว เพราะทุกคนรอบข้างก็เป็นแบบเดียวกัน ทำให้ความรู้สึกนั้นกลายเป็น "เรื่องปกติ"</div>
+        <div class="vocab-example">ใช้ได้ว่า: "คนที่ตื่นมาแล้วรู้สึกหนักอกทุกเช้าวันจันทร์แต่บอกว่า 'ก็ปกติแหละ' อาจกำลังอยู่ใน Quiet Desperation โดยไม่รู้ตัว"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Confirmed Desperation (ความสิ้นหวังที่สมบูรณ์แล้ว)</div>
+        <div class="vocab-meaning">สภาวะที่คนเริ่มเรียกการยอมแพ้ว่า "การยอมรับความเป็นจริง" หรือ "การเติบโต" ซึ่งอันตรายกว่าความสิ้นหวังธรรมดา เพราะปิดประตูการเปลี่ยนแปลงโดยไม่รู้สึกว่าตัวเองได้ปิดมัน</div>
+        <div class="vocab-example">ใช้ได้ว่า: "พอเราเริ่มบอกตัวเองว่า 'โอเคแล้วกับชีวิตแบบนี้' ทั้งๆ ที่ยังไม่โอเค นั่นคือ Confirmed Desperation"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Opportunity Cost (ต้นทุนค่าเสียโอกาส)</div>
+        <div class="vocab-meaning">ในบริบทของทอโร คือสิ่งที่เราสูญเสียไปเมื่อเลือกทางหนึ่ง เขาวัดราคาสิ่งของด้วย "จำนวนชีวิตที่ต้องแลก" แทนที่จะวัดด้วยเงิน ทำให้เห็นต้นทุนที่แท้จริงของการได้มา</div>
+        <div class="vocab-example">ใช้ได้ว่า: "Opportunity Cost ของการทำงานล่วงเวลาเพื่อซื้อรถหรูคือเวลาที่อาจได้ใช้กับครอบครัวหรือสิ่งที่รัก"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Individualism (ปัจเจกนิยม)</div>
+        <div class="vocab-meaning">แนวคิดที่ทอโรเชื่อมั่น คือการเปลี่ยนแปลงตัวเองก่อนที่จะคิดเปลี่ยนแปลงโลก เขามองว่าผู้ที่แก้ไขตัวเองได้แล้วมักจะไม่รู้สึกว่าต้องออกไปปฏิรูปสังคมอีกต่อไป</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ถ้าอยากเปลี่ยนโลก เริ่มจาก Individualism ก่อน คือทำให้ชีวิตของตัวเองดีขึ้นก่อนแล้วค่อยขยายออกไป"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Walden (วอลเดน)</div>
+        <div class="vocab-meaning">ชื่อทั้งหนังสือและบึงน้ำในรัฐแมสซาชูเซตส์ สหรัฐอเมริกา ที่ Henry David Thoreau ไปอยู่อาศัยในกระท่อมเป็นเวลา 2 ปี 2 เดือน และ 2 วัน ระหว่างปี 1845–1847 ก่อนจะนำประสบการณ์มาเขียนเป็นหนังสือ ตีพิมพ์ในปี 1854</div>
+        <div class="vocab-example">ใช้ได้ว่า: "Walden ไม่ใช่หนังสือสอนให้ทุกคนไปอยู่ป่า แต่เป็นหนังสือที่ถามว่าเราได้ใช้ชีวิตจริงๆ ของตัวเองไหม"</div>
+      </div>
+    </div>
+  </div>
+
+</article>
+
+<footer>
+  <p>บทที่ 9 &nbsp;·&nbsp; ชีวิตที่เราเลือกเอง &nbsp;·&nbsp; sirichokbook</p>
+</footer>
+
+<script>
+  const chapters = document.querySelectorAll('.chapter:not(.visible)');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); }
+    });
+  }, { threshold: 0.1 });
+  chapters.forEach(ch => observer.observe(ch));
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+  const tooltip = document.getElementById('tooltip');
+  const tooltipTerm = document.getElementById('tooltip-term');
+  const tooltipBody = document.getElementById('tooltip-body');
+  let hideTimeout;
+  document.querySelectorAll('.term').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      clearTimeout(hideTimeout);
+      tooltipTerm.textContent = el.getAttribute('data-term');
+      tooltipBody.textContent = el.getAttribute('data-def');
+      const rect = el.getBoundingClientRect();
+      const tipW = 260;
+      let left = rect.left;
+      let top = rect.bottom + 8;
+      if (left + tipW > window.innerWidth - 16) left = window.innerWidth - tipW - 16;
+      if (left < 16) left = 16;
+      if (top + 120 > window.innerHeight) top = rect.top - 130;
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+      tooltip.classList.add('show');
+      hideTimeout = setTimeout(() => tooltip.classList.remove('show'), 4000);
+    });
+  });
+  document.addEventListener('click', () => tooltip.classList.remove('show'));
+</script>
+</body>
+</html>

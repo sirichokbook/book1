@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>การ์ดใบเดียวราคารถหนึ่งคัน · sirichokbook</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,600;1,300&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root { --cream: #F5F0E8; --ink: #1A1208; --amber: #C8852A; --muted: #7A6E5F; --divider: #D9CFC0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background-color: var(--cream); color: var(--ink); font-family: 'Sarabun', sans-serif; font-weight: 300; line-height: 1.9; font-size: 17px; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 100; opacity: 0.4; }
+
+  .term { color: var(--amber); font-weight: 400; border-bottom: 1px dashed var(--amber); cursor: pointer; display: inline; }
+  .tooltip { display: none; position: fixed; background: var(--ink); color: var(--cream); font-size: 13px; line-height: 1.6; padding: 12px 16px; max-width: 260px; z-index: 9999; pointer-events: none; font-family: 'Sarabun', sans-serif; font-weight: 300; border-left: 3px solid var(--amber); }
+  .tooltip.show { display: block; }
+  .tooltip-term { font-weight: 600; font-size: 12px; letter-spacing: 0.1em; color: var(--amber); margin-bottom: 4px; text-transform: uppercase; }
+
+  .cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 60px 24px; position: relative; border-bottom: 1px solid var(--divider); overflow: hidden; }
+  .cover::after { content: ''; position: absolute; bottom: -80px; left: 50%; transform: translateX(-50%); width: 500px; height: 500px; background: radial-gradient(circle, rgba(200,133,42,0.08) 0%, transparent 70%); pointer-events: none; }
+  .cover-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 32px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.2s; }
+  .cover-title { font-family: 'Playfair Display', serif; font-size: clamp(34px, 7vw, 64px); font-weight: 900; line-height: 1.1; letter-spacing: -0.02em; color: var(--ink); max-width: 700px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.4s; }
+  .cover-title em { font-style: italic; color: var(--amber); }
+  .cover-subtitle { margin-top: 24px; font-size: 15px; color: var(--muted); max-width: 460px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.6s; }
+  .cover-divider { width: 48px; height: 2px; background: var(--amber); margin: 40px auto; opacity: 0; animation: fadeUp 0.8s ease forwards 0.8s; }
+  .cover-meta { font-size: 12px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; opacity: 0; animation: fadeUp 0.8s ease forwards 1s; }
+  .scroll-hint { position: absolute; bottom: 32px; display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: 0; animation: fadeUp 0.8s ease forwards 1.4s; }
+  .scroll-hint span { font-size: 11px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; }
+  .scroll-arrow { width: 1px; height: 32px; background: linear-gradient(to bottom, var(--amber), transparent); animation: scrollPulse 2s ease-in-out infinite; }
+  .back-link { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); text-decoration: none; position: absolute; top: 32px; left: 32px; transition: color 0.2s; opacity: 0; animation: fadeUp 0.8s ease forwards 0.1s; }
+  .back-link:hover { color: var(--amber); }
+
+  .toc { max-width: 680px; margin: 0 auto; padding: 80px 24px; border-bottom: 1px solid var(--divider); }
+  .toc-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 40px; }
+  .toc-item { display: flex; align-items: baseline; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--divider); text-decoration: none; color: var(--ink); transition: color 0.2s; }
+  .toc-item:hover { color: var(--amber); }
+  .toc-num { font-family: 'Playfair Display', serif; font-size: 13px; color: var(--amber); min-width: 24px; font-style: italic; }
+  .toc-title { font-size: 15px; font-weight: 400; flex: 1; }
+  .toc-dots { flex: 1; border-bottom: 1px dotted var(--divider); margin: 0 8px; min-width: 20px; }
+
+  .article { max-width: 680px; margin: 0 auto; padding: 80px 24px 120px; }
+  .chapter { margin-bottom: 100px; opacity: 0; transform: translateY(20px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .chapter.visible { opacity: 1; transform: translateY(0); }
+  .chapter-num { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 16px; display: block; }
+  .chapter-title { font-family: 'Playfair Display', serif; font-size: clamp(24px, 5vw, 36px); font-weight: 700; line-height: 1.2; margin-bottom: 40px; color: var(--ink); }
+  .chapter-body p { margin-bottom: 24px; color: #2E2416; }
+  .chapter-body strong { font-weight: 600; color: var(--ink); }
+  .chapter-body em { font-style: italic; color: var(--amber); }
+  .pull-quote { border-left: 3px solid var(--amber); padding: 4px 0 4px 24px; margin: 40px 0; font-family: 'Playfair Display', serif; font-size: 20px; font-style: italic; line-height: 1.5; color: var(--ink); }
+  .section-break { text-align: center; margin: 48px 0; color: var(--amber); letter-spacing: 0.3em; font-size: 14px; }
+
+  /* Stat row */
+  .stat-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 32px 0; }
+  .stat-card { border: 1px solid var(--divider); padding: 20px 16px; text-align: center; }
+  .stat-num { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 900; color: var(--amber); line-height: 1; margin-bottom: 8px; }
+  .stat-label { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* Story block */
+  .story-block { border: 1px solid var(--divider); padding: 28px 32px; margin: 32px 0; position: relative; }
+  .story-label { font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--amber); margin-bottom: 16px; display: block; }
+  .story-body { font-size: 15px; color: #2E2416; line-height: 1.9; }
+
+  /* How-to list */
+  .howto-list { margin: 32px 0; }
+  .howto-item { display: flex; gap: 20px; padding: 18px 0; border-bottom: 1px solid var(--divider); }
+  .howto-item:last-child { border-bottom: none; }
+  .howto-num { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 900; color: rgba(200,133,42,0.2); min-width: 32px; line-height: 1.1; padding-top: 2px; }
+  .howto-content { flex: 1; }
+  .howto-title { font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 6px; }
+  .howto-desc { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+  /* Type grid */
+  .type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 32px 0; }
+  .type-card { border: 1px solid var(--divider); padding: 20px; }
+  .type-name { font-weight: 600; font-size: 14px; color: var(--amber); margin-bottom: 6px; }
+  .type-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* Risk */
+  .risk-list { margin: 24px 0; }
+  .risk-item { display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--divider); }
+  .risk-item:last-child { border-bottom: none; }
+  .risk-icon { font-size: 18px; min-width: 28px; padding-top: 2px; }
+  .risk-content { flex: 1; }
+  .risk-title { font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 4px; }
+  .risk-desc { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+  /* Vocab */
+  .vocab-section { background: rgba(200,133,42,0.06); border: 1px solid var(--divider); padding: 40px; margin-top: 80px; }
+  .vocab-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 8px; display: block; }
+  .vocab-hint { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+  .vocab-item { padding: 16px 0; border-bottom: 1px solid var(--divider); }
+  .vocab-item:last-child { border-bottom: none; }
+  .vocab-term { font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 4px; }
+  .vocab-meaning { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .vocab-example { font-size: 13px; color: var(--amber); font-style: italic; margin-top: 4px; }
+
+  footer { text-align: center; padding: 60px 24px; border-top: 1px solid var(--divider); font-size: 12px; color: var(--muted); letter-spacing: 0.1em; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes scrollPulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+  @media (max-width: 600px) {
+    body { font-size: 16px; }
+    .toc, .article { padding-left: 20px; padding-right: 20px; }
+    .back-link { top: 20px; left: 20px; }
+    .stat-row { grid-template-columns: 1fr 1fr; }
+    .type-grid { grid-template-columns: 1fr; }
+    .story-block { padding: 20px; }
+    .tooltip { max-width: 200px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="tooltip" id="tooltip">
+  <div class="tooltip-term" id="tooltip-term"></div>
+  <div id="tooltip-body"></div>
+</div>
+
+<section class="cover">
+  <a class="back-link" href="index.html">← กลับหน้าหลัก</a>
+  <p class="cover-label">บทที่ 10</p>
+  <h1 class="cover-title">การ์ดใบเดียว<em>ราคารถหนึ่งคัน</em></h1>
+  <p class="cover-subtitle">ตลาดการ์ดสะสมโลกมีเงินสะพัด 250,000 ล้านบาท ในไทยมี 1,500 ล้านและยังโตต่อเนื่อง แล้วมันทำงานอย่างไร และใครกำลังทำเงินจากมันจริงๆ</p>
+  <div class="cover-divider"></div>
+  <p class="cover-meta">การลงทุน · ของสะสม &nbsp;·&nbsp; sirichokbook</p>
+  <div class="scroll-hint"><span>เริ่มอ่าน</span><div class="scroll-arrow"></div></div>
+</section>
+
+<nav class="toc">
+  <p class="toc-label">สารบัญ</p>
+  <a class="toc-item" href="#s1"><span class="toc-num">i</span><span class="toc-title">การ์ดมาจากไหน และทำไมมันถึงมีราคา</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s2"><span class="toc-num">ii</span><span class="toc-title">ตัวเลขที่ทำให้ต้องหยุดคิด</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s3"><span class="toc-num">iii</span><span class="toc-title">PSA คืออะไร และทำไมมันถึงสำคัญ</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s4"><span class="toc-num">iv</span><span class="toc-title">วิธีทำเงินในตลาดการ์ด</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s5"><span class="toc-num">v</span><span class="toc-title">เส้นทางของคนที่ซื้อ 500 ขาย 500,000</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s6"><span class="toc-num">vi</span><span class="toc-title">ความเสี่ยงที่ต้องรู้ก่อนเข้าตลาด</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s7"><span class="toc-num">vii</span><span class="toc-title">บทเรียนจากคนในวงการ</span><span class="toc-dots"></span></a>
+</nav>
+
+<article class="article">
+
+  <div class="chapter visible">
+    <div class="chapter-body">
+      <p>มีของที่ขายได้ 460,000 บาทวางอยู่บนโต๊ะ ข้างๆ มีอีกใบที่เพิ่งซื้อมาสองสัปดาห์ก่อนในราคา 200,000 กว่าบาท ทั้งสองใบเป็นกระดาษ ขนาดไม่ใหญ่กว่านามบัตรเท่าไหร่ และทั้งสองใบคือการ์ดสะสม</p>
+      <p>ตลาดที่หลายคนคิดว่าเป็นแค่ของเล่นเด็กนี้กำลังเคลื่อนเงินในระดับที่น่าสนใจมาก และคนที่เข้าใจกลไกของมันกำลังทำกำไรได้จริง</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s1">
+    <span class="chapter-num">i</span>
+    <h2 class="chapter-title">การ์ดมาจากไหน และทำไมมันถึงมีราคา</h2>
+    <div class="chapter-body">
+      <p>การ์ดสะสมไม่ได้เพิ่งเกิดขึ้นในยุคนี้ ต้นกำเนิดมาจากการ์ดเบสบอลที่แถมมากับซองบุหรี่ในศตวรรษที่ 19 จากนั้นพัฒนาเป็นการ์ดกีฬาที่ขายให้แฟนบาสเกตบอล อเมริกันฟุตบอล และเบสบอล ก่อนที่ประมาณ 30 ปีที่แล้วจะมีการ์ดตัวละครการ์ตูนเกิดขึ้น นำโดย Pokémon และ Yu-Gi-Oh ที่กลายเป็นปรากฏการณ์ระดับโลก</p>
+      <p>สิ่งที่ทำให้การ์ดมีมูลค่าคือสมการง่ายๆ สามตัวแปร ได้แก่ <strong>ความหายาก</strong> ว่าโลกนี้มีการ์ดใบนั้นกี่ใบ <strong>ความนิยมของตัวละครหรือนักกีฬา</strong> ว่าคนรักมันมากแค่ไหน และ <strong>สภาพของการ์ด</strong> ว่ามันอยู่ในสภาพดีเพียงใด ยิ่งหายาก ยิ่งเป็นที่รัก ยิ่งสมบูรณ์ มูลค่ายิ่งสูง</p>
+      <div class="pull-quote">การ์ดไม่ได้มีมูลค่าเพราะกระดาษ แต่มีมูลค่าเพราะความทรงจำและความต้องการของคนที่อยากได้</div>
+      <p>สำหรับการ์ดกีฬา ราคาขึ้นลงตาม <em>Performance</em> ของนักกีฬา ซื้อการ์ดนักกีฬาที่ยังไม่ดังแล้วเขาดังขึ้น ราคาก็พุ่ง แต่สำหรับการ์ดการ์ตูนอย่าง One Piece หรือ Pokémon ราคาขึ้นกับ <em>Rarity</em> และ <em>Population</em> เป็นหลัก ว่าทั่วโลกมีการ์ดใบนั้นในสภาพดีกี่ใบ</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s2">
+    <span class="chapter-num">ii</span>
+    <h2 class="chapter-title">ตัวเลขที่ทำให้ต้องหยุดคิด</h2>
+    <div class="chapter-body">
+      <p>ก่อนจะลงลึกในรายละเอียด มีตัวเลขที่ควรรู้อยู่สี่ตัว</p>
+
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="stat-num">250,000<br><span style="font-size:14px">ล้านบาท</span></div>
+          <div class="stat-label">มูลค่าตลาดรวมการ์ดสะสมทั่วโลก</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">1,500<br><span style="font-size:14px">ล้านบาท</span></div>
+          <div class="stat-label">เงินสะพัดในตลาดการ์ดไทย และยังโตต่อเนื่อง</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">512<br><span style="font-size:14px">ล้านบาท</span></div>
+          <div class="stat-label">ราคาการ์ด Pokémon ใบแพงที่สุดในโลก ทุบ Guinness World Record</div>
+        </div>
+      </div>
+
+      <p>ตัวเลขสุดท้ายนั้นมาจากการที่ Logan Paul นักสร้างคอนเทนต์ชื่อดังซื้อการ์ด Pokémon ใบหนึ่งมาเมื่อสามสี่ปีที่แล้ว แล้วนำมาขายใหม่ในราคา 512 ล้านบาท ซึ่งทำให้คนทั่วโลกหันมาสนใจตลาดนี้อย่างจริงจัง และในไทยก็เช่นกัน</p>
+      <p>ปัจจุบันงานการ์ดในไทยจัดทุกสองอาทิตย์ มีทั้งในห้างและในฮอลล์ขนาด 200 โต๊ะขึ้นไป ตลาดที่เคยมีเพียงไม่กี่สิบคนในกลุ่ม Facebook ตอนนี้กำลังขยายตัวอย่างรวดเร็ว</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s3">
+    <span class="chapter-num">iii</span>
+    <h2 class="chapter-title">PSA คืออะไร และทำไมมันถึงสำคัญ</h2>
+    <div class="chapter-body">
+      <p><span class="term" data-term="PSA (Professional Sports Authenticator)" data-def="บริษัทที่ให้บริการตรวจสอบและให้คะแนนสภาพการ์ดสะสม โดยให้คะแนนตั้งแต่ 1-10 การ์ดที่ได้ PSA 10 หมายถึงสภาพสมบูรณ์แบบที่สุด ซึ่งมักมีมูลค่าสูงกว่าการ์ดไม่ผ่านการเกรดหลายเท่า">PSA</span> ย่อมาจาก Professional Sports Authenticator คือบริษัทที่รับตรวจสอบและให้คะแนนสภาพการ์ด ตั้งแต่ 1 ถึง 10 โดย PSA 10 หมายถึงสภาพสมบูรณ์แบบที่สุด</p>
+      <p>สิ่งที่คนมักเข้าใจผิดคือคิดว่า PSA 10 คือเกรดที่ได้จากการเก็บรักษาดี แต่ความจริงคือ <strong>การ์ดที่แกะจากซองใหม่เอี่ยมก็อาจไม่ได้ PSA 10</strong> เพราะกระบวนการปริ้นต์ที่โรงงานอาจมีรอยขีดข่วนเล็กน้อย หรือตัดกระดาษไม่ตรง ทำให้ตกเกรดได้ทันที</p>
+
+      <div class="story-block">
+        <span class="story-label">ทำไม PSA 10 ถึงมีมูลค่าสูง</span>
+        <div class="story-body">การ์ด 1 ชุดมีประมาณ 30-40 แบบ มีหลายชุดออกมาตลอด การที่จะปลอมให้ผ่านการตรวจสอบของ PSA ทำได้ยากมาก เพราะบริษัทใช้เทคโนโลยีตรวจสอบสีและวัสดุในยุคที่ผลิต ทำให้การ์ดที่ได้ PSA 10 เป็นหลักฐานว่าของแท้และสภาพดีที่สุด ซึ่งเพิ่มมูลค่าได้ถึง 3 เท่าจากการ์ดที่ไม่ผ่านการเกรด</div>
+      </div>
+
+      <p>ข้อสำคัญอีกอย่างคือ <span class="term" data-term="Population (ป๊อป)" data-def="จำนวนการ์ดใบนั้นที่ได้รับการเกรดจาก PSA ทั่วโลก สามารถตรวจสอบได้จากเว็บไซต์ PSA การ์ดที่มี Population น้อยและได้เกรดสูงมักมีมูลค่าสูงกว่ามาก">Population</span> หรือ "ป๊อป" ซึ่งคือจำนวนการ์ดใบนั้นที่ได้ PSA 10 ทั่วโลก ตรวจสอบได้ฟรีจากเว็บไซต์ PSA การ์ดที่มี Population น้อยหมายความว่าของหายาก และยิ่งน่าเก็บ นี่คือตัวเลขที่คนในวงการดูก่อนตัดสินใจซื้อทุกครั้ง</p>
+      <p>ส่วนการดูว่าการ์ดแท้หรือปลอมนั้นคนที่สัมผัสการ์ดทุกวันสามารถรู้ได้จาก Texture ของกระดาษ สีที่ปริ้นต์ และความคมของภาพ การ์ดปลอมส่วนใหญ่ทำได้ไม่ถึงระดับต้นฉบับ และการ์ดมูลค่าสูงทุกใบในตลาดจริงจะถูกบังคับให้ส่งเกรดก่อนขาย</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s4">
+    <span class="chapter-num">iv</span>
+    <h2 class="chapter-title">วิธีทำเงินในตลาดการ์ด</h2>
+    <div class="chapter-body">
+      <p>ตลาดการ์ดไม่ได้มีแค่ทางเดียว มีโมเดลที่ผู้เล่นใช้กันอยู่หลายรูปแบบ แต่ละแบบมีระดับความเสี่ยงและต้นทุนต่างกัน</p>
+
+      <div class="type-grid">
+        <div class="type-card">
+          <div class="type-name">เปิดกล่องสุ่ม</div>
+          <div class="type-desc">ซื้อกล่องแล้วลุ้นว่าจะได้การ์ดหายากไหม ความเสี่ยงสูงสุด ผลตอบแทนสูงสุดถ้าโชคดี แต่ไม่ใช่การลงทุน เหมือนซื้อลอตเตอรี่</div>
+        </div>
+        <div class="type-card">
+          <div class="type-name">ซื้อใบ + ส่งเกรด</div>
+          <div class="type-desc">ซื้อการ์ดที่น่าจะได้ PSA 10 ส่งเกรด แล้วขายในราคาสูงขึ้น ต้องมีความรู้ว่าการ์ดใบไหนคุ้มส่ง (ค่าเกรดเริ่มต้นที่ใบละ 1,000 บาท)</div>
+        </div>
+        <div class="type-card">
+          <div class="type-name">ซื้อ-ขาย (Flip)</div>
+          <div class="type-desc">ซื้อการ์ดในราคาต่ำกว่าตลาด ขายในราคาตลาดหรือสูงกว่า ต้องเช็คราคาใน eBay หรือแอปเพื่อรู้ว่าราคายุติธรรมคือเท่าไหร่</div>
+        </div>
+        <div class="type-card">
+          <div class="type-name">เก็บระยะยาว</div>
+          <div class="type-desc">ซื้อการ์ด Population น้อย ตัวละครหลัก แล้วรอให้ราคาขึ้น คล้ายการลงทุนในหุ้นที่ต้องอาศัยความรู้และความอดทน</div>
+        </div>
+      </div>
+
+      <p>เครื่องมือสำคัญในการเช็คราคาคือ eBay ซึ่งสามารถถ่ายรูปการ์ดแล้วให้ระบบค้นหาราคาที่ขายอยู่ได้เลย ทำให้รู้ว่าราคาตลาดโลกอยู่ที่ไหน ก่อนจะซื้อหรือขายทุกครั้ง</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s5">
+    <span class="chapter-num">v</span>
+    <h2 class="chapter-title">เส้นทางของคนที่ซื้อ 500 ขาย 500,000</h2>
+    <div class="chapter-body">
+      <p>มีนักสะสมไทยคนหนึ่งที่เริ่มต้นจากการซื้อการ์ด Pokémon ในราคา 500 เหรียญสหรัฐ และขายต่อได้ 500,000 เหรียญ หรือประมาณ 14.4 ล้านบาทในขณะนั้น กำไร 1,000 เท่า เรื่องนี้เกิดขึ้นได้อย่างไร</p>
+
+      <div class="howto-list">
+        <div class="howto-item">
+          <div class="howto-num">1</div>
+          <div class="howto-content">
+            <div class="howto-title">ซื้อในราคาตลาด ไม่ใช่ซื้อถูก</div>
+            <div class="howto-desc">เขาซื้อการ์ดใบนั้นในราคาตลาดจาก Facebook ไทย ไม่ได้ได้มาถูกกว่าคนอื่น แต่เขารู้ว่าการ์ดใบนี้น่าส่งเกรด</div>
+          </div>
+        </div>
+        <div class="howto-item">
+          <div class="howto-num">2</div>
+          <div class="howto-content">
+            <div class="howto-title">ส่งเกรดและได้ PSA 10</div>
+            <div class="howto-desc">เขาส่งการ์ด 39 ใบในชุดเดียวกัน ได้ PSA 10 มา 10 ใบ แต่ใบที่ดันได้ 10 กลับเป็นใบที่หายากที่สุดในชุด — การ์ด Error ที่โรงงานลืมปริ้นต์หมายเลข ทำให้ถูกเรียกคืน จึงมีน้อยมากในตลาด</div>
+          </div>
+        </div>
+        <div class="howto-item">
+          <div class="howto-num">3</div>
+          <div class="howto-content">
+            <div class="howto-title">รู้ว่าสิ่งที่ตัวเองถืออยู่มีค่าแค่ไหน</div>
+            <div class="howto-desc">เขาปรึกษาผู้เชี่ยวชาญในวงการ Pokémon ระดับโลก ซึ่งยืนยันว่าการ์ดใบนี้ไม่มี PSA 10 มา 25 ปีแล้ว คำแนะนำคือให้ปล่อยออกมาแบบ Auction เท่านั้น อย่าขาย Private</div>
+          </div>
+        </div>
+        <div class="howto-item">
+          <div class="howto-num">4</div>
+          <div class="howto-content">
+            <div class="howto-title">ปล่อย Auction ในเวลาที่ถูกต้อง</div>
+            <div class="howto-desc">ช่วงนั้นพอดีกับที่ Logan Paul ประกาศจะเข้ามาเล่นการ์ด Pokémon ทำให้ความสนใจของโลกพุ่งสูง ราคาจบที่ 480,000 เหรียญ ประมาณ 14.4 ล้านบาท</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pull-quote">ไม่ใช่โชค แต่คือการรู้ว่าตัวเองถืออะไรอยู่ และรู้ว่าควรปล่อยมันเมื่อไหร่</div>
+      <p>ปัจจุบันการ์ดใบนั้นมีมูลค่าประมาณ 200,000 เหรียญ เพราะหลังจากนั้นมีคนส่งเกรดการ์ดใบเดียวกันเพิ่มและได้ PSA 10 เพิ่มขึ้น ทำให้ Population สูงขึ้นและราคาปรับลดลง นี่คือตัวอย่างที่ชัดเจนที่สุดว่า Timing และ Population สำคัญแค่ไหน</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s6">
+    <span class="chapter-num">vi</span>
+    <h2 class="chapter-title">ความเสี่ยงที่ต้องรู้ก่อนเข้าตลาด</h2>
+    <div class="chapter-body">
+      <p>ตลาดการ์ดมีโอกาสจริง แต่ก็มีความเสี่ยงจริงเช่นกัน ก่อนจะนำเงินเข้าไปควรเข้าใจสี่เรื่องนี้</p>
+
+      <div class="risk-list">
+        <div class="risk-item">
+          <div class="risk-icon">📦</div>
+          <div class="risk-content">
+            <div class="risk-title">การเปิดกล่องไม่ใช่การลงทุน</div>
+            <div class="risk-desc">การเปิดกล่องสุ่มคือการซื้อความตื่นเต้น ไม่ใช่การลงทุน คนที่เปิดกล่องราคาล้านบาทส่วนใหญ่คือคนที่กำไรจากการ์ดมาเยอะแล้วและแบ่งกำไรมาเล่น ถ้าเพิ่งเริ่มต้น อย่าเปิดกล่องเป็นกลยุทธ์หลัก</div>
+          </div>
+        </div>
+        <div class="risk-item">
+          <div class="risk-icon">📊</div>
+          <div class="risk-content">
+            <div class="risk-title">ราคาขึ้นลงตามกระแส</div>
+            <div class="risk-desc">ช่วง Crypto บูม เงินไหลเข้าตลาดการ์ดมหาศาล ราคาพุ่งเกินความเป็นจริง แล้วก็ปรับลงมา ตลาดการ์ดเป็นกราฟขึ้นลง ต้องศึกษาวงจรและไม่ซื้อด้วยอารมณ์</div>
+          </div>
+        </div>
+        <div class="risk-item">
+          <div class="risk-icon">💸</div>
+          <div class="risk-content">
+            <div class="risk-title">ค่าเกรดคือต้นทุนที่ต้องคำนวณ</div>
+            <div class="risk-desc">ค่าส่งเกรด PSA เริ่มต้นที่ประมาณ 1,000 บาทต่อใบ ถ้าการ์ดขายได้แค่ 2,000 บาท การส่งเกรดไม่คุ้ม ต้องคำนวณก่อนทุกครั้งว่ามูลค่าที่เพิ่มขึ้นหลังเกรดคุ้มกับค่าใช้จ่ายหรือไม่</div>
+          </div>
+        </div>
+        <div class="risk-item">
+          <div class="risk-icon">⚠️</div>
+          <div class="risk-content">
+            <div class="risk-title">สแกมมีอยู่จริง</div>
+            <div class="risk-desc">ตลาดออนไลน์มีการโกงอยู่ โดยเฉพาะการขายการ์ดราคาสูงโดยไม่มีการเกรด หรือเกรดปลอม ทางป้องกันที่ดีที่สุดคือซื้อการ์ดมูลค่าสูงจากแพลตฟอร์มที่มีระบบคุ้มครองผู้ซื้อ และตรวจ Serial Number จากเว็บ PSA ทุกครั้ง</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s7">
+    <span class="chapter-num">vii</span>
+    <h2 class="chapter-title">บทเรียนจากคนในวงการ</h2>
+    <div class="chapter-body">
+      <p>นักสะสมและนักลงทุนการ์ดที่ประสบความสำเร็จมักมีสิ่งหนึ่งเหมือนกัน คือพวกเขาไม่ได้ทำแค่อย่างเดียว</p>
+      <p>คนที่เริ่มจากการซื้อขายรองเท้า Streetwear แล้วหันมาเล่นการ์ด บอกว่าในช่วงที่เขากำลังซื้อการ์ดเพื่อลงทุน เขาก็รับจ้างเปิดกล่องสุ่มไปด้วย เพื่อให้มีรายได้สม่ำเสมอรองรับความเสี่ยงของการลงทุน ธุรกิจ Service ด้านข้างเสมอ ทำให้เขาสามารถรับความเสี่ยงในส่วนการลงทุนได้มากขึ้น</p>
+
+      <div class="story-block">
+        <span class="story-label">หลักการที่ได้จากคนในวงการ</span>
+        <div class="story-body">
+          ก่อนซื้อการ์ดทุกใบ ให้ถามตัวเองสามคำถาม หนึ่ง Population ทั้งโลกมีกี่ใบ สองตัวละครนี้เป็นตัวหลักหรือเปล่า และสาม ถ้าส่งเกรดแล้วได้ 10 มูลค่าจะเพิ่มขึ้นเท่าไหร่เมื่อเทียบกับค่าใช้จ่าย ถ้าตอบได้ทั้งสาม ค่อยตัดสินใจซื้อ
+        </div>
+      </div>
+
+      <p>ที่น่าสนใจกว่านั้นคือ การ์ดสะสมในยุคนี้ไม่ได้ขับเคลื่อนด้วยนักลงทุนอย่างเดียว แต่ขับเคลื่อนด้วยคน 2 กลุ่มพร้อมกัน คือ <strong>คนยุค 90 ที่โตแล้วมีเงิน</strong> และอยากซื้อของที่วัยเด็กไม่มีตังค์ซื้อ กับ <strong>เด็กรุ่นใหม่</strong> ที่เข้ามาจากเกมการ์ดและชอบแข่งขัน สองกลุ่มนี้ค้ำตลาดไว้จากสองทิศทาง ซึ่งเป็นเหตุผลที่ตลาดนี้ไม่น่าจะหายไปง่ายๆ</p>
+      <p>สุดท้ายแล้ว เหมือนกับการลงทุนทุกประเภท คนที่ทำเงินได้จริงในตลาดการ์ดคือคนที่ <em>มีความรู้มากกว่าคนอื่น</em> รู้ว่าอะไรหายาก รู้ว่าตลาดกำลังไปทางไหน และรู้ว่าตัวเองถืออะไรอยู่ในมือ</p>
+    </div>
+  </div>
+
+  <div class="chapter" id="vocab">
+    <div class="vocab-section">
+      <span class="vocab-label">คลังคำศัพท์ · บทที่ 10</span>
+      <p class="vocab-hint">* คำที่ขีดเส้นใต้สีทองในเนื้อหา กดได้เพื่อดูความหมายทันที</p>
+
+      <div class="vocab-item">
+        <div class="vocab-term">PSA 10 (Gem Mint)</div>
+        <div class="vocab-meaning">คะแนนสูงสุดจากบริษัท Professional Sports Authenticator หมายถึงการ์ดที่อยู่ในสภาพสมบูรณ์แบบที่สุด ไม่มีรอยขีดข่วน ตัดตรง พิมพ์ชัด โดยทั่วไปมีมูลค่าสูงกว่าการ์ดไม่เกรดหรือเกรดต่ำกว่า 3-10 เท่า</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ก่อนซื้อการ์ดราคาสูงควรเช็คก่อนว่าเป็น PSA 10 และดู Serial Number ในเว็บ PSA เพื่อยืนยันความแท้"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Population (ป๊อป)</div>
+        <div class="vocab-meaning">จำนวนการ์ดรุ่นและเกรดนั้นๆ ที่ผ่านการตรวจสอบจาก PSA ทั่วโลก ดูได้ฟรีในเว็บ PSA ยิ่ง Population น้อย ยิ่งหายาก ยิ่งมีมูลค่าสูง</div>
+        <div class="vocab-example">ใช้ได้ว่า: "Population PSA 10 ทั้งโลกมีแค่ 6 ใบ นั่นแหละเหตุผลที่ราคามันแพงขนาดนี้"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Rarity (ความหายาก)</div>
+        <div class="vocab-meaning">ระดับความหายากของการ์ดตามที่บริษัทผู้ผลิตกำหนด บางใบออกมาหลายล้านใบ บางใบมีแค่หลักร้อยหรือเป็น One of One คือมีใบเดียวในโลก ยิ่งหายากยิ่งมีมูลค่าสูง</div>
+        <div class="vocab-example">ใช้ได้ว่า: "การ์ดแข่งขันที่ได้จากทัวร์นาเมนต์เท่านั้นมี Rarity สูงกว่าการ์ดที่เปิดได้จากกล่องทั่วไป"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Flip</div>
+        <div class="vocab-meaning">กลยุทธ์ซื้อมาขายไปในระยะสั้น โดยซื้อในราคาต่ำกว่าตลาดแล้วขายในราคาตลาดหรือสูงกว่า เป็นวิธีทำกำไรที่ต้องอาศัยความรู้ด้านราคาและการมองหาดีลที่คนอื่นมองข้าม</div>
+        <div class="vocab-example">ใช้ได้ว่า: "Flip ได้ก็ต่อเมื่อรู้ว่าราคาตลาดจริงอยู่ที่ไหน ถ้าไม่เช็ค eBay ก่อนก็อาจซื้อแพงกว่าราคาตลาดโดยไม่รู้ตัว"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">One of One (1/1)</div>
+        <div class="vocab-meaning">การ์ดที่มีเพียงใบเดียวในโลก มักเป็นการ์ดพิเศษที่ผลิตขึ้นมาเพื่อรางวัลการแข่งขันหรือโปรโมชัน มีมูลค่าสูงมากเพราะไม่มีการ์ดใบอื่นที่เหมือนกัน</div>
+        <div class="vocab-example">ใช้ได้ว่า: "การ์ด One of One ขายได้ราคาสูงมาก แต่ก็ขายยากเพราะหาคนที่ต้องการพอดีได้ไม่ง่าย"</div>
+      </div>
+    </div>
+  </div>
+
+</article>
+
+<footer>
+  <p>บทที่ 10 &nbsp;·&nbsp; การ์ดใบเดียวราคารถหนึ่งคัน &nbsp;·&nbsp; sirichokbook</p>
+</footer>
+
+<script>
+  const chapters = document.querySelectorAll('.chapter:not(.visible)');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); }
+    });
+  }, { threshold: 0.1 });
+  chapters.forEach(ch => observer.observe(ch));
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+  const tooltip = document.getElementById('tooltip');
+  const tooltipTerm = document.getElementById('tooltip-term');
+  const tooltipBody = document.getElementById('tooltip-body');
+  let hideTimeout;
+  document.querySelectorAll('.term').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      clearTimeout(hideTimeout);
+      tooltipTerm.textContent = el.getAttribute('data-term');
+      tooltipBody.textContent = el.getAttribute('data-def');
+      const rect = el.getBoundingClientRect();
+      const tipW = 260;
+      let left = rect.left;
+      let top = rect.bottom + 8;
+      if (left + tipW > window.innerWidth - 16) left = window.innerWidth - tipW - 16;
+      if (left < 16) left = 16;
+      if (top + 120 > window.innerHeight) top = rect.top - 130;
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+      tooltip.classList.add('show');
+      hideTimeout = setTimeout(() => tooltip.classList.remove('show'), 4000);
+    });
+  });
+  document.addEventListener('click', () => tooltip.classList.remove('show'));
+</script>
+</body>
+</html>
