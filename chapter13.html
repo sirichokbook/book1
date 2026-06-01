@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>พูดให้คนฟัง ฟังให้คนพูด · หนังสือของฉัน</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #FAF7F2;
+    --warm-dark: #1C1814;
+    --brown: #6B4C2A;
+    --gold: #C9963A;
+    --rust: #A84B2F;
+    --sage: #5A7A5C;
+    --light-brown: #E8DDD0;
+    --mid-brown: #C4A882;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--cream);
+    color: var(--warm-dark);
+    font-family: 'Sarabun', sans-serif;
+    font-size: 16px;
+    line-height: 1.8;
+  }
+
+  /* COVER */
+  .cover {
+    min-height: 100vh;
+    background: var(--warm-dark);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cover::before {
+    content: '';
+    position: absolute;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    border: 1px solid rgba(201,150,58,0.15);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .cover::after {
+    content: '';
+    position: absolute;
+    width: 700px; height: 700px;
+    border-radius: 50%;
+    border: 1px solid rgba(201,150,58,0.08);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .cover-inner { position: relative; z-index: 2; max-width: 600px; }
+
+  .cover-label {
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 40px;
+    font-weight: 500;
+  }
+
+  .cover-ornament {
+    width: 60px; height: 1px;
+    background: var(--gold);
+    margin: 0 auto 40px;
+  }
+
+  .cover h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(32px, 6vw, 56px);
+    color: #FAF7F2;
+    line-height: 1.2;
+    margin-bottom: 16px;
+    font-weight: 700;
+  }
+
+  .cover h1 em {
+    color: var(--gold);
+    font-style: italic;
+  }
+
+  .cover-subtitle {
+    font-size: 14px;
+    color: var(--mid-brown);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 48px;
+  }
+
+  .cover-author {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    color: var(--mid-brown);
+    font-style: italic;
+    margin-bottom: 60px;
+  }
+
+  .cover-desc {
+    font-size: 14px;
+    color: rgba(250,247,242,0.5);
+    line-height: 1.9;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(201,150,58,0.5);
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+
+  /* TOC */
+  .toc {
+    background: var(--light-brown);
+    padding: 80px 40px;
+  }
+
+  .toc-inner { max-width: 700px; margin: 0 auto; }
+
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--brown);
+    margin-bottom: 32px;
+    font-weight: 600;
+  }
+
+  .toc h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    color: var(--warm-dark);
+    margin-bottom: 48px;
+  }
+
+  .toc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2px;
+  }
+
+  .toc-item {
+    background: white;
+    padding: 20px 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.2s;
+  }
+  .toc-item:hover { background: var(--cream); }
+
+  .toc-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    color: var(--mid-brown);
+    line-height: 1;
+    flex-shrink: 0;
+    width: 32px;
+  }
+
+  .toc-text { font-size: 13px; font-weight: 500; color: var(--warm-dark); line-height: 1.4; padding-top: 6px; }
+
+  /* CONTENT */
+  .content { max-width: 780px; margin: 0 auto; padding: 0 24px; }
+
+  /* OVERVIEW SECTION */
+  .overview {
+    padding: 100px 0 60px;
+    border-bottom: 1px solid var(--light-brown);
+  }
+
+  .overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 48px; }
+
+  .overview-box {
+    background: var(--warm-dark);
+    color: var(--cream);
+    padding: 32px;
+  }
+
+  .overview-box h4 {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+
+  .overview-box p { font-size: 14px; line-height: 1.8; color: rgba(250,247,242,0.8); }
+
+  /* CHAPTERS */
+  .chapter {
+    padding: 80px 0;
+    border-bottom: 1px solid var(--light-brown);
+    animation: fadeIn 0.5s ease;
+  }
+
+  @keyframes fadeIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+  .chapter-header { display: flex; align-items: flex-start; gap: 32px; margin-bottom: 48px; }
+
+  .chapter-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 80px;
+    line-height: 1;
+    color: var(--light-brown);
+    flex-shrink: 0;
+    font-weight: 700;
+  }
+
+  .chapter-meta { flex: 1; padding-top: 12px; }
+
+  .chapter-label {
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .chapter-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(20px, 3vw, 28px);
+    line-height: 1.3;
+    color: var(--warm-dark);
+  }
+
+  .chapter-body { font-size: 15px; line-height: 1.9; color: #3D3028; }
+  .chapter-body p { margin-bottom: 16px; }
+
+  /* CALLOUT BOX */
+  .callout {
+    border-left: 3px solid var(--gold);
+    padding: 24px 28px;
+    margin: 32px 0;
+    background: rgba(201,150,58,0.06);
+  }
+
+  .callout-title {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .callout p, .callout li { font-size: 14px; line-height: 1.8; }
+
+  /* STEPS */
+  .steps { margin: 32px 0; }
+
+  .step {
+    display: flex;
+    gap: 20px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--light-brown);
+  }
+  .step:last-child { border-bottom: none; }
+
+  .step-num {
+    width: 36px; height: 36px;
+    background: var(--warm-dark);
+    color: var(--gold);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .step-content { flex: 1; }
+  .step-title { font-weight: 600; font-size: 15px; margin-bottom: 6px; }
+  .step-desc { font-size: 14px; color: #5A4A3A; line-height: 1.7; }
+
+  /* QUOTE */
+  .pull-quote {
+    text-align: center;
+    padding: 48px 0;
+    margin: 32px 0;
+  }
+
+  .pull-quote p {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(18px, 2.5vw, 24px);
+    font-style: italic;
+    color: var(--brown);
+    line-height: 1.6;
+    max-width: 560px;
+    margin: 0 auto 16px;
+  }
+
+  .pull-quote cite {
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--mid-brown);
+    font-style: normal;
+  }
+
+  /* FORMULA */
+  .formula {
+    background: var(--warm-dark);
+    color: var(--cream);
+    padding: 32px 40px;
+    margin: 32px 0;
+    text-align: center;
+  }
+
+  .formula-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--mid-brown);
+    margin-bottom: 16px;
+  }
+
+  .formula-text {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(16px, 2.5vw, 22px);
+    color: var(--gold);
+    font-style: italic;
+  }
+
+  /* SUMMARY TABLE */
+  .summary-section {
+    background: var(--warm-dark);
+    padding: 80px 40px;
+    margin-top: 0;
+  }
+
+  .summary-inner { max-width: 780px; margin: 0 auto; }
+
+  .summary-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    color: var(--cream);
+    margin-bottom: 48px;
+  }
+
+  .summary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+
+  .summary-card {
+    border: 1px solid rgba(201,150,58,0.2);
+    padding: 28px;
+  }
+
+  .summary-card h4 {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+  }
+
+  .summary-card p { font-size: 14px; color: rgba(250,247,242,0.75); line-height: 1.7; }
+
+  /* FOOTER */
+  footer {
+    background: var(--warm-dark);
+    border-top: 1px solid rgba(201,150,58,0.2);
+    padding: 40px;
+    text-align: center;
+  }
+
+  footer p { font-size: 12px; color: var(--mid-brown); letter-spacing: 1px; }
+
+  /* UTILITY */
+  h2.section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(24px, 4vw, 36px);
+    margin-bottom: 8px;
+  }
+
+  strong { color: var(--brown); font-weight: 600; }
+
+  ul { padding-left: 20px; }
+  ul li { margin-bottom: 8px; font-size: 15px; line-height: 1.7; }
+
+  @media (max-width: 600px) {
+    .overview-grid { grid-template-columns: 1fr; }
+    .chapter-header { flex-direction: column; gap: 16px; }
+    .chapter-number { font-size: 56px; }
+    .toc { padding: 60px 20px; }
+    .content { padding: 0 20px; }
+    .summary-section { padding: 60px 20px; }
+  }
+</style>
+</head>
+<body>
+<a href="index.html" style="position:fixed;top:24px;left:24px;z-index:200;display:inline-flex;align-items:center;gap:8px;font-size:12px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(201,150,58,0.7);text-decoration:none;font-family:'Sarabun',sans-serif;transition:color 0.2s;" onmouseover="this.style.color='#C9963A'" onmouseout="this.style.color='rgba(201,150,58,0.7)'">← กลับหน้าหลัก</a>
+
+<!-- COVER -->
+<section class="cover">
+  <div class="cover-inner">
+    <div class="cover-label">สรุปหนังสือ · Book Summary</div>
+    <div class="cover-ornament"></div>
+    <h1>Nonviolent<br><em>Communication</em></h1>
+    <div class="cover-subtitle">A Language of Life</div>
+    <div class="cover-author">Marshall B. Rosenberg, Ph.D.</div>
+    <p class="cover-desc">ศาสตร์แห่งการสื่อสารที่ไม่ทำร้ายกัน เครื่องมือสร้างความเชื่อมต่อที่แท้จริงระหว่างมนุษย์ ผ่าน 14 บทที่เปลี่ยนวิธีที่เราพูด ฟัง และรู้สึก</p>
+  </div>
+  <div class="scroll-hint">↓ เลื่อนอ่าน</div>
+</section>
+
+<!-- TOC -->
+<section class="toc">
+  <div class="toc-inner">
+    <div class="section-label">สารบัญ</div>
+    <h2 class="section-title">14 บทที่ต้องรู้</h2>
+    <div class="toc-grid">
+      <a href="#ch1" class="toc-item"><span class="toc-num">1</span><span class="toc-text">การให้จากหัวใจ</span></a>
+      <a href="#ch2" class="toc-item"><span class="toc-num">2</span><span class="toc-text">การสื่อสารที่ปิดกั้นความเมตตา</span></a>
+      <a href="#ch3" class="toc-item"><span class="toc-num">3</span><span class="toc-text">การสังเกตโดยไม่ตัดสิน</span></a>
+      <a href="#ch4" class="toc-item"><span class="toc-num">4</span><span class="toc-text">การระบุและแสดงความรู้สึก</span></a>
+      <a href="#ch5" class="toc-item"><span class="toc-num">5</span><span class="toc-text">รับผิดชอบต่อความรู้สึกตัวเอง</span></a>
+      <a href="#ch6" class="toc-item"><span class="toc-num">6</span><span class="toc-text">การร้องขอสิ่งที่ทำให้ชีวิตดีขึ้น</span></a>
+      <a href="#ch7" class="toc-item"><span class="toc-num">7</span><span class="toc-text">การรับฟังด้วยความเห็นอกเห็นใจ</span></a>
+      <a href="#ch8" class="toc-item"><span class="toc-num">8</span><span class="toc-text">พลังของการเห็นอกเห็นใจ</span></a>
+      <a href="#ch9" class="toc-item"><span class="toc-num">9</span><span class="toc-text">เชื่อมต่อกับตัวเองด้วยความเมตตา</span></a>
+      <a href="#ch10" class="toc-item"><span class="toc-num">10</span><span class="toc-text">การแสดงความโกรธอย่างเต็มที่</span></a>
+      <a href="#ch11" class="toc-item"><span class="toc-num">11</span><span class="toc-text">การแก้ไขความขัดแย้งและการไกล่เกลี่ย</span></a>
+      <a href="#ch12" class="toc-item"><span class="toc-num">12</span><span class="toc-text">การใช้กำลังเพื่อป้องกัน</span></a>
+      <a href="#ch13" class="toc-item"><span class="toc-num">13</span><span class="toc-text">การปลดปล่อยตัวเองและการให้คำปรึกษา</span></a>
+      <a href="#ch14" class="toc-item"><span class="toc-num">14</span><span class="toc-text">การแสดงความขอบคุณใน NVC</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- MAIN CONTENT -->
+<div class="content">
+
+  <!-- OVERVIEW -->
+  <section class="overview">
+    <div class="section-label">ภาพรวม · Overview</div>
+    <h2 class="section-title">NVC คืออะไร?</h2>
+    <p style="margin-top:24px; font-size:15px; color:#3D3028; line-height:1.9; max-width:620px;">NVC คือวิธีการมีปฏิสัมพันธ์กับผู้อื่นและตัวเองด้วยความเห็นอกเห็นใจ เป้าหมายสูงสุดคือการสร้างการเชื่อมต่อที่แท้จริงระหว่างคน เมื่อมีการเชื่อมต่อที่แท้จริงแล้ว ปัญหาดั้งเดิมมักจะแก้ตัวเอง</p>
+    <div class="overview-grid">
+      <div class="overview-box">
+        <h4>4 องค์ประกอบหลัก</h4>
+        <p>การสังเกต · ความรู้สึก · ความต้องการ · การร้องขอ — ใช้ได้ทั้งเมื่อพูดและเมื่อฟัง</p>
+      </div>
+      <div class="overview-box">
+        <h4>ใช้ได้ที่ไหนบ้าง</h4>
+        <p>ครอบครัว, โรงเรียน, ธุรกิจ, รัฐบาล, ความสัมพันธ์ส่วนตัว และที่สำคัญที่สุด — กับตัวเอง</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHAPTER 1 -->
+  <section class="chapter" id="ch1">
+    <div class="chapter-header">
+      <div class="chapter-number">01</div>
+      <div class="chapter-meta">
+        <div class="chapter-label">บทที่หนึ่ง</div>
+        <h2 class="chapter-title">การให้จากหัวใจ<br><em style="font-family:'Playfair Display',serif;font-style:italic;font-size:0.8em;color:var(--mid-brown);">Giving from the Heart</em></h2>
+      </div>
+    </div>
+    <div class="chapter-body">
+      <p>กระบวนการ NVC เริ่มต้นจากความเชื่อว่ามนุษย์ทุกคนมีความเมตตาโดยธรรมชาติ และการสื่อสารที่แท้จริงเกิดขึ้นเมื่อเราให้ "จากหัวใจ" ไม่ใช่จากความกลัว ความรู้สึกผิด หรือการบังคับ</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">O</div>
+          <div class="step-content">
+            <div class="step-title">Observations — การสังเกต</div>
+            <div class="step-desc">พฤติกรรมที่เราเห็นหรือได้ยินซึ่งส่งผลต่อความเป็นอยู่ของเรา บอกตามข้อเท็จจริง ไม่ตีความ</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">F</div>
+          <div class="step-content">
+            <div class="step-title">Feelings — ความรู้สึก</div>
+            <div class="step-desc">เรารู้สึกอย่างไรกับสิ่งที่สังเกตเห็น บอกจากภายใน ไม่ใช่การตัดสินคนอื่น</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">N</div>
+          <div class="step-content">
+            <div class="step-title">Needs — ความต้องการ</div>
+            <div class="step-desc">ความต้องการ คุณค่า หรือความปรารถนาที่ก่อให้เกิดความรู้สึกนั้น เป็นรากของทุกอารมณ์</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">R</div>
+          <div class="step-content">
+            <div class="step-title">Requests — การร้องขอ</div>
+            <div class="step-desc">การกระทำที่เราขอเพื่อทำให้ชีวิตดีขึ้น บอกชัดเจน เป็นรูปธรรม ไม่ใช่การเรียกร้อง</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHAPTER 2 -->
+  <section class="chapter" id="ch2">
+    <div class="chapter-header">
+      <div class="chapter-number">02</div>
+      <div class="chapter-meta">
+        <div class="chapter-label">บทที่สอง</div>
+        <h2 class="chapter-title">การสื่อสารที่ปิดกั้นความเมตตา<br><em style="font-family:'Playfair Display',serif;font-style:italic;font-size:0.8em;color:var(--mid-brown);">Communication That Blocks Compassion</em></h2>
+      </div>
+    </div>
+    <div class="chapter-body">
+      <p>Rosenberg เรียกการสื่อสารบางรูปแบบว่า <strong>"life-alienating communication"</strong> หรือ การสื่อสารที่ทำให้แปลกแยกจากชีวิต ซึ่งเป็นอุปสรรคสำคัญของความเมตตา</p>
+      <div class="callout">
+        <div class="callout-title">รูปแบบที่ต้องระวัง</div>
+        <ul>
+          <li><strong>การตัดสินทางศีลธรรม</strong> — การบอกว่าใครผิด ใครถูก ใครดี ใครเลว</li>
+          <li><strong>การเปรียบเทียบ</strong> — "ทำไมไม่เหมือนคนอื่น?"</li>
+          <li><strong>การปฏิเสธความรับผิดชอบ</strong> — "ฉันต้องทำเพราะ..."</li>
+          <li><strong>การเรียกร้อง</strong> — ขอโดยมีนัยว่าจะลงโทษหากไม่ทำ</li>
+          <li><strong>การโทษคนอื่น</strong> — การดูถูก ติดป้าย วิจารณ์ ประณาม</li>
+        </ul>
+      </div>
+      <p>เราอันตรายที่สุดเมื่อเราไม่ตระหนักว่าตัวเองรับผิดชอบต่อความคิด ความรู้สึก และการกระทำของตัวเอง</p>
+    </div>
+  </section>
+
+  <!-- CHAPTER 3 -->
+  <section class="chapter" id="ch3">
+    <div class="chapter-header">
+      <div class="chapter-number">03</div>
+      <div class="chapter-meta">
+        <div class="chapter-label">บทที่สาม</div>
+        <h2 class="chapter-title">การสังเกตโดยไม่ตัดสิน<br><em style="font-family:'Playfair Display',serif;font-style:italic;font-size:0.8em;color:var(--mid-brown);">Observing Without Evaluating</em></h2>
+      </div>
+    </div>
+    <div class="chapter-body">
+      <div class="pull-quote">
+        <p>"การสังเกตโดยไม่ตัดสิน คือสติปัญญาสูงสุดของมนุษย์"</p>
+        <cite>— Jiddu Krishnamurti (อ้างโดย Rosenberg)</cite>
+      </div>
+      <p>ขั้นตอนแรกของ NVC ต้องการให้เราแยกระหว่าง <strong>สิ่งที่เห็น</strong> กับ <strong>การตีความ</strong> ออกจากกันอย่างชัดเจน</p>
+      <div class="callout">
+        <div class="callout-title">ตัวอย่างเปรียบเทียบ</div>
+        <p><strong>การตัดสิน:</strong> "เขาขี้เกียจมาก"<br>
+        <strong>การสังเกต:</strong> "เขาไม่ได้ทำการบ้านสามวันติดกัน"</p>
+        <br>
+        <p><strong>การตัดสิน:</strong> "เธอมักจะสาย"<br>
+        <strong>การสังเกต:</strong> "เธอมาสายสามครั้งในสัปดาห์นี้"</p>
+      </div>
+      <p>NVC ใช้ภาษาแบบ "กระบวนการ" ที่ไม่สรุปตายตัว การประเมินต้องอ้างอิงกับเวลาและบริบทที่เฉพาะเจาะจง</p>
+    </div>
+  </section>
+
+  <!-- CHAPTER 4 -->
+  <section class="chapter" id="ch4">
+    <div class="chapter-header">
+      <div class="chapter-number">04</div>
+      <div class="chapter-meta">
+        <div class="chapter-label">บทที่สี่</div>
+        <h2 class="chapter-title">การระบุและแสดงความรู้สึก<br><em style="font-family:'Playfair Display',serif;font-style:italic;font-size:0.8em;color:var(--mid-brown);">Identifying and Expressing Feelings</em></h2>
+      </div>
+    </div>
+    <div class="chapter-body">
+      <p>ความรู้สึกที่แท้จริงกับการตีความพฤติกรรมคนอื่นมักถูกสับสนกัน การแสดงความเปราะบางผ่านความรู้สึกจริงๆ ช่วยแก้ไขความขัดแย้งได้มากกว่าการกล่าวหา</p>
+      <div class="callout">
+        <div class="callout-title">ความรู้สึกจริง vs. ไม่ใช่ความรู้สึก</div>
+        <p><strong>ความรู้สึกจริง:</strong> เศร้า, กลัว, ดีใจ, โกรธ, หงุดหงิด, อบอุ่น, เหนื่อย<br><br>
+        <strong>ไม่ใช่ความรู้สึก (เป็นการตีความ):</strong><br>
+        "รู้สึกว่าถูกเมิน" = คิดว่าถูกเมิน<br>
+        "รู้สึกว่าเขาไม่แคร์" = ตีความว่าเขาไม่แคร์</p>
+      </div>
+      <p>คำกว้างๆ เช่น "รู้สึกดี" หรือ "รู้สึกแย่" ทำให้คนฟังเชื่อมต่อกับสิ่งที่เรารู้สึกจริงๆ ได้ยาก ยิ่งเฉพาะเจาะจงยิ่งดี</p>
+    </div>
+  </section>
+
+  <!-- CHAPTER 5 -->
+  <section class="chapter" id="ch5">
+    <div class="chapter-header">
+      <div class="chapter-number">05</div>
+      <div class="chapter-meta">
+        <div class="chapter-label">บทที่ห้า</div>
+        <h2 class="chapter-title">รับผิดชอบต่อความรู้สึกของตัวเอง<br><em style="font-family:'Playfair Display',serif;font-style:italic;font-size:0.8em;color:var(--mid-brown);">Taking Responsibility for Our Feelings</em></h2>
+      </div>
+    </div>
+    <div class="chapter-body">
+      <div class="formula">
+        <div class="formula-label">สูตรสำคัญ</div>
+        <div class="formula-text">"ฉันรู้สึก X เพราะฉันต้องการ Y"</div>
+      </div>
+      <p>สิ่งที่คนอื่นทำอาจเป็น <strong>ตัวกระตุ้น</strong> ความรู้สึกของเรา แต่ไม่ใช่ <strong>สาเหตุ</strong> สาเหตุที่แท้จริงคือความต้องการที่ได้รับหรือไม่ได้รับการตอบสนอง</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <div class="step-title">ทาสทางอารมณ์</div>
+            <div class="step-desc">เชื่อว่าเราต้องรับผิดชอบต่อความรู้สึกของคนอื่น คอยทำให้ทุกคนมีความสุข ถ้าใครไม่ดีขึ้นเราโทษตัวเอง</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <div class="step-title">ขั้นกลาง</div>
+            <div class="step-desc">เริ่มเข้าใจว่าเราไม่ได้รับผิดชอบต่อความรู้สึกคนอื่น แต่ยังไม่รู้วิธีที่จะแสดงออกโดยไม่ทำให้คนอื่นเจ็บปวด</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <div class="step-title">อิสรภาพทางอารมณ์</div>
+            <div class="step-desc">ตอบสนองความต้องการของคนอื่นด้วยความเมตตา ไม่ใช่ด้วยความกลัว ความรู้สึกผิด หรือความละอาย รับผิดชอบเจตนาและการกระทำของตัวเองเต็มที่</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHAPTER 6 -->
+  <section class="chapter" id="ch6">
+    <div class="chapter-header">
+      <div class="chapter-number">06</div>
+      <div class="chapter-meta">
+        <div class="chapter-label">บทที่หก</div>
+        <h2 class="chapter-title">การร้องขอสิ่งที่ทำให้ชีวิตดีขึ้น<br><em style="font-family:'Playfair Display',serif;font-style:italic;font-size:0.8em;color:var(--mid-brown);">Requesting That Which Would Enrich Life</em></h2>
+      </div>
+    </div>
+    <div class="chapter-body">
+      <p>การร้องขอที่ดีต้องชัดเจน เป็นรูปธรรม และใช้ภาษาเชิงบวก บอกว่าต้องการ <em>อะไร</em> ไม่ใช่ไม่ต้องการ <em>อะไร</em></p>
+      <div class="callout">
+        <div class="callout-title">การร้องขอ vs. การเรียกร้อง</div>
+        <p><strong>การร้องขอ:</strong> เมื่ออีกฝ่ายปฏิเสธ เราเข้าใจและฟังความต้องการของเขา<br><br>
+        <strong>การเรียกร้อง:</strong> เมื่ออีกฝ่ายปฏิเสธ เราโกรธ ตำหนิ หรือทำให้รู้สึกผิด</p>
+      </div>
+      <p>หลังจากร้องขอ ให้ขอให้ผู้ฟัง <strong>สะท้อนกลับ</strong> ว่าเข้าใจอะไร เพื่อให้แน่ใจว่าสารที่ส่งคือสารที่ได้รับ และขอบคุณเมื่อเขาพยายามสะท้อนกลับ</p>
+    </div>
+  </section>
+
+  <!-- CHAPTER 7 -->
+  <section class="chapter" id="ch7">
+    <div class="chapter-header">
+      <div class="chapter-number">07</div>
+      <div class="chapter-meta">
+        <div class="chapter-label">บทที่เจ็ด</div>
+        <h2 class="chapter-title">การรับฟังด้วยความเห็นอกเห็นใจ<br><em style="font-family:'Playfair Display',serif;font-style:italic;font-size:0.8em;color:var(--mid-brown);">Receiving Empathically</em></h2>
+      </div>
+    </div>
+    <div class="chapter-body">
+      <p>NVC ไม่ใช่แค่วิธีพูด แต่เป็นวิธีฟัง ความเห็นอกเห็นใจแท้จริงเกิดขึ้นเมื่อเราวางทุกอย่างไว้และมีอยู่อย่างสมบูรณ์กับอีกฝ่าย</p>
+      <div class="callout">
+        <div class="callout-title">สิ่งที่ขัดขวางการเห็นอกเห็นใจ</div>
+        <ul>
+          <li>การรีบให้คำแนะนำ</li>
+          <li>การพยายาม "แก้ปัญหา"</li>
+          <li>การเล่าเรื่องของตัวเอง</li>
+          <li>การอธิบายหรือให้เหตุผล</li>
+          <li>การปลอบ (" ไม่เป็นไรหรอก")</li>
+        </ul>
+      </div>
+      <p>ฟังที่ <strong>ความต้องการ</strong> ไม่ใช่ที่คำพูด เมื่อเราสะท้อนกลับ ให้ระวังน้ำเสียง เพราะผู้พูดจะรับรู้ถึงคำวิจารณ์เพียงเล็กน้อยได้ทันที</p>
+    </div>
+  </section>
+
+  <!-- CHAPTER 8 -->
+  <section class="chapter" id="ch8">
+    <div class="chapter-header">
+      <div class="chapter-number">08</div>
+      <div class="chapter-meta">
+        <div class="chapter-label">บทที่แปด</div>
+        <h2 class="chapter-title">พลังของการเห็นอกเห็นใจ<br><em style="font-family:'Playfair Display',serif;font-style:italic;font-size:0.8em;color:var(--mid-brown);">The Power of Empathy</em></h2>
+      </div>
+    </div>
+    <div class="chapter-body">
+      <p>การเห็นอกเห็นใจมีพลังในการเปลี่ยนแปลงที่เหนือกว่าคำอธิบายหรือเหตุผลใดๆ มันทำให้คนรู้สึกว่าตัวเองถูกได้ยิน และพร้อมจะเปิดใจมากขึ้น</p>
+      <div class="callout">
+        <div class="callout-title">หลักการสำคัญ</div>
+        <ul>
+          <li>แทนที่จะโต้แย้งคนที่โกรธ — ให้เห็นอกเห็นใจก่อน</li>
+          <li>ยากกว่าที่จะเห็นอกเห็นใจผู้ที่มีอำนาจสูงกว่า</li>
+          <li>หากบทสนทนาชะงัก ให้ "ขัดจังหวะด้วยการเห็นอกเห็นใจ"</li>
+          <li>เห็นอกเห็นใจความเงียบ — ฟังความรู้สึกและความต้องการที่อยู่เบื้องหลัง</li>
+          <li>ถ้าเราขาดแคลนความเห็นอกเห็นใจ อาจหมายความว่าเราต้องการมันเองก่อน</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHAPTER 9 -->
+  <section class="chapter" id="ch9">
+    <div class="chapter-header">
+      <div class="chapter-number">09</div>
+      <div class="chapter-meta">
+        <div class="chapter-label">บทที่เก้า</div>
+        <h2 class="chapter-title">เชื่อมต่อกับตัวเองด้วยความเมตตา<br><em style="font-family:'Playfair Display',serif;font-style:italic;font-size:0.8em;color:var(--mid-brown);">Connecting Compassionately With Ourselves</em></h2>
+      </div>
+    </div>
+    <div class="chapter-body">
+      <p>NVC ไม่ได้ใช้แค่กับคนอื่น แต่เริ่มจากภายในตัวเราก่อน การเปลี่ยนภาษาที่ใช้กับตัวเองเป็นจุดเริ่มต้นของการเปลี่ยนแปลงทั้งหมด</p>
+      <div class="callout">
+        <div class="callout-title">การไว้ทุกข์และการให้อภัยตัวเองใน NVC</div>
+        <p><strong>การไว้ทุกข์:</strong> เชื่อมต่ออย่างเต็มที่กับความต้องการที่ไม่ได้รับการตอบสนองและความรู้สึกที่เกิดขึ้นเมื่อเราไม่สมบูรณ์แบบ<br><br>
+        <strong>การให้อภัยตัวเอง:</strong> เชื่อมต่อกับความต้องการที่เราพยายามตอบสนองในตอนที่กระทำสิ่งที่เสียใจ ไม่ใช่การโทษตัวเอง</p>
+      </div>
+      <p>ลองทำแบบทดสอบนี้: จดสิ่งที่คุณทำในชีวิตโดยที่ไม่รู้สึกว่าเป็นการเล่น สิ่งที่คุณทำเพราะรู้สึกว่า "ต้อง" — แล้วถามว่า <strong>ความต้องการอะไรที่การเลือกนี้ตอบสนอง?</strong></p>
+    </div>
+  </section>
+
+  <!-- CHAPTER 10 -->
+  <section class="chapter" id="ch10">
+    <div class="chapter-header">
+      <div class="chapter-number">10</div>
+      <div class="chapter-meta">
+        <div class="chapter-label">บทที่สิบ</div>
+        <h2 class="chapter-title">การแสดงความโกรธอย่างเต็มที่<br><em style="font-family:'Playfair Display',serif;font-style:italic;font-size:0.8em;color:var(--mid-brown);">Expressing Anger Fully</em></h2>
+      </div>
+    </div>
+    <div class="chapter-body">
+      <div class="pull-quote">
+        <p>"เราไม่เคยโกรธเพราะสิ่งที่คนอื่นพูดหรือทำ"</p>
+        <cite>— Marshall Rosenberg</cite>
+      </div>
+      <p>ความโกรธเป็นสัญญาณว่ามีความต้องการที่ไม่ได้รับการตอบสนอง และเราคิดในแบบที่ทำให้ยากที่จะได้รับมัน ความรุนแรงมาจากความเชื่อว่าคนอื่นทำให้เราเจ็บปวดและสมควรได้รับโทษ</p>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><div class="step-content"><div class="step-title">หยุด หายใจ</div><div class="step-desc">ให้เวลาตัวเองก่อนที่จะตอบสนองด้วยอัตโนมัติ</div></div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-content"><div class="step-title">ระบุความคิดที่ตัดสิน</div><div class="step-desc">ฉันกำลังคิดอะไรเกี่ยวกับคนนี้?</div></div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-content"><div class="step-title">เชื่อมต่อกับความต้องการ</div><div class="step-desc">ความต้องการอะไรของฉันที่ไม่ได้รับการตอบสนอง?</div></div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-content"><div class="step-title">แสดงความรู้สึกและความต้องการ</div><div class="step-desc">บอกอีกฝ่ายด้วยภาษา NVC ไม่ใช่การกล่าวหา</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHAPTER 11 -->
+  <section class="chapter" id="ch11">
+    <div class="chapter-header">
+      <div class="chapter-number">11</div>
+      <div class="chapter-meta">
+        <div class="chapter-label">บทที่สิบเอ็ด</div>
+        <h2 class="chapter-title">การแก้ไขความขัดแย้งและการไกล่เกลี่ย<br><em style="font-family:'Playfair Display',serif;font-style:italic;font-size:0.8em;color:var(--mid-brown);">Conflict Resolution and Mediation</em></h2>
+      </div>
+    </div>
+    <div class="chapter-body">
+      <p>การแก้ไขความขัดแย้งด้วย NVC ต้องการให้ทุกฝ่ายได้ยินและรู้สึกว่าตัวเองถูกเข้าใจก่อน จากนั้นจึงหาทางออกที่ตอบสนองความต้องการของทุกคน</p>
+      <div class="callout">
+        <div class="callout-title">หลักการในการไกล่เกลี่ย</div>
+        <ul>
+          <li>หลีกเลี่ยงภาษาที่บอกว่าใครผิด</li>
+          <li>เรียนรู้ที่จะได้ยินความต้องการโดยไม่คำนึงว่าคนพูดออกมาอย่างไร</li>
+          <li>เมื่อคนหงุดหงิด พวกเขาต้องการการเห็นอกเห็นใจก่อน</li>
+          <li>เมื่อคนพูดว่า "ไม่" — หมายความว่าพวกเขามีความต้องการที่ทำให้พูด "ใช่" ไม่ได้</li>
+          <li>ยิ่งเราเห็นอกเห็นใจมากเท่าไหร่ อีกฝ่ายยิ่งมีแนวโน้มที่จะฟังเราเท่านั้น</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHAPTER 12 -->
+  <section class="chapter" id="ch12">
+    <div class="chapter-header">
+      <div class="chapter-number">12</div>
+      <div class="chapter-meta">
+        <div class="chapter-label">บทที่สิบสอง</div>
+        <h2 class="chapter-title">การใช้กำลังเพื่อป้องกัน<br><em style="font-family:'Playfair Display',serif;font-style:italic;font-size:0.8em;color:var(--mid-brown);">The Protective Use of Force</em></h2>
+      </div>
+    </div>
+    <div class="chapter-body">
+      <p>มีบางสถานการณ์ที่การใช้กำลังจำเป็นเพื่อป้องกันอันตราย NVC แยกความแตกต่างระหว่าง <strong>การใช้กำลังเพื่อป้องกัน</strong> กับ <strong>การใช้กำลังเพื่อลงโทษ</strong></p>
+      <div class="callout">
+        <div class="callout-title">ความแตกต่างที่สำคัญ</div>
+        <p><strong>กำลังเพื่อป้องกัน:</strong> เจตนาคือการปกป้อง ทำเพราะเห็นอันตราย ไม่ใช่เพราะโกรธ<br><br>
+        <strong>กำลังเพื่อลงโทษ:</strong> เจตนาคือให้เจ็บปวด ทำให้รู้สึกผิด ลดความนับถือตัวเอง<br><br>
+        ความกลัวการลงโทษทำให้คนมุ่งที่ผลลัพธ์ ไม่ใช่ที่คุณค่าและความรู้สึกผิดชอบของตัวเอง</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHAPTER 13 -->
+  <section class="chapter" id="ch13">
+    <div class="chapter-header">
+      <div class="chapter-number">13</div>
+      <div class="chapter-meta">
+        <div class="chapter-label">บทที่สิบสาม</div>
+        <h2 class="chapter-title">การปลดปล่อยตัวเองและการให้คำปรึกษา<br><em style="font-family:'Playfair Display',serif;font-style:italic;font-size:0.8em;color:var(--mid-brown);">Liberating Ourselves and Counseling Others</em></h2>
+      </div>
+    </div>
+    <div class="chapter-body">
+      <p>NVC สามารถใช้เพื่อปลดปล่อยตัวเราจากรูปแบบความคิดเก่าๆ และใช้ในการให้คำปรึกษาผู้อื่นด้วยความเมตตา</p>
+      <div class="callout">
+        <div class="callout-title">ข้อมูลเชิงลึก</div>
+        <ul>
+          <li>ภาวะซึมเศร้าเป็นสัญญาณของการแปลกแยกจากความต้องการของตัวเอง</li>
+          <li>ความสามารถในการได้ยินความรู้สึกและความต้องการของตัวเองและเห็นอกเห็นใจมันสามารถปลดปล่อยเราจากภาวะซึมเศร้าได้</li>
+          <li>มุ่งที่ <em>สิ่งที่ต้องการทำ</em> ไม่ใช่ที่ <em>สิ่งที่ผิดพลาด</em></li>
+          <li>การแทนที่การวินิจฉัยด้วย NVC ช่วยให้เกิดการเชื่อมต่อที่แท้จริง</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHAPTER 14 -->
+  <section class="chapter" id="ch14">
+    <div class="chapter-header">
+      <div class="chapter-number">14</div>
+      <div class="chapter-meta">
+        <div class="chapter-label">บทที่สิบสี่</div>
+        <h2 class="chapter-title">การแสดงความขอบคุณใน NVC<br><em style="font-family:'Playfair Display',serif;font-style:italic;font-size:0.8em;color:var(--mid-brown);">Expressing Appreciation in Nonviolent Communication</em></h2>
+      </div>
+    </div>
+    <div class="chapter-body">
+      <p>แม้แต่การขอบคุณ NVC ก็มีวิธีการที่ต่างออกไป ไม่ใช่เพื่อจัดการหรือเอาใจ แต่เพื่อเฉลิมฉลองสิ่งที่ดีงามอย่างแท้จริง</p>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><div class="step-content"><div class="step-title">การกระทำที่ส่งเสริมความเป็นอยู่ที่ดีของเรา</div><div class="step-desc">บอกว่า <em>อะไรที่เฉพาะเจาะจง</em> ที่เขาทำ</div></div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-content"><div class="step-title">ความต้องการของเราที่ได้รับการตอบสนอง</div><div class="step-desc">บอกว่า <em>ความต้องการอะไร</em> ของเราที่ถูกตอบสนองด้วยการกระทำนั้น</div></div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-content"><div class="step-title">ความรู้สึกที่เกิดขึ้น</div><div class="step-desc">บอก <em>ความรู้สึก</em> ที่เกิดจากการที่ความต้องการนั้นได้รับการตอบสนอง</div></div></div>
+      </div>
+      <div class="formula">
+        <div class="formula-label">สูตรการขอบคุณแบบ NVC</div>
+        <div class="formula-text">"นี่คือสิ่งที่คุณทำ · นี่คือสิ่งที่ฉันรู้สึก · นี่คือความต้องการที่ได้รับการตอบสนอง"</div>
+      </div>
+      <p>รับความขอบคุณโดยไม่รู้สึกเหนือกว่าหรือถ่อมตนปลอมๆ แค่รับรู้อย่างเต็มที่ว่าคุณได้มีส่วนช่วยในชีวิตของคนอื่น</p>
+    </div>
+  </section>
+
+</div>
+
+<!-- SUMMARY -->
+<section class="summary-section">
+  <div class="summary-inner">
+    <div class="section-label" style="color:var(--mid-brown);">สรุปภาพรวม · At a Glance</div>
+    <h2>NVC ในหนึ่งหน้า</h2>
+    <div class="summary-grid">
+      <div class="summary-card">
+        <h4>เมื่อพูด</h4>
+        <p>สังเกต → รู้สึก → ต้องการ → ร้องขอ<br>ใช้ภาษาเชิงบวก เป็นรูปธรรม</p>
+      </div>
+      <div class="summary-card">
+        <h4>เมื่อฟัง</h4>
+        <p>ฟังความต้องการไม่ใช่คำพูด สะท้อนกลับด้วยความเมตตา ไม่รีบแก้ปัญหา</p>
+      </div>
+      <div class="summary-card">
+        <h4>กับตัวเอง</h4>
+        <p>เมตตาตัวเอง ไม่ตัดสิน ทำจากความปรารถนา ไม่ใช่ความกลัวหรือภาระหน้าที่</p>
+      </div>
+      <div class="summary-card">
+        <h4>ความขัดแย้ง</h4>
+        <p>เห็นอกเห็นใจก่อน แล้วค่อยแก้ปัญหา ฟังว่า "ไม่" หมายถึงความต้องการอะไร</p>
+      </div>
+      <div class="summary-card">
+        <h4>ความโกรธ</h4>
+        <p>สัญญาณของความต้องการที่ยังขาด หยุด → ระบุ → เชื่อมต่อ → แสดงออก</p>
+      </div>
+      <div class="summary-card">
+        <h4>ขอบคุณ</h4>
+        <p>การกระทำ + ความรู้สึก + ความต้องการที่ได้รับ เพื่อเฉลิมฉลอง ไม่ใช่จัดการ</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>บทที่ 13 &nbsp;·&nbsp; พูดให้คนฟัง ฟังให้คนพูด &nbsp;·&nbsp; หนังสือของฉัน</p>
+</footer>
+
+</body>
+</html>

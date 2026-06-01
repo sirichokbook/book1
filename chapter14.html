@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blockchain 5 ปีให้หลัง · หนังสือของฉัน</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,600;1,300&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root { --cream: #F5F0E8; --ink: #1A1208; --amber: #C8852A; --muted: #7A6E5F; --divider: #D9CFC0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background-color: var(--cream); color: var(--ink); font-family: 'Sarabun', sans-serif; font-weight: 300; line-height: 1.9; font-size: 17px; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 100; opacity: 0.4; }
+
+  .term { color: var(--amber); font-weight: 400; border-bottom: 1px dashed var(--amber); cursor: pointer; display: inline; }
+  .tooltip { display: none; position: fixed; background: var(--ink); color: var(--cream); font-size: 13px; line-height: 1.6; padding: 12px 16px; max-width: 260px; z-index: 9999; pointer-events: none; font-family: 'Sarabun', sans-serif; font-weight: 300; border-left: 3px solid var(--amber); }
+  .tooltip.show { display: block; }
+  .tooltip-term { font-weight: 600; font-size: 12px; letter-spacing: 0.1em; color: var(--amber); margin-bottom: 4px; text-transform: uppercase; }
+
+  .cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 60px 24px; position: relative; border-bottom: 1px solid var(--divider); overflow: hidden; }
+  .cover::after { content: ''; position: absolute; bottom: -80px; left: 50%; transform: translateX(-50%); width: 500px; height: 500px; background: radial-gradient(circle, rgba(200,133,42,0.08) 0%, transparent 70%); pointer-events: none; }
+  .cover-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 32px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.2s; }
+  .cover-title { font-family: 'Playfair Display', serif; font-size: clamp(34px, 7vw, 64px); font-weight: 900; line-height: 1.1; letter-spacing: -0.02em; color: var(--ink); max-width: 700px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.4s; }
+  .cover-title em { font-style: italic; color: var(--amber); }
+  .cover-subtitle { margin-top: 24px; font-size: 15px; color: var(--muted); max-width: 460px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.6s; }
+  .cover-divider { width: 48px; height: 2px; background: var(--amber); margin: 40px auto; opacity: 0; animation: fadeUp 0.8s ease forwards 0.8s; }
+  .cover-meta { font-size: 12px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; opacity: 0; animation: fadeUp 0.8s ease forwards 1s; }
+  .scroll-hint { position: absolute; bottom: 32px; display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: 0; animation: fadeUp 0.8s ease forwards 1.4s; }
+  .scroll-hint span { font-size: 11px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; }
+  .scroll-arrow { width: 1px; height: 32px; background: linear-gradient(to bottom, var(--amber), transparent); animation: scrollPulse 2s ease-in-out infinite; }
+  .back-link { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); text-decoration: none; position: absolute; top: 32px; left: 32px; transition: color 0.2s; opacity: 0; animation: fadeUp 0.8s ease forwards 0.1s; }
+  .back-link:hover { color: var(--amber); }
+
+  .toc { max-width: 680px; margin: 0 auto; padding: 80px 24px; border-bottom: 1px solid var(--divider); }
+  .toc-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 40px; }
+  .toc-item { display: flex; align-items: baseline; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--divider); text-decoration: none; color: var(--ink); transition: color 0.2s; }
+  .toc-item:hover { color: var(--amber); }
+  .toc-num { font-family: 'Playfair Display', serif; font-size: 13px; color: var(--amber); min-width: 24px; font-style: italic; }
+  .toc-title { font-size: 15px; font-weight: 400; flex: 1; }
+  .toc-dots { flex: 1; border-bottom: 1px dotted var(--divider); margin: 0 8px; min-width: 20px; }
+
+  .article { max-width: 680px; margin: 0 auto; padding: 80px 24px 120px; }
+  .chapter { margin-bottom: 100px; opacity: 0; transform: translateY(20px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .chapter.visible { opacity: 1; transform: translateY(0); }
+  .chapter-num { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 16px; display: block; }
+  .chapter-title { font-family: 'Playfair Display', serif; font-size: clamp(24px, 5vw, 36px); font-weight: 700; line-height: 1.2; margin-bottom: 40px; color: var(--ink); }
+  .chapter-body p { margin-bottom: 24px; color: #2E2416; }
+  .chapter-body strong { font-weight: 600; color: var(--ink); }
+  .chapter-body em { font-style: italic; color: var(--amber); }
+  .pull-quote { border-left: 3px solid var(--amber); padding: 4px 0 4px 24px; margin: 40px 0; font-family: 'Playfair Display', serif; font-size: 20px; font-style: italic; line-height: 1.5; color: var(--ink); }
+  .section-break { text-align: center; margin: 48px 0; color: var(--amber); letter-spacing: 0.3em; font-size: 14px; }
+
+  /* Verdict cards */
+  .verdict-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 32px 0; }
+  .verdict-card { border: 1px solid var(--divider); padding: 22px; }
+  .verdict-tag { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 8px; display: block; }
+  .verdict-tag.worked { color: #5A7A5C; }
+  .verdict-tag.failed { color: #A84B2F; }
+  .verdict-tag.partial { color: var(--amber); }
+  .verdict-name { font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 6px; }
+  .verdict-desc { font-size: 13px; color: var(--muted); line-height: 1.7; }
+
+  /* Claim list */
+  .claim-list { margin: 32px 0; }
+  .claim-item { display: flex; gap: 16px; padding: 20px 0; border-bottom: 1px solid var(--divider); }
+  .claim-item:last-child { border-bottom: none; }
+  .claim-icon { font-size: 18px; min-width: 28px; padding-top: 2px; }
+  .claim-content { flex: 1; }
+  .claim-title { font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 4px; }
+  .claim-desc { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+  /* Insight */
+  .insight { background: rgba(200,133,42,0.06); border-left: 3px solid var(--amber); padding: 20px 24px; margin: 32px 0; }
+  .insight-label { font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--amber); margin-bottom: 10px; display: block; }
+  .insight-body { font-size: 14px; color: #2E2416; line-height: 1.8; }
+
+  /* Vocab */
+  .vocab-section { background: rgba(200,133,42,0.06); border: 1px solid var(--divider); padding: 40px; margin-top: 80px; }
+  .vocab-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 8px; display: block; }
+  .vocab-hint { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+  .vocab-item { padding: 16px 0; border-bottom: 1px solid var(--divider); }
+  .vocab-item:last-child { border-bottom: none; }
+  .vocab-term { font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 4px; }
+  .vocab-meaning { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .vocab-example { font-size: 13px; color: var(--amber); font-style: italic; margin-top: 4px; }
+
+  footer { text-align: center; padding: 60px 24px; border-top: 1px solid var(--divider); font-size: 12px; color: var(--muted); letter-spacing: 0.1em; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes scrollPulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+  @media (max-width: 600px) {
+    body { font-size: 16px; }
+    .toc, .article { padding-left: 20px; padding-right: 20px; }
+    .back-link { top: 20px; left: 20px; }
+    .verdict-grid { grid-template-columns: 1fr; }
+    .tooltip { max-width: 200px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="tooltip" id="tooltip">
+  <div class="tooltip-term" id="tooltip-term"></div>
+  <div id="tooltip-body"></div>
+</div>
+
+<section class="cover">
+  <a class="back-link" href="index.html">← กลับหน้าหลัก</a>
+  <p class="cover-label">บทที่ 14</p>
+  <h1 class="cover-title">Blockchain <em>5 ปีให้หลัง</em></h1>
+  <p class="cover-subtitle">ปี 2016 หนังสือ Blockchain Revolution บอกว่ามันจะเปลี่ยนโลก ผ่านมา 10 ปี มันเปลี่ยนจริงไหม อะไรเวิร์ค อะไรไม่เวิร์ค และเราเรียนรู้อะไรจากมัน</p>
+  <div class="cover-divider"></div>
+  <p class="cover-meta">เทคโนโลยี · วิเคราะห์ &nbsp;·&nbsp; หนังสือของฉัน</p>
+  <div class="scroll-hint"><span>เริ่มอ่าน</span><div class="scroll-arrow"></div></div>
+</section>
+
+<nav class="toc">
+  <p class="toc-label">สารบัญ</p>
+  <a class="toc-item" href="#s1"><span class="toc-num">i</span><span class="toc-title">จากหนังสือที่เปลี่ยนโลก สู่ปี 2026</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s2"><span class="toc-num">ii</span><span class="toc-title">DeFi และระบบการเงิน — เวิร์คบ้าง แต่ไม่ล้มธนาคาร</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s3"><span class="toc-num">iii</span><span class="toc-title">NFT — บูม แตก และบทเรียนที่ได้</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s4"><span class="toc-num">iv</span><span class="toc-title">Supply Chain และการเลือกตั้ง — ลองแล้วเจ็บ</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s5"><span class="toc-num">v</span><span class="toc-title">ทำไม Decentralize ถึงไม่ชนะ</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s6"><span class="toc-num">vi</span><span class="toc-title">สรุป: เทคโนโลยีดี แต่ไม่ใช่คำตอบของทุกอย่าง</span><span class="toc-dots"></span></a>
+</nav>
+
+<article class="article">
+
+  <div class="chapter visible">
+    <div class="chapter-body">
+      <p>ปี 2016 มีหนังสือเล่มหนึ่งชื่อ <em>Blockchain Revolution</em> วางขายและกลายเป็นหนังสือที่ผู้บริหารทั่วโลกหยิบขึ้นมาอ่าน เนื้อหาระบุว่า Blockchain จะเปลี่ยนระบบการเงิน รัฐบาล ทรัพย์สิน และการทำสัญญาไปตลอดกาล</p>
+      <p>ตอนนี้ปี 2026 ผ่านมาสิบปีแล้ว มาดูกันว่าอะไรเกิดขึ้นจริง อะไรไม่เกิด และทำไม</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s1">
+    <span class="chapter-num">i</span>
+    <h2 class="chapter-title">จากหนังสือที่เปลี่ยนโลก สู่ปี 2026</h2>
+    <div class="chapter-body">
+      <p>หนังสือ Blockchain Revolution เคลมไว้หลายอย่างมาก ทั้งว่าธนาคารจะล่มสลาย รัฐบาลจะออกโฉนดบน Blockchain ศิลปินจะได้รับค่าตอบแทนทุกครั้งที่งานถูกขายต่อ และ Smart Contract จะทำให้ทุกการทำธุรกรรมง่ายขึ้นโดยไม่ต้องมีคนกลาง</p>
+      <p>ช่วงปี 2020-2021 กระแส Blockchain และ NFT พุ่งสูงสุด ระดับเดียวกับที่ AI กำลังเป็นในตอนนี้ ทุกบริษัทพูดถึงมัน ทุกนักลงทุนต้องการมี และทุก startup ใส่คำว่า Blockchain ในพิทช์ด็คเพื่อระดมทุน</p>
+      <div class="pull-quote">ในปี 2022-2023 ทุกคนเริ่มรู้ตัวและถอยออกมา หมดตังค์ไปเป็นร้อยล้านดอลลาร์</div>
+      <p>ตอนนี้ในปี 2026 สถานการณ์ชัดเจนมากขึ้นแล้วว่าอะไรเวิร์คจริงและอะไรเป็นแค่กระแส</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s2">
+    <span class="chapter-num">ii</span>
+    <h2 class="chapter-title">DeFi และระบบการเงิน — เวิร์คบ้าง แต่ไม่ล้มธนาคาร</h2>
+    <div class="chapter-body">
+      <p><span class="term" data-term="DeFi (Decentralized Finance)" data-def="ระบบการเงินที่ทำงานบน Blockchain โดยไม่ต้องผ่านสถาบันการเงินกลาง เช่น ธนาคาร ใช้ Smart Contract ในการทำธุรกรรมอัตโนมัติ">DeFi</span> เกิดขึ้นจริงและยังมีคนใช้อยู่ในปี 2026 แต่เป็นส่วนเล็กมากของระบบการเงินโลก ธนาคารไม่ได้ล่มสลาย และคนส่วนใหญ่ก็ยังใช้ธนาคารอยู่เหมือนเดิม</p>
+      <p>เหตุผลหลักคือคนส่วนใหญ่ <strong>ไม่ได้มีปัญหากับธนาคาร</strong> มากพอที่จะเปลี่ยน การฝากเงินกับธนาคารแลกกับความสะดวกสบายและการคุ้มครองเมื่อเกิดปัญหา ดีกว่าการต้องจำ Seed Phrase 20 คำ ซื้อ Hardware Wallet และรับผิดชอบทุกอย่างเอง</p>
+
+      <div class="insight">
+        <span class="insight-label">ปัญหาของ Decentralize ในทางปฏิบัติ</span>
+        <div class="insight-body">ถ้าธนาคาร Decentralize จริง เมื่อมิจฉาชีพโอนเงินไป ก็เรียกคืนไม่ได้ แต่ระบบธนาคารปัจจุบันยังระงับบัญชีปลายทางและดึงเงินคืนได้ คนส่วนใหญ่จึงเลือก Centralize ที่มี Authority ดูแลดีกว่า Decentralize ที่รับผิดชอบตัวเองทั้งหมด</div>
+      </div>
+
+      <p>สิ่งที่เวิร์คจริงในด้านการเงินคือ <span class="term" data-term="Stable Coin" data-def="สกุลเงินดิจิทัลที่มีมูลค่าผูกกับสินทรัพย์จริง เช่น ดอลลาร์สหรัฐ เช่น USDC ช่วยให้โอนเงินข้ามประเทศได้รวดเร็วและค่าธรรมเนียมต่ำ">Stable Coin</span> อย่าง USDC ที่ช่วยให้โอนเงินข้ามพรมแดนได้ง่ายขึ้น และ Bitcoin ที่พิสูจน์ตัวเองมาแล้วว่าเป็น Store of Value ที่ยั่งยืน แต่ทั้งสองอย่างนี้ก็ยังมีความ Centralize ในระดับหนึ่งอยู่</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s3">
+    <span class="chapter-num">iii</span>
+    <h2 class="chapter-title">NFT — บูม แตก และบทเรียนที่ได้</h2>
+    <div class="chapter-body">
+      <p>NFT คือกรณีศึกษาที่ชัดเจนที่สุดของ Blockchain Hype งานวิจัยพบว่าในช่วงที่ NFT บูม มีการซื้อขายมากกว่า 80-90% เป็นการ <em>ซื้อมาขายไปของตัวเองเพื่อปั๊มราคา</em> ไม่ใช่การซื้อขายจริงระหว่างคนต่างคน</p>
+
+      <div class="claim-list">
+        <div class="claim-item">
+          <div class="claim-icon">❌</div>
+          <div class="claim-content">
+            <div class="claim-title">ศิลปินจะได้ค่าตอบแทนทุกครั้งที่งานถูกขายต่อ</div>
+            <div class="claim-desc">เกิดขึ้นจริงในช่วงแรก แต่พอค่า Gas สูงขึ้น แพลตฟอร์มหลังๆ ก็ตัด Royalty ออกเพื่อดึงดูดผู้ซื้อ สุดท้ายศิลปินก็ได้แค่รอบแรก</div>
+          </div>
+        </div>
+        <div class="claim-item">
+          <div class="claim-icon">❌</div>
+          <div class="claim-content">
+            <div class="claim-title">NFT คือความเป็นเจ้าของที่แท้จริง</div>
+            <div class="claim-desc">NFT บันทึกแค่สิทธิ์การใช้งาน ไม่ใช่สิทธิ์ในการทำซ้ำหรือดัดแปลง ซื้อ NFT ภาพดังมา แต่ยังทำ Merchandise ไม่ได้ เพราะคนวาดเป็นเจ้าของทรัพย์สินทางปัญญาอยู่</div>
+          </div>
+        </div>
+        <div class="claim-item">
+          <div class="claim-icon">⚠️</div>
+          <div class="claim-content">
+            <div class="claim-title">ไอเทมในเกมบน Blockchain</div>
+            <div class="claim-desc">ใกล้เคียงที่สุดกับ Use Case จริง เพราะของในเกมซื้อขายกันอยู่แล้ว แต่ก็ทำได้โดยไม่ต้องใช้ Blockchain เซิร์ฟเวอร์ปกติก็ทำได้เหมือนกัน</div>
+          </div>
+        </div>
+      </div>
+
+      <p>ปัญหาพื้นฐานของ NFT คือมันแก้ปัญหาที่ไม่ได้มีอยู่จริงสำหรับคนส่วนใหญ่ และสร้างปัญหาใหม่ขึ้นมาแทน เช่น ใครจะเป็นคนบังคับใช้ว่า NFT นี้เป็นของใครถ้าไม่มีศาลหรือตำรวจ ซึ่งสุดท้ายก็ต้องพึ่ง Authority อยู่ดี</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s4">
+    <span class="chapter-num">iv</span>
+    <h2 class="chapter-title">Supply Chain และการเลือกตั้ง — ลองแล้วเจ็บ</h2>
+    <div class="chapter-body">
+      <p>หนึ่งในไอเดียที่ฟังดูดีที่สุดคือการติดตาม Supply Chain บน Blockchain สแกน QR แล้วรู้ทันทีว่าวัตถุดิบมาจากไหน ไม่มีใครแก้ไขข้อมูลได้ บริษัทใหญ่หลายเจ้าลงทุนไปหลายร้อยล้านดอลลาร์เพื่อทำระบบนี้</p>
+      <p>ผลคือ <strong>เจ๊งหมดแล้ว</strong> เหตุผลง่ายมาก ทุกคนใน Supply Chain ต้องมาเขียนข้อมูลลง Blockchain ด้วยกัน แต่ไม่มีใครอยากทำ เพราะต้องลงทุนรันโหนด และต้องเปิดเผยข้อมูลที่ไม่อยากเปิดให้คู่แข่งเห็น สุดท้ายก็มีแค่บริษัทเดียวที่รันโหนด ซึ่งก็ไม่ต่างจากฐานข้อมูลธรรมดา</p>
+
+      <div class="insight">
+        <span class="insight-label">คำถามที่ทุกโปรเจกต์ตอบไม่ได้</span>
+        <div class="insight-body">"ทำไมเราต้องเขียนข้อมูลลง Blockchain ของคุณ?" ถ้าตอบคำถามนี้ไม่ได้ โปรเจกต์นั้นไม่ต้องใช้ Blockchain ก็ได้ และส่วนใหญ่ก็ตอบไม่ได้จริงๆ</div>
+      </div>
+
+      <p>เรื่องการเลือกตั้งบน Blockchain ก็เช่นกัน ปัญหาของการเลือกตั้งไม่ได้อยู่ที่ว่าข้อมูลถูกแก้ไขได้หรือไม่ แต่อยู่ที่จุดอื่นทั้งก่อนและหลังการเขียนข้อมูลลง Chain ซึ่ง Blockchain แก้ให้ไม่ได้</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s5">
+    <span class="chapter-num">v</span>
+    <h2 class="chapter-title">ทำไม Decentralize ถึงไม่ชนะ</h2>
+    <div class="chapter-body">
+      <p>มีสองเหตุผลหลักที่ <span class="term" data-term="Decentralization" data-def="การกระจายอำนาจ ไม่มีศูนย์กลางควบคุม ทุกคนช่วยกันดูแลระบบ ตรงข้ามกับ Centralization ที่มีผู้ควบคุมเพียงรายเดียว">Decentralize</span> ไม่ได้รับการยอมรับในวงกว้างอย่างที่คาด</p>
+
+      <div class="verdict-grid">
+        <div class="verdict-card">
+          <span class="verdict-tag failed">ปัญหาที่ 1</span>
+          <div class="verdict-name">ใช้ยากเกินไป</div>
+          <div class="verdict-desc">Seed Phrase 20 คำ Hardware Wallet ค่า Gas Cryptography ทั้งหมดนี้สูงเกินไปสำหรับคนทั่วไป และเมื่อพลาดแล้วก็ไม่มีใครช่วยได้</div>
+        </div>
+        <div class="verdict-card">
+          <span class="verdict-tag failed">ปัญหาที่ 2</span>
+          <div class="verdict-name">มนุษย์ชอบมีคนดูแลให้</div>
+          <div class="verdict-desc">เสรีภาพมาพร้อมความรับผิดชอบ แต่คนส่วนใหญ่ยอมสละเสรีภาพบางส่วนเพื่อความสะดวกและความปลอดภัย ธนาคารคือบริการนั้น</div>
+        </div>
+        <div class="verdict-card">
+          <span class="verdict-tag partial">ความจริงที่น่าสนใจ</span>
+          <div class="verdict-name">Decentralize จริงๆ แทบไม่มี</div>
+          <div class="verdict-desc">แม้แต่ Bitcoin ก็ถูก Run โดยกลุ่มใหญ่ 2-3 กลุ่ม และรัฐบาลก็ยังสามารถอายัด Wallet ได้ในทางปฏิบัติ</div>
+        </div>
+        <div class="verdict-card">
+          <span class="verdict-tag partial">ข้อสังเกต</span>
+          <div class="verdict-name">Database ธรรมดาทำได้เหมือนกัน</div>
+          <div class="verdict-desc">ฟีเจอร์หลักของ Blockchain คือเขียนแล้วแก้ไม่ได้ แต่ Database ปกติก็มี Audit Log ที่แก้ไขไม่ได้เหมือนกัน โดยไม่ต้อง Decentralize</div>
+        </div>
+      </div>
+
+      <p>สิ่งเดียวที่ Blockchain ทำได้จริงๆ คือพอเขียนไปแล้วมันแก้ไขไม่ได้ถ้า Decentralize จริง แต่ในทางปฏิบัติส่วนใหญ่มันไม่ได้ Decentralize จริงๆ และ Database ธรรมดาก็ทำแบบนี้ได้โดยไม่ต้องมีความซับซ้อนเพิ่ม</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s6">
+    <span class="chapter-num">vi</span>
+    <h2 class="chapter-title">สรุป: เทคโนโลยีดี แต่ไม่ใช่คำตอบของทุกอย่าง</h2>
+    <div class="chapter-body">
+      <p>Blockchain ไม่ใช่เทคโนโลยีที่แย่ แนวคิดมันดีมาก แต่มัน <em>ไม่ใช่คำตอบของทุกปัญหา</em> อย่างที่หนังสือเล่มนั้นเคลมไว้ มี Use Case จริงที่มันเหมาะสม แต่น้อยกว่าที่คิดมาก</p>
+
+      <div class="claim-list">
+        <div class="claim-item">
+          <div class="claim-icon">✅</div>
+          <div class="claim-content">
+            <div class="claim-title">Bitcoin — Store of Value</div>
+            <div class="claim-desc">พิสูจน์ตัวเองมาแล้วว่าอยู่ได้ในระยะยาว มีคนเชื่อถือและถือเป็นทรัพย์สินดิจิทัล</div>
+          </div>
+        </div>
+        <div class="claim-item">
+          <div class="claim-icon">✅</div>
+          <div class="claim-content">
+            <div class="claim-title">Stable Coin — โอนเงินข้ามพรมแดน</div>
+            <div class="claim-desc">ช่วยให้โอนเงินระหว่างประเทศเร็วขึ้นและค่าธรรมเนียมต่ำลง แม้จะยังมีความ Centralize อยู่บ้าง</div>
+          </div>
+        </div>
+        <div class="claim-item">
+          <div class="claim-icon">⚠️</div>
+          <div class="claim-content">
+            <div class="claim-title">Digital ID — ยุโรปกำลังเริ่มทำ</div>
+            <div class="claim-desc">การเก็บ Identity บน Blockchain เพื่อยืนยันตัวตนออนไลน์ ยุโรปกำลังพัฒนา Digital Wallet สำหรับสิ่งนี้ น่าจับตามองที่สุดในตอนนี้</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pull-quote">บางทีเทคโนโลยีมันเป็นอะไรที่เราคิดแล้ววางไว้ก่อน แล้วอีก 10-20 ปีมันอาจจะกลับมาก็ได้ เหมือน AI ที่มีมาตั้งแต่ปี 1970 แต่เพิ่งเวิร์คตอนนี้</div>
+
+      <p>บทเรียนจาก Blockchain ที่นำไปใช้ได้กับเทคโนโลยีทุกอย่างคือ ก่อนจะเชื่อว่ามันจะเปลี่ยนโลก ให้ถามก่อนว่า <strong>มันแก้ปัญหาอะไรที่มีอยู่จริง และทำไมต้องใช้มัน แทนที่จะใช้วิธีเดิมที่ง่ายกว่า</strong> ถ้าตอบไม่ได้ กระแสนั้นน่าจะเป็นแค่กระแส</p>
+    </div>
+  </div>
+
+  <div class="chapter" id="vocab">
+    <div class="vocab-section">
+      <span class="vocab-label">คลังคำศัพท์ · บทที่ 14</span>
+      <p class="vocab-hint">* คำที่ขีดเส้นใต้สีทองในเนื้อหา กดได้เพื่อดูความหมายทันที</p>
+
+      <div class="vocab-item">
+        <div class="vocab-term">Blockchain</div>
+        <div class="vocab-meaning">ฐานข้อมูลแบบกระจายที่ข้อมูลถูกเก็บเป็นบล็อกต่อกันเป็นสาย เมื่อเขียนแล้วแก้ไขไม่ได้ถ้าระบบ Decentralize จริง ทำงานโดยให้ผู้ใช้หลายรายช่วยกันตรวจสอบความถูกต้องแทนที่จะมีศูนย์กลาง</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ก่อนจะเอา Blockchain มาใช้กับโปรเจกต์ ถามก่อนว่าจำเป็นต้อง Decentralize ไหม ถ้าไม่จำเป็น Database ธรรมดาก็พอ"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Smart Contract</div>
+        <div class="vocab-meaning">โปรแกรมที่ทำงานบน Blockchain โดยอัตโนมัติเมื่อเงื่อนไขที่กำหนดเป็นจริง เช่น เมื่อโอนเงินครบ สัญญาจะถูก Execute โดยไม่ต้องมีคนกลาง</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ไอเดีย Smart Contract ดีมาก แต่ปัญหาคือถ้าเขียนโค้ดผิด ก็ไม่มีใครมาแก้ให้ได้"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">NFT (Non-Fungible Token)</div>
+        <div class="vocab-meaning">โทเคนดิจิทัลที่ไม่สามารถแทนที่กันได้ ใช้บันทึกความเป็นเจ้าของของสินทรัพย์ดิจิทัลบน Blockchain แต่ไม่ได้ให้สิทธิ์ทางทรัพย์สินทางปัญญาโดยอัตโนมัติ</div>
+        <div class="vocab-example">ใช้ได้ว่า: "NFT บอกว่าใครเป็นเจ้าของไฟล์นี้บน Blockchain แต่ไม่ได้ป้องกันคนอื่น Copy ไฟล์นั้นไปใช้"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Seed Phrase</div>
+        <div class="vocab-meaning">ชุดคำ 12-24 คำที่ใช้กู้คืน Crypto Wallet ถ้าทำหายหรือลืม Seed Phrase ก็สูญเสียสินทรัพย์ทั้งหมดโดยไม่มีวิธีกู้คืน ซึ่งต่างจากธนาคารที่ยังมีกระบวนการกู้บัญชีได้</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ความที่ต้องจำ Seed Phrase คือหนึ่งในเหตุผลที่คนทั่วไปไม่ยอมมาใช้ Crypto"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Adoption (การยอมรับใช้)</div>
+        <div class="vocab-meaning">การที่คนหรือองค์กรหันมาใช้เทคโนโลยีใหม่ ปัญหาของ Blockchain คือ Adoption ต่ำมากเพราะใช้ยาก ซับซ้อน และไม่มี Safety Net เมื่อเกิดความผิดพลาด</div>
+        <div class="vocab-example">ใช้ได้ว่า: "เทคโนโลยีดีแค่ไหนก็ไม่มีประโยชน์ถ้า Adoption ต่ำ คนก็ยังใช้ระบบเก่าที่คุ้นเคยอยู่ดี"</div>
+      </div>
+    </div>
+  </div>
+
+</article>
+
+<footer>
+  <p>บทที่ 14 &nbsp;·&nbsp; Blockchain 5 ปีให้หลัง &nbsp;·&nbsp; หนังสือของฉัน</p>
+</footer>
+
+<script>
+  const chapters = document.querySelectorAll('.chapter:not(.visible)');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); }
+    });
+  }, { threshold: 0.1 });
+  chapters.forEach(ch => observer.observe(ch));
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+  const tooltip = document.getElementById('tooltip');
+  const tooltipTerm = document.getElementById('tooltip-term');
+  const tooltipBody = document.getElementById('tooltip-body');
+  let hideTimeout;
+  document.querySelectorAll('.term').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      clearTimeout(hideTimeout);
+      tooltipTerm.textContent = el.getAttribute('data-term');
+      tooltipBody.textContent = el.getAttribute('data-def');
+      const rect = el.getBoundingClientRect();
+      const tipW = 260;
+      let left = rect.left;
+      let top = rect.bottom + 8;
+      if (left + tipW > window.innerWidth - 16) left = window.innerWidth - tipW - 16;
+      if (left < 16) left = 16;
+      if (top + 120 > window.innerHeight) top = rect.top - 130;
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+      tooltip.classList.add('show');
+      hideTimeout = setTimeout(() => tooltip.classList.remove('show'), 4000);
+    });
+  });
+  document.addEventListener('click', () => tooltip.classList.remove('show'));
+</script>
+</body>
+</html>
