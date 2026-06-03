@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เก่งก่อน แล้วแพชั่นจะตามมาเอง · หนังสือของฉัน</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,600;1,300&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root { --cream: #F5F0E8; --ink: #1A1208; --amber: #C8852A; --muted: #7A6E5F; --divider: #D9CFC0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background-color: var(--cream); color: var(--ink); font-family: 'Sarabun', sans-serif; font-weight: 300; line-height: 1.9; font-size: 17px; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 100; opacity: 0.4; }
+
+  .term { color: var(--amber); font-weight: 400; border-bottom: 1px dashed var(--amber); cursor: pointer; display: inline; }
+  .tooltip { display: none; position: fixed; background: var(--ink); color: var(--cream); font-size: 13px; line-height: 1.6; padding: 12px 16px; max-width: 260px; z-index: 9999; pointer-events: none; font-family: 'Sarabun', sans-serif; font-weight: 300; border-left: 3px solid var(--amber); }
+  .tooltip.show { display: block; }
+  .tooltip-term { font-weight: 600; font-size: 12px; letter-spacing: 0.1em; color: var(--amber); margin-bottom: 4px; text-transform: uppercase; }
+
+  .cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 60px 24px; position: relative; border-bottom: 1px solid var(--divider); overflow: hidden; }
+  .cover::after { content: ''; position: absolute; bottom: -80px; left: 50%; transform: translateX(-50%); width: 500px; height: 500px; background: radial-gradient(circle, rgba(200,133,42,0.08) 0%, transparent 70%); pointer-events: none; }
+  .cover-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 32px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.2s; }
+  .cover-title { font-family: 'Playfair Display', serif; font-size: clamp(34px, 7vw, 64px); font-weight: 900; line-height: 1.1; letter-spacing: -0.02em; color: var(--ink); max-width: 700px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.4s; }
+  .cover-title em { font-style: italic; color: var(--amber); }
+  .cover-subtitle { margin-top: 24px; font-size: 15px; color: var(--muted); max-width: 460px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.6s; }
+  .cover-divider { width: 48px; height: 2px; background: var(--amber); margin: 40px auto; opacity: 0; animation: fadeUp 0.8s ease forwards 0.8s; }
+  .cover-meta { font-size: 12px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; opacity: 0; animation: fadeUp 0.8s ease forwards 1s; }
+  .scroll-hint { position: absolute; bottom: 32px; display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: 0; animation: fadeUp 0.8s ease forwards 1.4s; }
+  .scroll-hint span { font-size: 11px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; }
+  .scroll-arrow { width: 1px; height: 32px; background: linear-gradient(to bottom, var(--amber), transparent); animation: scrollPulse 2s ease-in-out infinite; }
+  .back-link { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); text-decoration: none; position: absolute; top: 32px; left: 32px; transition: color 0.2s; opacity: 0; animation: fadeUp 0.8s ease forwards 0.1s; }
+  .back-link:hover { color: var(--amber); }
+
+  .toc { max-width: 680px; margin: 0 auto; padding: 80px 24px; border-bottom: 1px solid var(--divider); }
+  .toc-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 40px; }
+  .toc-item { display: flex; align-items: baseline; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--divider); text-decoration: none; color: var(--ink); transition: color 0.2s; }
+  .toc-item:hover { color: var(--amber); }
+  .toc-num { font-family: 'Playfair Display', serif; font-size: 13px; color: var(--amber); min-width: 24px; font-style: italic; }
+  .toc-title { font-size: 15px; font-weight: 400; flex: 1; }
+  .toc-dots { flex: 1; border-bottom: 1px dotted var(--divider); margin: 0 8px; min-width: 20px; }
+
+  .article { max-width: 680px; margin: 0 auto; padding: 80px 24px 120px; }
+  .chapter { margin-bottom: 100px; opacity: 0; transform: translateY(20px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .chapter.visible { opacity: 1; transform: translateY(0); }
+  .chapter-num { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 16px; display: block; }
+  .chapter-title { font-family: 'Playfair Display', serif; font-size: clamp(24px, 5vw, 36px); font-weight: 700; line-height: 1.2; margin-bottom: 40px; color: var(--ink); }
+  .chapter-body p { margin-bottom: 24px; color: #2E2416; }
+  .chapter-body strong { font-weight: 600; color: var(--ink); }
+  .chapter-body em { font-style: italic; color: var(--amber); }
+  .pull-quote { border-left: 3px solid var(--amber); padding: 4px 0 4px 24px; margin: 40px 0; font-family: 'Playfair Display', serif; font-size: 20px; font-style: italic; line-height: 1.5; color: var(--ink); }
+  .section-break { text-align: center; margin: 48px 0; color: var(--amber); letter-spacing: 0.3em; font-size: 14px; }
+
+  /* Rules grid */
+  .rule-list { margin: 32px 0; }
+  .rule-item { display: flex; gap: 20px; padding: 24px 0; border-bottom: 1px solid var(--divider); }
+  .rule-item:last-child { border-bottom: none; }
+  .rule-num { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 900; color: rgba(200,133,42,0.2); min-width: 40px; line-height: 1; padding-top: 4px; }
+  .rule-content { flex: 1; }
+  .rule-title { font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 8px; }
+  .rule-desc { font-size: 14px; color: var(--muted); line-height: 1.8; }
+
+  /* SDT 3 boxes */
+  .sdt-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 32px 0; }
+  .sdt-card { border: 1px solid var(--divider); padding: 20px; text-align: center; }
+  .sdt-icon { font-size: 24px; margin-bottom: 10px; }
+  .sdt-name { font-weight: 600; font-size: 14px; color: var(--amber); margin-bottom: 6px; }
+  .sdt-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* Arrow flow */
+  .flow { display: flex; align-items: center; gap: 0; margin: 32px 0; flex-wrap: wrap; }
+  .flow-box { border: 1px solid var(--divider); padding: 14px 18px; font-size: 13px; font-weight: 600; color: var(--ink); text-align: center; flex: 1; min-width: 100px; }
+  .flow-arrow { font-size: 18px; color: var(--amber); padding: 0 8px; }
+
+  /* Insight */
+  .insight { background: rgba(200,133,42,0.06); border-left: 3px solid var(--amber); padding: 20px 24px; margin: 32px 0; }
+  .insight-label { font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--amber); margin-bottom: 10px; display: block; }
+  .insight-body { font-size: 14px; color: #2E2416; line-height: 1.8; }
+
+  /* Caution block */
+  .caution { border: 1px solid var(--divider); padding: 24px 28px; margin: 32px 0; }
+  .caution-label { font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; display: block; }
+  .caution-body { font-size: 14px; color: #2E2416; line-height: 1.8; }
+
+  /* Vocab */
+  .vocab-section { background: rgba(200,133,42,0.06); border: 1px solid var(--divider); padding: 40px; margin-top: 80px; }
+  .vocab-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 8px; display: block; }
+  .vocab-hint { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+  .vocab-item { padding: 16px 0; border-bottom: 1px solid var(--divider); }
+  .vocab-item:last-child { border-bottom: none; }
+  .vocab-term { font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 4px; }
+  .vocab-meaning { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .vocab-example { font-size: 13px; color: var(--amber); font-style: italic; margin-top: 4px; }
+
+  footer { text-align: center; padding: 60px 24px; border-top: 1px solid var(--divider); font-size: 12px; color: var(--muted); letter-spacing: 0.1em; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes scrollPulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+  @media (max-width: 600px) {
+    body { font-size: 16px; }
+    .toc, .article { padding-left: 20px; padding-right: 20px; }
+    .back-link { top: 20px; left: 20px; }
+    .sdt-grid { grid-template-columns: 1fr; }
+    .flow { flex-direction: column; }
+    .flow-arrow { transform: rotate(90deg); }
+    .tooltip { max-width: 200px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="tooltip" id="tooltip">
+  <div class="tooltip-term" id="tooltip-term"></div>
+  <div id="tooltip-body"></div>
+</div>
+
+<section class="cover">
+  <a class="back-link" href="index.html">← กลับหน้าหลัก</a>
+  <p class="cover-label">บทที่ 15</p>
+  <h1 class="cover-title">เก่งก่อน แล้ว<em>แพชั่นจะตามมาเอง</em></h1>
+  <p class="cover-subtitle">Cal Newport ท้าทายความเชื่อที่ฝังรากลึกว่า "จงทำในสิ่งที่รัก" และบอกว่าลำดับนั้นผิด ความหลงใหลไม่ได้มาก่อนความเชี่ยวชาญ แต่เป็นผลพลอยได้จากมัน</p>
+  <div class="cover-divider"></div>
+  <p class="cover-meta">การพัฒนาตัวเอง · อาชีพ &nbsp;·&nbsp; หนังสือของฉัน</p>
+  <div class="scroll-hint"><span>เริ่มอ่าน</span><div class="scroll-arrow"></div></div>
+</section>
+
+<nav class="toc">
+  <p class="toc-label">สารบัญ</p>
+  <a class="toc-item" href="#s1"><span class="toc-num">i</span><span class="toc-title">ทำไม Follow Your Passion ถึงอาจเป็นกับดัก</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s2"><span class="toc-num">ii</span><span class="toc-title">สามสิ่งที่ทำให้มีความสุขในงานจริงๆ</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s3"><span class="toc-num">iii</span><span class="toc-title">กฎ 4 ข้อของ Skill Before Passion</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s4"><span class="toc-num">iv</span><span class="toc-title">บทเรียนจากจีโร่ — ชายผู้ไม่ได้รักซูชิตั้งแต่แรก</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s5"><span class="toc-num">v</span><span class="toc-title">สิ่งที่ Newport มองข้ามและควรระวัง</span><span class="toc-dots"></span></a>
+  <a class="toc-item" href="#s6"><span class="toc-num">vi</span><span class="toc-title">บทสรุป: อย่าถามว่างานนี้ทำให้ฉันมีความสุขไหม</span><span class="toc-dots"></span></a>
+</nav>
+
+<article class="article">
+
+  <div class="chapter visible">
+    <div class="chapter-body">
+      <p>มีคำถามหนึ่งที่คนรุ่นเราถูกสอนให้ถามตัวเองก่อนเลือกงาน ก่อนเปลี่ยนสาย หรือก่อนตัดสินใจครั้งใหญ่ใดๆ ในชีวิต คือ "ฉันหลงใหลอะไร?"</p>
+      <p>Cal Newport นักวิจัยจาก MIT บอกว่านั่นอาจเป็นคำถามที่ผิด ไม่ใช่เพราะ Passion ไม่สำคัญ แต่เพราะ <em>ลำดับนั้นผิด</em></p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s1">
+    <span class="chapter-num">i</span>
+    <h2 class="chapter-title">ทำไม Follow Your Passion ถึงอาจเป็นกับดัก</h2>
+    <div class="chapter-body">
+      <p>งานวิจัยสำรวจนักศึกษาที่กำลังจะเรียนจบในแคนาดากว่า 500 คน พบว่ามีเพียง <strong>4%</strong> เท่านั้นที่รู้ว่าตัวเองหลงใหลอะไร และความหลงใหลส่วนใหญ่ของคนวัยหนุ่มสาวมักเป็นงานอดิเรก เช่น กีฬา เกม การอ่าน ซึ่งไม่ใช่เรื่องงาน</p>
+      <p>ถ้าเชื่อว่างานในฝันรออยู่ที่ไหนสักแห่ง เราก็จะเปลี่ยนงานไปเรื่อยๆ โดยหวังว่าจะเจอมันวันหนึ่ง ถ้าไม่เจอ ก็จะเริ่มสงสัยในตัวเอง ซึ่งส่งผลต่อความก้าวหน้าและความมั่นคงทางจิตใจ</p>
+      <div class="pull-quote">ที่เราหา Passion ไม่เจอไม่ใช่เรื่องแปลก เราถูกบังคับให้รู้คำตอบนั้นเร็วเกินไป</div>
+      <p>งานวิจัยของ Prof. Amy Wrzesniewski พบว่า พนักงานที่มีความสุขที่สุดไม่ใช่คนที่เข้ามาทำงานด้วยความหลงใหล แต่เป็น <strong>คนที่ทำงานมานานพอจนเก่งในสิ่งที่ตัวเองทำ</strong> ความหลงใหลเกิดขึ้นทีหลัง ไม่ใช่ก่อน</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s2">
+    <span class="chapter-num">ii</span>
+    <h2 class="chapter-title">สามสิ่งที่ทำให้มีความสุขในงานจริงๆ</h2>
+    <div class="chapter-body">
+      <p><span class="term" data-term="Self-Determination Theory" data-def="ทฤษฎีจิตวิทยาที่ศึกษาแรงจูงใจของมนุษย์ บอกว่าความสุขและแรงจูงใจภายในมาจากสามปัจจัยหลัก คือ อิสระ ความสามารถ และความสัมพันธ์ ไม่ใช่จากรางวัลภายนอก">Self-Determination Theory</span> ทฤษฎีจิตวิทยาที่ศึกษาเรื่องแรงจูงใจของมนุษย์ บอกว่าความสุขในงานมาจากสามปัจจัย ไม่ใช่จาก Passion ที่มีตั้งแต่แรก</p>
+
+      <div class="sdt-grid">
+        <div class="sdt-card">
+          <div class="sdt-icon">🔓</div>
+          <div class="sdt-name">Autonomy</div>
+          <div class="sdt-desc">ความรู้สึกว่าควบคุมสิ่งที่ทำได้ เลือกได้ว่าจะทำอะไร เมื่อไหร่ และอย่างไร</div>
+        </div>
+        <div class="sdt-card">
+          <div class="sdt-icon">💪</div>
+          <div class="sdt-name">Competence</div>
+          <div class="sdt-desc">ความรู้สึกว่าเก่งในสิ่งที่ทำ เห็นพัฒนาการของตัวเอง และรู้ว่างานที่ทำมีคุณค่า</div>
+        </div>
+        <div class="sdt-card">
+          <div class="sdt-icon">🤝</div>
+          <div class="sdt-name">Relatedness</div>
+          <div class="sdt-desc">ความรู้สึกเชื่อมโยงกับผู้อื่น ทำงานร่วมกับคนที่สนิทใจ และรู้สึกว่าส่วนหนึ่งของบางสิ่ง</div>
+        </div>
+      </div>
+
+      <p>Newport อธิบายว่า เมื่อเราพัฒนาทักษะมากขึ้น เราจะได้ Competence มากขึ้น แล้ว Autonomy จะตามมา แล้ว Passion จะเกิดขึ้นเอง กระบวนการไหลในทิศทางเดียว</p>
+
+      <div class="flow">
+        <div class="flow-box">พัฒนาทักษะ</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box">รู้สึกเก่งขึ้น</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box">ได้อิสระมากขึ้น</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box">Passion เกิดขึ้น</div>
+      </div>
+
+      <p>นี่คือเหตุผลที่คนที่ทำงานมาสักระยะมักมีความสุขกับงานมากกว่าตอนเริ่มต้น ไม่ใช่เพราะงานเปลี่ยน แต่เพราะ <em>ตัวเองเปลี่ยน</em></p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s3">
+    <span class="chapter-num">iii</span>
+    <h2 class="chapter-title">กฎ 4 ข้อของ Skill Before Passion</h2>
+    <div class="chapter-body">
+
+      <div class="rule-list">
+        <div class="rule-item">
+          <div class="rule-num">1</div>
+          <div class="rule-content">
+            <div class="rule-title">อย่าทำในสิ่งที่รัก</div>
+            <div class="rule-desc">ไม่ได้แปลว่าห้ามทำงานที่ชอบ แต่แปลว่าแทนที่จะรอหางานในฝัน ให้หาวิธีทำให้งานที่มีอยู่กลายเป็นงานที่รักแทน เพราะความรู้สึกหลงใหลมักเกิดขึ้นหลังจากเก่งขึ้นแล้ว ไม่ใช่ก่อน</div>
+          </div>
+        </div>
+        <div class="rule-item">
+          <div class="rule-num">2</div>
+          <div class="rule-content">
+            <div class="rule-title">เก่งจนไม่มีใครกล้าเมิน</div>
+            <div class="rule-desc">วิธีคิดแบบ <span class="term" data-term="Craftsman Mindset" data-def="วิธีคิดที่โฟกัสว่าตัวเองจะมอบคุณค่าอะไรให้โลก แทนที่จะโฟกัสว่างานทำให้ตัวเองมีความสุขไหม Newport นำมาตรงข้ามกับ Passion Mindset ที่มักทำให้คนทำงานอย่างครึ่งๆ กลางๆ">Craftsman Mindset</span> คือโฟกัสว่าจะมอบคุณค่าอะไรให้โลก ไม่ใช่ว่างานสนุกไหม การสะสม <span class="term" data-term="Career Capital" data-def="ทักษะที่หายากและมีคุณค่าในสายงาน ซึ่งสะสมได้จากการฝึกฝนอย่างตั้งใจ เมื่อมี Career Capital มากพอจะมีอำนาจต่อรองในการเลือกงาน เงิน และความยืดหยุ่นในชีวิต">Career Capital</span> คือทักษะที่หายากและมีคุณค่า จะทำให้มีอำนาจต่อรองมากขึ้นในการได้มาซึ่งงานที่ชอบ เงินที่ใช่ และอิสระที่ต้องการ</div>
+          </div>
+        </div>
+        <div class="rule-item">
+          <div class="rule-num">3</div>
+          <div class="rule-content">
+            <div class="rule-title">ปฏิเสธการเลื่อนตำแหน่ง</div>
+            <div class="rule-desc">ใช้ Career Capital ที่สะสมมาแลกกับ Autonomy ในชีวิตการทำงาน แต่มีกับดักสองอย่าง คือ ไขว่คว้าอิสระก่อนที่จะมีทักษะพอ และใช้อำนาจต่อรองมากเกินไปจนคนอื่นหาคนใหม่แทน กฎง่ายๆ คือก่อนเปลี่ยนงานหรือเริ่มธุรกิจ ต้องหาหลักฐานว่ามีคนยินดีจ่ายเงินสำหรับสิ่งที่จะทำจริงๆ</div>
+          </div>
+        </div>
+        <div class="rule-item">
+          <div class="rule-num">4</div>
+          <div class="rule-content">
+            <div class="rule-title">คิดเล็กทำใหญ่</div>
+            <div class="rule-desc">อย่าตั้งเป้าหมายใหญ่โตตั้งแต่แรก ให้เริ่มจากการทดลองทำโครงการเล็กๆ หลายๆ อย่างเพื่อหาว่าอะไรเหมาะสมและทำได้จริง ภารกิจที่ใช่จะเจอได้เมื่อมีประสบการณ์มากพอ ไม่ใช่ก่อนเริ่มทำ</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s4">
+    <span class="chapter-num">iv</span>
+    <h2 class="chapter-title">บทเรียนจากจีโร่ — ชายผู้ไม่ได้รักซูชิตั้งแต่แรก</h2>
+    <div class="chapter-body">
+      <p>Jiro Ono เจ้าของร้านซูชิ Michelin 3 ดาวในโตเกียว คือตัวอย่างที่ Newport หยิบมาเล่าในหนังสือ สิ่งที่น่าสนใจไม่ใช่ว่าเขาเก่งแค่ไหน แต่คือ <strong>เขาไม่ได้เริ่มต้นจากความหลงใหลในซูชิ</strong></p>
+      <p>จีโร่เริ่มทำซูชิจากความจำเป็น แต่เมื่อทำแล้ว เขาตัดสินใจว่าจะทำให้ดีที่สุดเท่าที่ทำได้ แค่นั้นเอง แล้วความรักในงานก็ค่อยๆ สะสมตามความเชี่ยวชาญที่เพิ่มขึ้น จนถึงวันนี้อายุ 90 กว่าปีแล้วยังคงค้นหาวิธีทำซูชิที่ดีขึ้นอยู่เสมอ</p>
+      <div class="pull-quote">จีโร่บอกว่าถ้าชะตาพาให้ต้องทำดาบ เขาก็จะทำดาบในแบบเดียวกับที่ทำซูชิ</div>
+      <p>นั่นไม่ใช่คำพูดของคนที่มี Passion ในดาบ แต่เป็นคำพูดของคนที่มีปรัชญาในการทำงาน ความแตกต่างนี้สำคัญมาก</p>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s5">
+    <span class="chapter-num">v</span>
+    <h2 class="chapter-title">สิ่งที่ Newport มองข้ามและควรระวัง</h2>
+    <div class="chapter-body">
+      <p>ก่อนรับแนวคิดนี้ไปใช้ทั้งหมด มีสองอย่างที่ควรรู้ครับ</p>
+
+      <div class="caution">
+        <span class="caution-label">ข้อที่ควรระวัง 1</span>
+        <div class="caution-body">Newport Over-correct ในทิศทางตรงข้ามกับ Follow Your Passion จนดูเหมือน Passion ไม่มีประโยชน์เลย ซึ่งไม่จริง งานบางประเภทโดยเฉพาะที่ต้องทนกับช่วงแรกที่ยากมาก เช่น นักเขียน นักดนตรี นักวิจัย Passion ช่วยให้ไม่หยุดก่อนถึงจุดที่เก่งพอ คนที่ไม่มี Passion เลยมักเลิกก่อนที่จะเห็นผล</div>
+      </div>
+
+      <div class="caution">
+        <span class="caution-label">ข้อที่ควรระวัง 2</span>
+        <div class="caution-body">หนังสือเล่มนี้เขียนจากมุมมองของคนที่มีทางเลือก Newport เองเป็น Professor ที่ MIT คนที่ถูกกดทับด้วยสภาพแวดล้อม ครอบครัว หรือฐานะทางเศรษฐกิจ อาจไม่มีสิทธิ์เลือกได้ตั้งแต่แรกว่าจะพัฒนาทักษะอะไร</div>
+      </div>
+
+      <div class="insight">
+        <span class="insight-label">สิ่งที่ Newport พูดถูกที่สุด</span>
+        <div class="insight-body">เขาไม่ได้บอกว่า Passion ไม่สำคัญ แต่บอกว่า ลำดับมันผิด คนส่วนใหญ่รอให้ Passion มาก่อนแล้วค่อยทำงาน แต่จริงๆ ต้องทำงานก่อนแล้ว Passion จะตามมา ความต่างเล็กๆ ของลำดับนี้เปลี่ยนทุกอย่างในทางปฏิบัติ</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-break">· · ·</div>
+
+  <div class="chapter" id="s6">
+    <span class="chapter-num">vi</span>
+    <h2 class="chapter-title">บทสรุป: อย่าถามว่างานนี้ทำให้ฉันมีความสุขไหม</h2>
+    <div class="chapter-body">
+      <p>ถ้าต้องจำจากบทนี้แค่หนึ่งอย่าง Newport บอกว่าให้เปลี่ยนคำถาม</p>
+      <p>แทนที่จะถามว่า <em>"งานนี้ทำให้ฉันมีความสุขไหม"</em> ให้ถามว่า <em>"ฉันจะทำงานนี้ให้ดีพอที่มันจะทำให้ฉันมีความสุขได้ยังไง"</em></p>
+      <p>มันฟังดูต่างกันเล็กน้อย แต่ความต่างนั้นเปลี่ยนทิศทางของชีวิตการทำงานทั้งหมด คำถามแรกทำให้เราเป็นผู้รับ รอให้งานมอบความสุขให้ คำถามที่สองทำให้เราเป็นผู้สร้าง ลงมือสร้างเงื่อนไขที่ทำให้งานมีความหมาย</p>
+      <div class="pull-quote">ที่เราไม่รู้ว่าตัวเองหลงใหลอะไรในตอนนี้ ไม่ได้แปลว่ามันไม่มีอยู่ แต่แปลว่าเรายังไม่เก่งพอที่จะรู้สึกมันได้</div>
+      <p>และนั่นก็เป็นเรื่องที่แก้ได้ด้วยเวลาและการฝึกฝนอย่างตั้งใจ ไม่ใช่ด้วยการเปลี่ยนงานไปเรื่อยๆ</p>
+    </div>
+  </div>
+
+  <div class="chapter" id="vocab">
+    <div class="vocab-section">
+      <span class="vocab-label">คลังคำศัพท์ · บทที่ 15</span>
+      <p class="vocab-hint">* คำที่ขีดเส้นใต้สีทองในเนื้อหา กดได้เพื่อดูความหมายทันที</p>
+
+      <div class="vocab-item">
+        <div class="vocab-term">Career Capital (ต้นทุนทางอาชีพ)</div>
+        <div class="vocab-meaning">ทักษะที่หายากและมีคุณค่าในสายงานที่สะสมได้จากการฝึกฝนอย่างตั้งใจ เมื่อมีมากพอจะมีอำนาจต่อรองในการเลือกงาน เงิน และความยืดหยุ่น Newport บอกว่านี่คือสิ่งที่ควรสร้างก่อนที่จะคิดเรื่อง Passion</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ก่อนจะลาออกไปทำสิ่งที่รัก ถามตัวเองก่อนว่ามี Career Capital มากพอที่คนจะยินดีจ่ายเงินให้หรือยัง"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Craftsman Mindset (วิธีคิดแบบช่างฝีมือ)</div>
+        <div class="vocab-meaning">วิธีคิดที่โฟกัสว่าตัวเองจะมอบคุณค่าอะไรให้โลก แทนที่จะโฟกัสว่างานทำให้ตัวเองมีความสุขไหม Newport นำมาตรงข้ามกับ Passion Mindset ซึ่งมักทำให้คนทำงานอย่างครึ่งๆ กลางๆ เพราะรอให้งานมาสร้างความสุขให้ก่อน</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ลองเปลี่ยนจาก Passion Mindset เป็น Craftsman Mindset ดู แทนที่จะถามว่างานนี้สนุกไหม ให้ถามว่าทำให้ดีขึ้นได้อีกยังไง"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Deliberate Practice (การฝึกอย่างตั้งใจ)</div>
+        <div class="vocab-meaning">การฝึกที่มุ่งเน้นไปที่จุดอ่อนโดยเฉพาะ รับ Feedback อย่างสม่ำเสมอ และทำสิ่งที่ยากกว่าระดับปัจจุบันเสมอ ต่างจากการทำซ้ำสิ่งที่ถนัดแล้ว Newport บอกว่านี่คือวิธีสร้าง Career Capital ที่ได้ผลจริง</div>
+        <div class="vocab-example">ใช้ได้ว่า: "แค่ทำงาน 10,000 ชั่วโมงไม่พอ ต้องเป็น Deliberate Practice คือฝึกในสิ่งที่ยากและรับ Feedback ตลอดเวลาด้วย"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Self-Determination Theory</div>
+        <div class="vocab-meaning">ทฤษฎีจิตวิทยาที่บอกว่าแรงจูงใจภายในและความสุขมาจากสามปัจจัย คือ Autonomy อิสระในการเลือก Competence ความรู้สึกว่าเก่งและมีคุณค่า และ Relatedness ความรู้สึกเชื่อมโยงกับผู้อื่น ไม่ใช่จากรางวัลภายนอกหรือ Passion ที่มีตั้งแต่แรก</div>
+        <div class="vocab-example">ใช้ได้ว่า: "Self-Determination Theory อธิบายได้ว่าทำไมคนที่ทำงานอิสระมักมีความสุขมากกว่า เพราะได้ Autonomy เต็มที่"</div>
+      </div>
+      <div class="vocab-item">
+        <div class="vocab-term">Passion Trap (กับดักแพชั่น)</div>
+        <div class="vocab-meaning">ความเชื่อผิดๆ ว่ามีงานในฝันรออยู่ที่ไหนสักแห่ง และถ้าเจองานนั้นแล้วจะมีความสุขทันที ซึ่ง Newport บอกว่าทำให้คนเปลี่ยนงานบ่อยและสร้าง Career Capital ไม่ได้เลย</div>
+        <div class="vocab-example">ใช้ได้ว่า: "ถ้าเปลี่ยนงานครั้งที่สามแล้วยังรู้สึกว่ายังไม่ใช่ อาจไม่ใช่ปัญหาของงาน แต่อาจติด Passion Trap อยู่"</div>
+      </div>
+    </div>
+  </div>
+
+</article>
+
+<footer>
+  <p>บทที่ 15 &nbsp;·&nbsp; เก่งก่อน แล้วแพชั่นจะตามมาเอง &nbsp;·&nbsp; หนังสือของฉัน</p>
+</footer>
+
+<script>
+  const chapters = document.querySelectorAll('.chapter:not(.visible)');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); }
+    });
+  }, { threshold: 0.1 });
+  chapters.forEach(ch => observer.observe(ch));
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+  const tooltip = document.getElementById('tooltip');
+  const tooltipTerm = document.getElementById('tooltip-term');
+  const tooltipBody = document.getElementById('tooltip-body');
+  let hideTimeout;
+  document.querySelectorAll('.term').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      clearTimeout(hideTimeout);
+      tooltipTerm.textContent = el.getAttribute('data-term');
+      tooltipBody.textContent = el.getAttribute('data-def');
+      const rect = el.getBoundingClientRect();
+      const tipW = 260;
+      let left = rect.left;
+      let top = rect.bottom + 8;
+      if (left + tipW > window.innerWidth - 16) left = window.innerWidth - tipW - 16;
+      if (left < 16) left = 16;
+      if (top + 120 > window.innerHeight) top = rect.top - 130;
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+      tooltip.classList.add('show');
+      hideTimeout = setTimeout(() => tooltip.classList.remove('show'), 4000);
+    });
+  });
+  document.addEventListener('click', () => tooltip.classList.remove('show'));
+</script>
+</body>
+</html>
